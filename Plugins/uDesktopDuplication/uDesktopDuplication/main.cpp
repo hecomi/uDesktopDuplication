@@ -34,7 +34,7 @@ extern "C"
         {
             // Search the main monitor from all outputs.
             IDXGIOutput* output;
-            for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); j++) 
+            for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
             {
                 DXGI_OUTPUT_DESC outputDesc;
                 output->GetDesc(&outputDesc);

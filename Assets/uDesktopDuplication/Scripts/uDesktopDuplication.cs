@@ -3,6 +3,9 @@ using System;
 using System.Collections;
 using System.Runtime.InteropServices;
 
+namespace uDesktopDuplication
+{
+
 public class uDesktopDuplication : MonoBehaviour
 {
     [DllImport("uDesktopDuplication")]
@@ -22,16 +25,20 @@ public class uDesktopDuplication : MonoBehaviour
     [DllImport("uDesktopDuplication")]
     private static extern IntPtr GetRenderEventFunc();
 
-    public bool isPointerVisible = false;
-    public int pointerX = 0;
-    public int pointerY = 0;
+    private Material material_;
+    public bool invertX = false;
+    public bool invertY = false;
 
-    Coroutine renderCoroutine_ = null;
+    public delegate void MouseMoveEventHandler(Vector2 pos);
+    public MouseMoveEventHandler onMouseMove { get; set; }
+
+    private Coroutine renderCoroutine_ = null;
 
     void OnEnable()
     {
         var tex = new Texture2D(GetWidth(), GetHeight(), TextureFormat.BGRA32, false);
-        GetComponent<Renderer>().sharedMaterial.mainTexture = tex;
+        material_ = GetComponent<Renderer>().material;
+        material_.mainTexture = tex;
 
         SetTexturePtr(tex.GetNativeTexturePtr());
         renderCoroutine_ = StartCoroutine(OnRender());
@@ -47,9 +54,35 @@ public class uDesktopDuplication : MonoBehaviour
 
     void Update()
     {
-        isPointerVisible = IsPointerVisible();
-        pointerX = GetPointerX();
-        pointerY = GetPointerY();
+        UpdateMouseEvent();
+        UpdateMaterial();
+    }
+
+    void UpdateMouseEvent()
+    {
+        var isVisible = IsPointerVisible();
+        if (isVisible && onMouseMove != null) {
+            var x = GetPointerX();
+            var y = GetPointerY();
+            var w = GetWidth();
+            var h = GetHeight();
+            onMouseMove(new Vector2(2f * x / w - 1f, 1f - 2f * y / h));
+        }
+    }
+
+    void UpdateMaterial()
+    {
+        if (invertX) {
+            material_.EnableKeyword("INVERT_X");
+        } else {
+            material_.DisableKeyword("INVERT_X");
+        }
+
+        if (invertY) {
+            material_.EnableKeyword("INVERT_Y");
+        } else {
+            material_.DisableKeyword("INVERT_Y");
+        }
     }
 
     IEnumerator OnRender()
@@ -59,4 +92,6 @@ public class uDesktopDuplication : MonoBehaviour
             GL.IssuePluginEvent(GetRenderEventFunc(), 0);
         }
     }
+}
+
 }
