@@ -38,5 +38,6 @@ Version
 -------
 | Data       | Version | Description                       |
 | ---------- | ------- | --------------------------------- |
+| 2016/10/27 |  0.0.3  | Support lienar color.             |
 | 2016/10/27 |  0.0.2  | Add mouse cursor / shader family. |
 | 2016/10/27 |  0.0.1  | Initial commit.                   |
