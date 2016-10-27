@@ -1,7 +1,7 @@
 uDesktopDuplication
 ===================
 
-**uDesktopDuplication** is Desktop Duplication API implementation for Unity.
+**uDesktopDuplication** is a simple Desktop Duplication API implementation for Unity.
 
 
 ScreenShot
