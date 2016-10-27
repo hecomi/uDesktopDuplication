@@ -43,8 +43,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    uddInvertUV(i.uv);
-    return tex2D(_MainTex, i.uv) * _Color;
+    return uddGetTexture(_MainTex, i.uv) * _Color;
 }
 
 ENDCG

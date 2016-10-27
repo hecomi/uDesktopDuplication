@@ -48,8 +48,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    uddInvertUV(i.uv);
-    fixed4 tex = tex2D(_MainTex, i.uv);
+    fixed4 tex = uddGetTexture(_MainTex, i.uv);
     fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
     return fixed4(tex.rgb * _Color.rgb, alpha);
 }
