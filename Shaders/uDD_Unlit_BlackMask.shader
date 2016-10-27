@@ -1,16 +1,20 @@
-﻿Shader "uDesktopDuplication/Unlit"
+﻿Shader "uDesktopDuplication/Unlit BlackMask"
 {
 
 Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
+    _Mask ("Mask", Range(0, 1)) = 0.1
 }
 
 SubShader
 {
 
-Tags { "RenderType"="Opaque" }
+Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
+
+ZWrite Off
+Blend SrcAlpha OneMinusSrcAlpha
 
 CGINCLUDE
 
@@ -32,6 +36,7 @@ struct v2f
 sampler2D _MainTex;
 float4 _MainTex_ST;
 fixed4 _Color;
+fixed _Mask;
 
 v2f vert(appdata v)
 {
@@ -44,7 +49,9 @@ v2f vert(appdata v)
 fixed4 frag(v2f i) : SV_Target
 {
     uddInvertUV(i.uv);
-    return tex2D(_MainTex, i.uv) * _Color;
+    fixed4 tex = tex2D(_MainTex, i.uv);
+    fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
+    return fixed4(tex.rgb * _Color.rgb, alpha);
 }
 
 ENDCG

@@ -1,4 +1,4 @@
-﻿Shader "uDesktopDuplication/Unlit"
+﻿Shader "uDesktopDuplication/Unlit Transparent"
 {
 
 Properties
@@ -10,7 +10,10 @@ Properties
 SubShader
 {
 
-Tags { "RenderType"="Opaque" }
+Tags { "Queue"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" }
+
+ZWrite Off
+Blend SrcAlpha OneMinusSrcAlpha
 
 CGINCLUDE
 
@@ -44,7 +47,7 @@ v2f vert(appdata v)
 fixed4 frag(v2f i) : SV_Target
 {
     uddInvertUV(i.uv);
-    return tex2D(_MainTex, i.uv) * _Color;
+    return fixed4(tex2D(_MainTex, i.uv).rgb, 1.0) * _Color;
 }
 
 ENDCG
@@ -61,6 +64,6 @@ Pass
 
 }
 
-Fallback "Unlit/Texture"
+Fallback "Unlit/Transparent"
 
 }
