@@ -29,7 +29,7 @@ TODOs
 -----
 - [x] Mouse cursor
 - [ ] Monitor selector
-- [ ] Support linear color
+- [x] Support linear color
 
 Please request new features you want to issues.
 

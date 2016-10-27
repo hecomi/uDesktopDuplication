@@ -35,8 +35,7 @@ SubShader
 
     void surf(Input IN, inout SurfaceOutputStandard o) 
     {
-        uddInvertUV(IN.uv_MainTex);
-        fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
+        fixed4 c = uddGetTexture(_MainTex, IN.uv_MainTex) * _Color;
         o.Albedo = c.rgb;
         o.Metallic = _Metallic;
         o.Smoothness = _Glossiness;
