@@ -26,6 +26,7 @@ namespace
     };
 
     IUnityInterfaces* g_unity = nullptr;
+    int g_timeout = 10;
     std::vector<Monitor> g_monitors;
 }
 
@@ -113,8 +114,7 @@ extern "C"
         IDXGIResource* resource = nullptr;
         DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
-        const UINT timeout = 100; // ms
-        hr = monitor.output->AcquireNextFrame(timeout, &frameInfo, &resource);
+        hr = monitor.output->AcquireNextFrame(g_timeout, &frameInfo, &resource);
         switch (hr) 
         {
             case S_OK: 
@@ -123,7 +123,7 @@ extern "C"
             }
             case DXGI_ERROR_ACCESS_LOST: 
             {
-                FinalizeDuplication();
+                resource->Release();
                 InitializeDuplication();
                 return;
             }
@@ -142,16 +142,17 @@ extern "C"
         if (hr != S_OK) 
         {
             resource->Release();
+            monitor.output->ReleaseFrame();
             return;
         }
-
-        resource->Release();
 
         ID3D11DeviceContext* context;
         auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
         device->GetImmediateContext(&context);
         context->CopyResource(monitor.texture, texture);
 
+        resource->Release();
+        texture->Release();
         monitor.output->ReleaseFrame();
     }
 
@@ -163,6 +164,11 @@ extern "C"
     UNITY_INTERFACE_EXPORT size_t UNITY_INTERFACE_API GetMonitorCount()
     {
         return g_monitors.size();
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTimeout(int timeout)
+    {
+        g_timeout = timeout;
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)

@@ -3,8 +3,9 @@
 namespace uDesktopDuplication
 {
 
-[RequireComponent(typeof(uDD_Texture))]
-public class uDD_Cursor : MonoBehaviour
+[AddComponentMenu("uDesktopDuplication/Cursor"), 
+ RequireComponent(typeof(Texture))]
+public class Cursor : MonoBehaviour
 {
     [SerializeField]
     Transform cursor;
@@ -13,11 +14,11 @@ public class uDD_Cursor : MonoBehaviour
     [SerializeField]
     Vector2 offset = new Vector2(0.5f, 0.5f);
 
-    private uDD_Texture texture_;
+    private Texture texture_;
 
     void OnEnable()
     {
-        texture_ = GetComponent<uDD_Texture>();
+        texture_ = GetComponent<Texture>();
     }
 
     void Update()

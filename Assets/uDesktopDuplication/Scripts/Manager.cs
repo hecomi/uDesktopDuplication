@@ -5,32 +5,40 @@ using System.Collections.Generic;
 namespace uDesktopDuplication
 {
 
-public class uDD_Manager : MonoBehaviour
+public class Manager : MonoBehaviour
 {
-    private static uDD_Manager instance_;
-    public static uDD_Manager instance 
+    private static Manager instance_;
+    public static Manager instance 
     {
         get 
         { 
             if (instance_) return instance_;
             var go = new GameObject("uDesktopDuplicationManager");
-            return go.AddComponent<uDD_Manager>();
+            return go.AddComponent<Manager>();
         }
     }
 
-    private List<uDD_Monitor> monitors_ = new List<uDD_Monitor>();
-    static public List<uDD_Monitor> monitors
+    private List<Monitor> monitors_ = new List<Monitor>();
+    static public List<Monitor> monitors
     {
         get { return instance.monitors_; }
     }
 
-    static public uDD_Monitor primary
+    static public int monitorCount
+    {
+        get { return instance.monitors_.Count; }
+    }
+
+    static public Monitor primary
     {
         get 
         {
             return instance.monitors_.Find(monitor => monitor.isPrimary);
         }
     }
+
+    [SerializeField, Tooltip("Set Desktop Duplication API timeout (milliseconds).")] 
+    int timeout = 0;
 
     private Coroutine renderCoroutine_ = null;
 
@@ -39,9 +47,11 @@ public class uDD_Manager : MonoBehaviour
         if (instance_ != null) return;
         instance_ = this;
 
-        for (int i = 0; i < uDD_Monitor.count; ++i) {
-            monitors.Add(new uDD_Monitor(i));
+        for (int i = 0; i < Lib.GetMonitorCount(); ++i) {
+            monitors.Add(new Monitor(i));
         }
+
+        Lib.SetTimeout(timeout);
     }
 
     void OnEnable()
@@ -61,7 +71,8 @@ public class uDD_Manager : MonoBehaviour
     {
         for (;;) {
             yield return new WaitForEndOfFrame();
-            foreach (var monitor in monitors) {
+            for (int i = 0; i < monitors.Count; ++i) {
+                var monitor = monitors[i];
                 if (monitor.shouldBeUpdated) {
                     monitor.Render();
                 }

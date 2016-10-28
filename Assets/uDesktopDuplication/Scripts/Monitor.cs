@@ -3,16 +3,11 @@
 namespace uDesktopDuplication
 {
 
-public class uDD_Monitor
+public class Monitor
 {
-    public uDD_Monitor(int id)
+    public Monitor(int id)
     {
         this.id = id;
-    }
-
-    public static int count
-    {
-        get { return uDD_Lib.GetMonitorCount(); }
     }
 
     public int id 
@@ -23,37 +18,37 @@ public class uDD_Monitor
 
     public string name
     { 
-        get { return uDD_Lib.GetName(id); }
+        get { return Lib.GetName(id); }
     }
 
     public bool isPrimary
     { 
-        get { return uDD_Lib.IsPrimary(id); }
+        get { return Lib.IsPrimary(id); }
     }
 
     public int width 
     { 
-        get { return uDD_Lib.GetWidth(id); }
+        get { return Lib.GetWidth(id); }
     }
 
     public int height
     { 
-        get { return uDD_Lib.GetHeight(id); }
+        get { return Lib.GetHeight(id); }
     }
 
     public bool isPointerVisible
     { 
-        get { return uDD_Lib.IsPointerVisible(id); }
+        get { return Lib.IsPointerVisible(id); }
     }
 
     public int pointerX
     { 
-        get { return uDD_Lib.GetPointerX(id); }
+        get { return Lib.GetPointerX(id); }
     }
 
     public int pointerY
     { 
-        get { return uDD_Lib.GetPointerY(id); }
+        get { return Lib.GetPointerY(id); }
     }
 
     public bool shouldBeUpdated
@@ -69,7 +64,7 @@ public class uDD_Monitor
         { 
             if (texture_ == null) {
                 texture_ = new Texture2D(width, height, TextureFormat.BGRA32, false);
-                uDD_Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
+                Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
             }
             return texture_;
         }
@@ -77,7 +72,7 @@ public class uDD_Monitor
 
     public void Render()
     {
-        GL.IssuePluginEvent(uDD_Lib.GetRenderEventFunc(), id);
+        GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
     }
 }
 

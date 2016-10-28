@@ -3,9 +3,26 @@
 namespace uDesktopDuplication
 {
 
-public class uDD_Texture : MonoBehaviour
+[AddComponentMenu("uDesktopDuplication/Texture")] 
+public class Texture : MonoBehaviour
 {
-    public uDD_Monitor monitor { get; set; }
+    private Monitor monitor_;
+    public Monitor monitor 
+    { 
+        get { return monitor_; }
+        set 
+        { 
+            monitor_ = value;
+            material_ = GetComponent<Renderer>().material;
+            material_.mainTexture = monitor_.texture;
+        }
+    }
+
+    public int monitorId
+    { 
+        get { return monitor.id; }
+        set { monitor = Manager.monitors[Mathf.Clamp(value, 0, Manager.monitorCount - 1)]; }
+    }
 
     public bool invertX = false;
     public bool invertY = false;
@@ -15,10 +32,8 @@ public class uDD_Texture : MonoBehaviour
     void OnEnable()
     {
         if (monitor == null) {
-            monitor = uDD_Manager.primary;
+            monitor = Manager.primary;
         }
-        material_ = GetComponent<Renderer>().material;
-        material_.mainTexture = monitor.texture;
     }
 
     void Update()
