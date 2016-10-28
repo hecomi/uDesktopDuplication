@@ -5,10 +5,12 @@ using System.Runtime.InteropServices;
 namespace uDesktopDuplication
 {
 
-public static class uDD_Lib
+public static class Lib
 {
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
+    [DllImport("uDesktopDuplication")]
+    public static extern void SetTimeout(int timeout);
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetRenderEventFunc();
     [DllImport("uDesktopDuplication")]
