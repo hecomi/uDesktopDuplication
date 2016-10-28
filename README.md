@@ -1,7 +1,7 @@
 uDesktopDuplication
 ===================
 
-**uDesktopDuplication** is a Unity asset to use the realtime screen capture as `Texture2D` using Desktop Duplication API.
+**uDesktopDuplication** is an Unity asset to use the realtime screen capture as `Texture2D` using Desktop Duplication API.
 
 
 ScreenShot
