@@ -1,7 +1,7 @@
 uDesktopDuplication
 ===================
 
-**uDesktopDuplication** is a simple Desktop Duplication API implementation for Unity.
+**uDesktopDuplication** is a Unity asset to use the realtime screen capture as `Texture2D` using Desktop Duplication API.
 
 
 ScreenShot
@@ -22,24 +22,16 @@ Please download the latest *uDesktopDuplication.unitypackage* from the [release 
 
 Usage
 -----
-Attach `uDesktopDuplication.cs` component to the target object, then its main texture will be replaced with the captured screen.
-
-
-TODOs
------
-- [x] Mouse cursor
-- [ ] Monitor selector
-- [x] Support linear color
-
-Please request new features you want to issues.
+Attach `uDesktopDuplication/Texture` component to the target object, then its main texture will be replaced with the captured screen. Please see example scenes for more details.
 
 
 Version
 -------
 | Data       | Version | Description                       |
 | ---------- | ------- | --------------------------------- |
+| 2016/10/28 |  1.0.0  | Support multiple screens.         |
 | 2016/10/27 |  0.0.3  | Support lienar color.             |
-| 2016/10/27 |  0.0.2  | Add mouse cursor / shader family. |
+| 2016/10/27 |  0.0.2  | Add mouse cursor / shaders.       |
 | 2016/10/27 |  0.0.1  | Initial commit.                   |
 
 
