@@ -1,5 +1,7 @@
 #include <d3d11.h>
 #include <dxgi1_2.h>
+#include <vector>
+#include <string>
 
 #include "IUnityInterface.h"
 #include "IUnityGraphics.h"
@@ -10,21 +12,39 @@
 
 namespace
 {
-    IUnityInterfaces*       g_unity            = nullptr;
-    IDXGIOutputDuplication* g_deskDupl         = nullptr;
-    ID3D11Texture2D*        g_texture          = nullptr;
-    bool                    g_isPointerVisible = -1;
-    int                     g_pointerX         = -1;
-    int                     g_pointerY         = -1;
-    int                     g_width            = -1;
-    int                     g_height           = -1;
+    struct Monitor
+    {
+        IDXGIOutputDuplication* output           = nullptr;
+        ID3D11Texture2D*        texture          = nullptr;
+        std::string             name             = "";
+        bool                    isPrimary        = false;
+        bool                    isPointerVisible = false;
+        int                     pointerX         = -1;
+        int                     pointerY         = -1;
+        int                     width            = -1;
+        int                     height           = -1;
+    };
+
+    IUnityInterfaces* g_unity = nullptr;
+    std::vector<Monitor> g_monitors;
 }
 
 
 extern "C"
 {
+    void FinalizeDuplication()
+    {
+        for (auto& monitor : g_monitors)
+        {
+            monitor.output->Release();
+        }
+        g_monitors.clear();
+    }
+
     void InitializeDuplication()
     {
+        FinalizeDuplication();
+
         IDXGIFactory1* factory;
         CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory));
 
@@ -43,22 +63,18 @@ extern "C"
                 monitorInfo.cbSize = sizeof(MONITORINFOEX);
                 GetMonitorInfo(outputDesc.Monitor, &monitorInfo);
 
-                if (monitorInfo.dwFlags == MONITORINFOF_PRIMARY) 
-                {
-                    g_width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
-                    g_height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+                Monitor monitor;
+                monitor.name = monitorInfo.szDevice;
+                monitor.isPrimary = (monitorInfo.dwFlags == MONITORINFOF_PRIMARY);
+                monitor.width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+                monitor.height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
 
-                    auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
-                    IDXGIOutput1* output1;
-                    output1 = reinterpret_cast<IDXGIOutput1*>(output);
-                    output1->DuplicateOutput(device, &g_deskDupl);
+                auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
+                IDXGIOutput1* output1;
+                output1 = reinterpret_cast<IDXGIOutput1*>(output);
+                output1->DuplicateOutput(device, &monitor.output);
 
-                    output->Release();
-                    adapter->Release();
-                    factory->Release();
-
-                    return;
-                }
+                g_monitors.push_back(monitor);
 
                 output->Release();
             }
@@ -67,12 +83,6 @@ extern "C"
         }
 
         factory->Release();
-    }
-
-    void FinalizeDuplication()
-    {
-        g_deskDupl->Release();
-        g_deskDupl = nullptr;
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
@@ -84,24 +94,27 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
         g_unity = nullptr;
-        g_texture = nullptr;
-        g_width = -1;
-        g_height = -1;
-        g_pointerX = -1;
-        g_pointerY = -1;
         FinalizeDuplication();
     }
 
-    void UNITY_INTERFACE_API OnRenderEvent(int eventId)
+    bool DoesMonitorExist(int id)
     {
-        if (g_deskDupl == nullptr || g_texture == nullptr) return;
+        return id >= 0 && id < g_monitors.size();
+    }
+
+    void UNITY_INTERFACE_API OnRenderEvent(int id)
+    {
+        if (!DoesMonitorExist(id)) return;
+        auto& monitor = g_monitors[id];
+
+        if (monitor.output == nullptr || monitor.texture == nullptr) return;
 
         HRESULT hr;
         IDXGIResource* resource = nullptr;
         DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
         const UINT timeout = 100; // ms
-        hr = g_deskDupl->AcquireNextFrame(timeout, &frameInfo, &resource);
+        hr = monitor.output->AcquireNextFrame(timeout, &frameInfo, &resource);
         switch (hr) 
         {
             case S_OK: 
@@ -120,9 +133,9 @@ extern "C"
             }
         }
 
-        g_isPointerVisible = frameInfo.PointerPosition.Visible;
-        g_pointerX = frameInfo.PointerPosition.Position.x;
-        g_pointerY = frameInfo.PointerPosition.Position.y;
+        monitor.isPointerVisible = frameInfo.PointerPosition.Visible == TRUE;
+        monitor.pointerX = frameInfo.PointerPosition.Position.x;
+        monitor.pointerY = frameInfo.PointerPosition.Position.y;
 
         ID3D11Texture2D* texture;
         hr = resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
@@ -137,9 +150,9 @@ extern "C"
         ID3D11DeviceContext* context;
         auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
         device->GetImmediateContext(&context);
-        context->CopyResource(g_texture, texture);
+        context->CopyResource(monitor.texture, texture);
 
-        g_deskDupl->ReleaseFrame();
+        monitor.output->ReleaseFrame();
     }
 
     UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API GetRenderEventFunc()
@@ -147,33 +160,56 @@ extern "C"
         return OnRenderEvent;
     }
 
-    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetWidth()
+    UNITY_INTERFACE_EXPORT size_t UNITY_INTERFACE_API GetMonitorCount()
     {
-        return g_width;
+        return g_monitors.size();
     }
 
-    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetHeight()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)
     {
-        return g_height;
+        if (!DoesMonitorExist(id)) return;
+        strcpy_s(buf, len, g_monitors[id].name.c_str());
     }
 
-    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API IsPointerVisible()
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsPrimary(int id)
     {
-        return g_isPointerVisible;
+        if (!DoesMonitorExist(id)) return false;
+        return g_monitors[id].isPrimary;
     }
 
-    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerX()
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetWidth(int id)
     {
-        return g_pointerX;
+        if (!DoesMonitorExist(id)) return -1;
+        return g_monitors[id].width;
     }
 
-    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerY()
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetHeight(int id)
     {
-        return g_pointerY;
+        if (!DoesMonitorExist(id)) return -1;
+        return g_monitors[id].height;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTexturePtr(void* texture)
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API IsPointerVisible(int id)
     {
-        g_texture = reinterpret_cast<ID3D11Texture2D*>(texture);
+        if (!DoesMonitorExist(id)) return false;
+        return g_monitors[id].isPointerVisible;
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerX(int id)
+    {
+        if (!DoesMonitorExist(id)) return -1;
+        return g_monitors[id].pointerX;
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerY(int id)
+    {
+        if (!DoesMonitorExist(id)) return -1;
+        return g_monitors[id].pointerY;
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTexturePtr(int id, void* texture)
+    {
+        if (!DoesMonitorExist(id)) return;
+        g_monitors[id].texture = reinterpret_cast<ID3D11Texture2D*>(texture);
     }
 }
