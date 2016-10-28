@@ -32,6 +32,7 @@ public class Cursor : MonoBehaviour
             var worldPos = transform.TransformPoint(localPos);
             worldPos += cursor.right * offset.x * cursor.localScale.x;
             worldPos += -cursor.up * offset.y * cursor.localScale.y;
+            worldPos += -cursor.forward * 0.001f;
             cursor.position = worldPos;
         }
     }
