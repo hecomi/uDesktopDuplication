@@ -6,7 +6,7 @@ uDesktopDuplication
 
 ScreenShot
 ----------
-![uDesktopDuplication](https://raw.githubusercontent.com/wiki/hecomi/uDesktopDuplication/screenshot.png)
+![uDesktopDuplication](https://raw.githubusercontent.com/wiki/hecomi/uDesktopDuplication/animation.gif)
 
 
 Environment
