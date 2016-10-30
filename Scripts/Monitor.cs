@@ -36,6 +36,11 @@ public class Monitor
         get { return Lib.GetHeight(id); }
     }
 
+    public float aspect
+    { 
+        get { return (float)width / height; }
+    }
+
     public bool isPointerVisible
     { 
         get { return Lib.IsPointerVisible(id); }
