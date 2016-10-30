@@ -14,8 +14,10 @@ namespace
 {
     struct Monitor
     {
-        IDXGIOutputDuplication* output           = nullptr;
+        IDXGIOutputDuplication* deskDupl         = nullptr;
         ID3D11Texture2D*        texture          = nullptr;
+        DXGI_OUTPUT_DESC        outputDesc;
+        MONITORINFOEX           monitorInfo;
         std::string             name             = "";
         bool                    isPrimary        = false;
         bool                    isPointerVisible = false;
@@ -38,7 +40,7 @@ extern "C"
     {
         for (auto& monitor : g_monitors)
         {
-            monitor.output->Release();
+            monitor.deskDupl->Release();
         }
         g_monitors.clear();
     }
@@ -58,27 +60,18 @@ extern "C"
             IDXGIOutput* output;
             for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
             {
-                DXGI_OUTPUT_DESC outputDesc;
-                output->GetDesc(&outputDesc);
-
-                MONITORINFOEX monitorInfo;
-                monitorInfo.cbSize = sizeof(MONITORINFOEX);
-                GetMonitorInfo(outputDesc.Monitor, &monitorInfo);
-
                 Monitor monitor;
-                monitor.name = monitorInfo.szDevice;
-                monitor.isPrimary = (monitorInfo.dwFlags == MONITORINFOF_PRIMARY);
-                monitor.width = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
-                monitor.height = monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+
+                output->GetDesc(&monitor.outputDesc);
+                monitor.monitorInfo.cbSize = sizeof(MONITORINFOEX);
+                GetMonitorInfo(monitor.outputDesc.Monitor, &monitor.monitorInfo);
 
                 auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
-                IDXGIOutput1* output1;
-                output1 = reinterpret_cast<IDXGIOutput1*>(output);
-                output1->DuplicateOutput(device, &monitor.output);
+                auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
+                output1->DuplicateOutput(device, &monitor.deskDupl);
+                output->Release();
 
                 g_monitors.push_back(monitor);
-
-                output->Release();
             }
 
             adapter->Release();
@@ -109,12 +102,12 @@ extern "C"
         if (!DoesMonitorExist(id)) return;
         auto& monitor = g_monitors[id];
 
-        if (monitor.output == nullptr || monitor.texture == nullptr) return;
+        if (monitor.deskDupl == nullptr || monitor.texture == nullptr) return;
 
         IDXGIResource* resource = nullptr;
         DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
-        g_errorCode = monitor.output->AcquireNextFrame(g_timeout, &frameInfo, &resource);
+        g_errorCode = monitor.deskDupl->AcquireNextFrame(g_timeout, &frameInfo, &resource);
         switch (g_errorCode) 
         {
             case S_OK: 
@@ -142,7 +135,7 @@ extern "C"
         if (g_errorCode != S_OK) 
         {
             resource->Release();
-            monitor.output->ReleaseFrame();
+            monitor.deskDupl->ReleaseFrame();
             return;
         }
 
@@ -153,7 +146,7 @@ extern "C"
 
         resource->Release();
         texture->Release();
-        monitor.output->ReleaseFrame();
+        monitor.deskDupl->ReleaseFrame();
     }
 
     UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API GetRenderEventFunc()
@@ -174,25 +167,27 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)
     {
         if (!DoesMonitorExist(id)) return;
-        strcpy_s(buf, len, g_monitors[id].name.c_str());
+        strcpy_s(buf, len, g_monitors[id].monitorInfo.szDevice);
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsPrimary(int id)
     {
         if (!DoesMonitorExist(id)) return false;
-        return g_monitors[id].isPrimary;
+        return g_monitors[id].monitorInfo.dwFlags == MONITORINFOF_PRIMARY;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetWidth(int id)
     {
         if (!DoesMonitorExist(id)) return -1;
-        return g_monitors[id].width;
+        const auto rect = g_monitors[id].monitorInfo.rcMonitor;
+        return rect.right - rect.left;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetHeight(int id)
     {
         if (!DoesMonitorExist(id)) return -1;
-        return g_monitors[id].height;
+        const auto rect = g_monitors[id].monitorInfo.rcMonitor;
+        return rect.bottom - rect.top;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API IsPointerVisible(int id)
