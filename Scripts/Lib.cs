@@ -29,6 +29,8 @@ public static class Lib
     public static extern int GetPointerY(int id);
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetErrorCode();
 
     public static string GetName(int id)
     {
