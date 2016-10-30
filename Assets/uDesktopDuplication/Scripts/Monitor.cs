@@ -41,6 +41,16 @@ public class Monitor
         get { return (float)width / height; }
     }
 
+    public bool isHorizontal
+    { 
+        get { return width > height; }
+    }
+
+    public bool isVertical 
+    { 
+        get { return height > width; }
+    }
+
     public bool isPointerVisible
     { 
         get { return Lib.IsPointerVisible(id); }
@@ -68,7 +78,9 @@ public class Monitor
         get 
         { 
             if (texture_ == null) {
-                texture_ = new Texture2D(width, height, TextureFormat.BGRA32, false);
+                var w = isHorizontal ? width : height;
+                var h = isHorizontal ? height : width;
+                texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
                 Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
             }
             return texture_;
