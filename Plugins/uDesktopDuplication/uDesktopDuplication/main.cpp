@@ -27,6 +27,7 @@ namespace
 
     IUnityInterfaces* g_unity = nullptr;
     int g_timeout = 10;
+    HRESULT g_errorCode = 0;
     std::vector<Monitor> g_monitors;
 }
 
@@ -110,12 +111,11 @@ extern "C"
 
         if (monitor.output == nullptr || monitor.texture == nullptr) return;
 
-        HRESULT hr;
         IDXGIResource* resource = nullptr;
         DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
-        hr = monitor.output->AcquireNextFrame(g_timeout, &frameInfo, &resource);
-        switch (hr) 
+        g_errorCode = monitor.output->AcquireNextFrame(g_timeout, &frameInfo, &resource);
+        switch (g_errorCode) 
         {
             case S_OK: 
             {
@@ -138,8 +138,8 @@ extern "C"
         monitor.pointerY = frameInfo.PointerPosition.Position.y;
 
         ID3D11Texture2D* texture;
-        hr = resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
-        if (hr != S_OK) 
+        g_errorCode = resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
+        if (g_errorCode != S_OK) 
         {
             resource->Release();
             monitor.output->ReleaseFrame();
@@ -217,5 +217,10 @@ extern "C"
     {
         if (!DoesMonitorExist(id)) return;
         g_monitors[id].texture = reinterpret_cast<ID3D11Texture2D*>(texture);
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetErrorCode()
+    {
+        return static_cast<int>(g_errorCode);
     }
 }
