@@ -55,6 +55,12 @@ public class Texture : MonoBehaviour
         } else {
             material_.DisableKeyword("INVERT_Y");
         }
+
+        if (monitor.isVertical) {
+            material_.EnableKeyword("VERTICAL");
+        } else {
+            material_.DisableKeyword("VERTICAL");
+        }
     }
 }
 

@@ -62,6 +62,7 @@ Pass
     #pragma fragment frag
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
+    #pragma multi_compile ___ VERTICAL
     ENDCG
 }
 

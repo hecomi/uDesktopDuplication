@@ -19,6 +19,7 @@ SubShader
     #pragma surface surf Standard fullforwardshadows
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
+    #pragma multi_compile ___ VERTICAL
 
     #include "./uDD_Common.cginc"
 

@@ -11,6 +11,11 @@ inline void uddInvertUV(inout float2 uv)
 #ifdef INVERT_Y
     uv.y = 1.0 - uv.y;
 #endif
+#ifdef VERTICAL
+    float2 tmp = uv;
+    uv.x = tmp.y;
+    uv.y = 1.0 - tmp.x;
+#endif
 }
 
 inline fixed4 uddGetTexture(sampler2D tex, float2 uv)
