@@ -6,10 +6,10 @@
 inline void uddInvertUV(inout float2 uv)
 {
 #ifdef INVERT_X
-    uv.x *= -1.0;
+    uv.x = 1.0 - uv.x;
 #endif
 #ifdef INVERT_Y
-    uv.y *= -1.0;
+    uv.y = 1.0 - uv.y;
 #endif
 }
 
