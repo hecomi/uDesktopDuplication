@@ -66,6 +66,21 @@ public class Monitor
         get { return Lib.GetPointerY(id); }
     }
 
+    public int pointerShapeWidth
+    { 
+        get { return Lib.GetPointerShapeWidth(id); }
+    }
+
+    public int pointerShapeHeight
+    { 
+        get { return Lib.GetPointerShapeHeight(id); }
+    }
+
+    public PointerShapeType pointerShapeType
+    { 
+        get { return Lib.GetPointerShapeType(id); }
+    }
+
     public bool shouldBeUpdated
     {
         get; 
@@ -90,6 +105,11 @@ public class Monitor
     public void Render()
     {
         GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
+    }
+
+    public void UpdatePointerTexture(System.IntPtr ptr)
+    {
+        Lib.UpdatePointerTexture(id, ptr);
     }
 }
 

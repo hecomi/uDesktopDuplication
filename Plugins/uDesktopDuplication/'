@@ -14,7 +14,6 @@ namespace
 {
     struct Monitor
     {
-        int                     id            = -1;
         IDXGIOutputDuplication* deskDupl      = nullptr;
         ID3D11Texture2D*        texture       = nullptr;
         DXGI_OUTPUT_DESC        outputDesc;
@@ -35,7 +34,6 @@ namespace
     };
 
     IUnityInterfaces*    g_unity        = nullptr;
-    int                  g_mouseMonitor = 0;
     int                  g_timeout      = 10;
     HRESULT              g_errorCode    = 0;
     std::string          g_errorMessage = "";
@@ -62,7 +60,6 @@ extern "C"
         CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory));
 
         // Check all display adapters.
-        int id = 0;
         IDXGIAdapter1* adapter;
         for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
         {
@@ -71,7 +68,6 @@ extern "C"
             for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
             {
                 Monitor monitor;
-                monitor.id = id++;
 
                 output->GetDesc(&monitor.outputDesc);
                 monitor.monitorInfo.cbSize = sizeof(MONITORINFOEX);
@@ -114,172 +110,146 @@ extern "C"
         pointer.isVisible = frameInfo.PointerPosition.Visible != 0;
         pointer.x = frameInfo.PointerPosition.Position.x;
         pointer.y = frameInfo.PointerPosition.Position.y;
-
-        // Pointer type
-        const auto pointerType = pointer.shapeInfo.Type;
-        const bool isMono = pointerType == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME;
-        const bool isColorMask = pointerType == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
-
-        if (pointer.isVisible)
+        if (frameInfo.PointerShapeBufferSize != 0) 
         {
-            g_mouseMonitor = monitor.id;
-        }
-
-        if (g_mouseMonitor != monitor.id) {
-            return true;
-        }
-
-        // Increase the buffer size if needed
-        if (frameInfo.PointerShapeBufferSize > pointer.apiBufferSize)
-        {
-            if (pointer.apiBuffer) delete[] pointer.apiBuffer;
-            pointer.apiBuffer = new BYTE[frameInfo.PointerShapeBufferSize];
-            pointer.apiBufferSize = frameInfo.PointerShapeBufferSize;
-        }
-        if (!pointer.apiBuffer) return true;
-
-        // Get information about the mouse pointer if needed
-        if (frameInfo.PointerShapeBufferSize != 0)
-        {
-            UINT bufferSize;
-            monitor.deskDupl->GetFramePointerShape(
-                frameInfo.PointerShapeBufferSize,
-                reinterpret_cast<void*>(pointer.apiBuffer),
-                &bufferSize,
-                &pointer.shapeInfo);
-        }
-
-        // Size
-        const auto w = pointer.shapeInfo.Width;
-        const auto h = pointer.shapeInfo.Height / (isMono ? 2 : 1);
-        const auto p = pointer.shapeInfo.Pitch; 
-
-        // Convert the buffer given by API into BGRA32
-        const auto bgraBufferSize = w * h * 4;
-        if (bgraBufferSize > pointer.bgra32BufferSize)
-        {
-            if (pointer.bgra32Buffer) delete[] pointer.bgra32Buffer;
-            pointer.bgra32Buffer = new BYTE[bgraBufferSize];
-            pointer.bgra32BufferSize = bgraBufferSize;
-        }
-        if (!pointer.bgra32Buffer) return true;
-
-        // If masked, copy the desktop image and merge it with masked image.
-        if (isMono || isColorMask)
-        {
-            HRESULT hr;
-
-            D3D11_TEXTURE2D_DESC desc;
-            desc.Width = w;
-            desc.Height = h;
-            desc.MipLevels = 1;
-            desc.ArraySize = 1;
-            desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-            desc.SampleDesc.Count = 1;
-            desc.SampleDesc.Quality = 0;
-            desc.Usage = D3D11_USAGE_STAGING;
-            desc.BindFlags = 0;
-            desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-            desc.MiscFlags = 0;
-
-            ID3D11DeviceContext* context;
-            auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
-            device->GetImmediateContext(&context);
-
-            ID3D11Texture2D* texture = nullptr;
-            hr = device->CreateTexture2D(&desc, nullptr, &texture);
-            if (FAILED(hr)) 
+            if (frameInfo.PointerShapeBufferSize > pointer.apiBufferSize)
             {
-                return false;
+                if (pointer.apiBuffer) delete[] pointer.apiBuffer;
+                pointer.apiBuffer = new BYTE[frameInfo.PointerShapeBufferSize];
+                pointer.apiBufferSize = frameInfo.PointerShapeBufferSize;
+            }
+            if (pointer.apiBuffer)
+            {
+                UINT bufferSize;
+                monitor.deskDupl->GetFramePointerShape(
+                    frameInfo.PointerShapeBufferSize,
+                    reinterpret_cast<void*>(pointer.apiBuffer),
+                    &bufferSize,
+                    &pointer.shapeInfo);
             }
 
-            D3D11_BOX box;
-            box.front = 0;
-            box.back = 1;
-            box.left = pointer.x;
-            box.top = pointer.y;
-            box.right = pointer.x + w;
-            box.bottom = pointer.y + h;
-            context->CopySubresourceRegion(texture, 0, 0, 0, 0, monitor.texture, 0, &box);
-
-            IDXGISurface* surface = nullptr;
-            hr = texture->QueryInterface(__uuidof(IDXGISurface), (void**)&surface);
-            texture->Release();
-            if (FAILED(hr))
+            // Convert buffer give by API into BGRA32
+            const auto bgraBufferSize = pointer.shapeInfo.Width * pointer.shapeInfo.Height * 4;
+            if (bgraBufferSize > pointer.bgra32BufferSize)
             {
-                return false;
+                if (pointer.bgra32Buffer) delete[] pointer.bgra32Buffer;
+                pointer.bgra32Buffer = new BYTE[bgraBufferSize];
+                pointer.bgra32BufferSize = bgraBufferSize;
             }
-
-            DXGI_MAPPED_RECT mappedSurface;
-            hr = surface->Map(&mappedSurface, DXGI_MAP_READ);
-            if (FAILED(hr))
+            if (pointer.bgra32Buffer) 
             {
-                surface->Release();
-                return false;
-            }
+                const auto w = pointer.shapeInfo.Width;
+                const auto h = pointer.shapeInfo.Height;
+                const auto p = pointer.shapeInfo.Pitch; 
 
-            // Finally, get the texture behind the mouse pointer.
-            const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
-            const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
-
-            // Access RGBA values at the same time
-            auto output32 = reinterpret_cast<UINT*>(pointer.bgra32Buffer);
-
-            if (isMono)
-            {
-                for (UINT row = 0; row < h; ++row) 
+                // If masked, copy the desktop image and merge it with masked image.
+                const bool isMasked = 
+                    pointer.shapeInfo.Type == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME ||
+                    pointer.shapeInfo.Type == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
+                if (isMasked)
                 {
-                    BYTE mask = 0x80;
-                    for (UINT col = 0; col < w; ++col) 
+                    HRESULT hr;
+
+                    D3D11_TEXTURE2D_DESC desc;
+                    desc.Width = w;
+                    desc.Height = h;
+                    desc.MipLevels = 1;
+                    desc.ArraySize = 1;
+                    desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+                    desc.SampleDesc.Count = 1;
+                    desc.SampleDesc.Quality = 0;
+                    desc.Usage = D3D11_USAGE_STAGING;
+                    desc.BindFlags = 0;
+                    desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+                    desc.MiscFlags = 0;
+
+                    ID3D11DeviceContext* context;
+                    auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
+                    device->GetImmediateContext(&context);
+
+                    ID3D11Texture2D* texture = nullptr;
+                    hr = device->CreateTexture2D(&desc, nullptr, &texture);
+                    if (FAILED(hr)) 
                     {
-                        const int i = row * w + col;
-                        const BYTE andMask = pointer.apiBuffer[col / 8 + row * p] & mask;
-                        const BYTE xorMask = pointer.apiBuffer[col / 8 + (row + h) * p] & mask;
-                        const UINT andMask32 = andMask ? 0xFFFFFFFF : 0xFF000000;
-                        const UINT xorMask32 = xorMask ? 0x00FFFFFF : 0x00000000;
-                        output32[i] = (desktop32[row * desktopPitch + col] & andMask32) ^ xorMask32;
-                        mask = (mask == 0x01) ? 0x80 : (mask >> 1);
+                        return false;
                     }
-                }
-            }
-            else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR
-            {
-                const auto buffer32 = reinterpret_cast<UINT*>(pointer.apiBuffer);
 
-                for (UINT row = 0; row < h; ++row) 
-                {
-                    for (UINT col = 0; col < w; ++col) 
+                    D3D11_BOX box;
+                    box.left = pointer.x;
+                    box.top = pointer.y;
+                    box.right = pointer.x + w;
+                    box.bottom = pointer.y + h;
+                    context->CopySubresourceRegion(texture, 0, 0, 0, 0, monitor.texture, 0, &box);
+
+                    IDXGISurface* surface = nullptr;
+                    hr = texture->QueryInterface(__uuidof(IDXGISurface), (void**)&surface);
+                    texture->Release();
+                    if (FAILED(hr))
                     {
-                        const int i = row * w + col;
-                        const int j = row * p / sizeof(UINT) + col;
+                        return false;
+                    }
 
-                        UINT mask = 0xFF000000 & buffer32[j];
-                        if (mask)
+                    DXGI_MAPPED_RECT mappedSurface;
+                    hr = surface->Map(&mappedSurface, DXGI_MAP_READ);
+                    if (FAILED(hr))
+                    {
+                        surface->Release();
+                        return false;
+                    }
+
+                    // Finally, get the texture behind the mouse pointer.
+                    const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
+                    const auto desktopPitch = mappedSurface.Pitch / sizeof(UINT);
+
+                    // Access RGBA values at the same time
+                    auto output32 = reinterpret_cast<UINT*>(pointer.bgra32Buffer);
+
+                    if (pointer.shapeInfo.Type == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME)
+                    {
+                        for (UINT row = 0; row < h; ++row) 
                         {
-                            output32[i] = (desktop32[row * desktopPitch + col] ^ buffer32[j]) | 0xFF000000;
-                        }
-                        else
-                        {
-                            output32[i] = buffer32[j] | 0xFF000000;
+                            for (UINT col = 0; col < w; ++col) 
+                            {
+                                const int i = row * w + col;
+                                const UINT mask = 0b10000000 >> (i % 8);
+                                const BYTE andMask = pointer.apiBuffer[col / 8 + row * p] & mask;
+                                const BYTE xorMask = pointer.apiBuffer[col / 8 + (row + h / 2) * p] & mask;
+                                const UINT andMask32 = andMask ? 0xFFFFFFFF : 0xFF000000;
+                                const UINT xorMask32 = xorMask ? 0x00FFFFFF : 0x00000000;
+                                output32[i] = (desktop32[row * desktopPitch + col] & andMask32) ^ xorMask32;
+                            }
                         }
                     }
-                }
-            }
+                    else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR
+                    {
+                        const auto buffer32 = reinterpret_cast<UINT*>(pointer.apiBuffer);
 
-            hr = surface->Unmap();
-            surface->Release();
-            if (FAILED(hr))
-            {
-                return false;
-            }
-        }
-        else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR
-        {
-            auto output32 = reinterpret_cast<UINT*>(pointer.bgra32Buffer);
-            const auto buffer32 = reinterpret_cast<UINT*>(pointer.apiBuffer);
-            for (UINT i = 0; i < w * h; ++i) 
-            {
-                output32[i] = buffer32[i];
+                        for (UINT row = 0; row < h; ++row) 
+                        {
+                            for (UINT col = 0; col < w; ++col) 
+                            {
+                                const int i = row * w + col;
+                                const int j = row * p / sizeof(UINT) + col;
+
+                                UINT MaskVal = 0xFF000000 & buffer32[j];
+
+                                const UINT mask = 0xFF000000 & buffer[j];
+                                if (mask) {
+                                    output[i] = 0xFF000000 ^ buffer[j];
+                                } else {
+                                    output[i] = 0x00000000;
+                                }
+                            }
+                        }
+                    }
+
+                    hr = surface->Unmap();
+                    surface->Release();
+                    if (FAILED(hr))
+                    {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -306,7 +276,7 @@ extern "C"
             }
             else
             {
-                g_errorMessage = "[IDXGIOutputDuplication::AcquireNextFrame()] Maybe timeout.";
+                g_errorMessage = "[IDXGIOutputDuplication::AcquireNextFrame()] Unknown error.";
             }
             return;
         }
@@ -397,8 +367,7 @@ extern "C"
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerShapeHeight(int id)
     {
         if (!IsValidMonitorId(id)) return -1;
-        const auto& info = g_monitors[id].pointer.shapeInfo;
-        return (info.Type == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME) ? info.Height / 2 : info.Height;
+        return g_monitors[id].pointer.shapeInfo.Height;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetPointerShapePitch(int id)
@@ -417,11 +386,10 @@ extern "C"
     {
         if (!IsValidMonitorId(id)) return;
         const auto& pointer = g_monitors[id].pointer;
-        if (!pointer.bgra32Buffer) return;
         auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
         ID3D11DeviceContext* context;
         device->GetImmediateContext(&context);
-        context->UpdateSubresource(ptr, 0, nullptr, pointer.bgra32Buffer, pointer.shapeInfo.Width * 4, 0);
+        context->UpdateSubresource(ptr, 0, nullptr, pointer.bgra32Buffer, pointer.shapeInfo.Pitch, 0);
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTexturePtr(int id, void* texture)
@@ -432,16 +400,6 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetErrorCode()
     {
-        const auto code = g_errorCode;
-        g_errorCode = 0;
-        return static_cast<int>(code);
+        return static_cast<int>(g_errorCode);
     }
-
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetErrorMessage(char* buf, int len)
-    {
-        const auto message = g_errorMessage;
-        g_errorMessage = "";
-        strcpy_s(buf, len, message.c_str());
-    }
-
 }
