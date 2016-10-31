@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace uDesktopDuplication
 {
@@ -16,6 +17,8 @@ public class Cursor : MonoBehaviour
 
     private Texture2D pointerTexture_;
     private Material cursorMaterial_;
+
+    private Dictionary<Vector2, Texture2D> pointerTextures_ = new Dictionary<Vector2, Texture2D>();
 
     void OnEnable()
     {
@@ -62,10 +65,15 @@ public class Cursor : MonoBehaviour
 
     void UpdateTexture()
     {
-        pointerTexture_ = new Texture2D(monitor.pointerShapeWidth, monitor.pointerShapeHeight, TextureFormat.BGRA32, false);
-        pointerTexture_.wrapMode = TextureWrapMode.Clamp;
-        monitor.UpdatePointerTexture(pointerTexture_.GetNativeTexturePtr());
-        cursorMaterial_.SetTexture("_MainTex", pointerTexture_);
+        var scale = new Vector2(monitor.pointerShapeWidth, monitor.pointerShapeHeight);
+        if (!pointerTextures_.ContainsKey(scale)) {
+            var texture = new Texture2D(monitor.pointerShapeWidth, monitor.pointerShapeHeight, TextureFormat.BGRA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            pointerTextures_.Add(scale, texture);
+        }
+        var pointerTexture = pointerTextures_[scale];
+        monitor.UpdatePointerTexture(pointerTexture.GetNativeTexturePtr());
+        cursorMaterial_.SetTexture("_MainTex", pointerTexture);
     }
 
     void UpdateMaterial()
