@@ -40,6 +40,9 @@ public class Manager : MonoBehaviour
     [SerializeField, Tooltip("Set Desktop Duplication API timeout (milliseconds).")] 
     int timeout = 0;
 
+    [SerializeField, Tooltip("Output logs given by the plugin.")] 
+    bool outputDebugLog = false;
+
     private Coroutine renderCoroutine_ = null;
 
     void Awake()
@@ -77,6 +80,10 @@ public class Manager : MonoBehaviour
                     monitor.Render();
                 }
                 monitor.shouldBeUpdated = false;
+            }
+            if (outputDebugLog && Lib.GetErrorCode() != 0)
+            {
+                Debug.Log(Lib.GetErrorMessage());
             }
         }
     }

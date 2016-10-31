@@ -18,13 +18,18 @@ inline void uddInvertUV(inout float2 uv)
 #endif
 }
 
+inline void uddToLinearIfNeeded(inout float3 rgb)
+{
+    if (!IsGammaSpace()) {
+        rgb = GammaToLinearSpace(rgb);
+    }
+}
+
 inline fixed4 uddGetTexture(sampler2D tex, float2 uv)
 {
     uddInvertUV(uv);
     fixed4 c = tex2D(tex, uv);
-    if (!IsGammaSpace()) {
-        c.rgb = GammaToLinearSpace(c.rgb);
-    }
+    uddToLinearIfNeeded(c.rgb);
     return c;
 }
 
