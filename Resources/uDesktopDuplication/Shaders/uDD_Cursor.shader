@@ -17,7 +17,7 @@ Offset -1, -1
 CGINCLUDE
 
 #include "UnityCG.cginc"
-#include "./uDD_Common.cginc"
+#include "../../../Shaders/uDD_Common.cginc"
 
 half4 _PositionScale;
 #define _PointerX      _PositionScale.x
