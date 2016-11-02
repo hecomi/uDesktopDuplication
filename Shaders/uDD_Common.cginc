@@ -18,7 +18,7 @@ inline void uddInvertUV(inout float2 uv)
 #endif
 }
 
-inline void uddToLinearIfNeeded(inout float3 rgb)
+inline void uddToLinearIfNeeded(inout fixed3 rgb)
 {
     if (!IsGammaSpace()) {
         rgb = GammaToLinearSpace(rgb);

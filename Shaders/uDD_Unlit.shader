@@ -5,12 +5,15 @@ Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
+    [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
 SubShader
 {
 
 Tags { "RenderType"="Opaque" }
+
+Cull [_Cull]
 
 CGINCLUDE
 
