@@ -65,9 +65,13 @@ public class Cursor : MonoBehaviour
 
     void UpdateTexture()
     {
-        var scale = new Vector2(monitor.pointerShapeWidth, monitor.pointerShapeHeight);
+        var w = monitor.pointerShapeWidth;
+        var h = monitor.pointerShapeHeight;
+        if (w == 0 || h == 0) return;
+
+        var scale = new Vector2(w, h);
         if (!pointerTextures_.ContainsKey(scale)) {
-            var texture = new Texture2D(monitor.pointerShapeWidth, monitor.pointerShapeHeight, TextureFormat.BGRA32, false);
+            var texture = new Texture2D(w, h, TextureFormat.BGRA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             pointerTextures_.Add(scale, texture);
         }
