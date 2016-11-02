@@ -4,15 +4,17 @@
 Properties
 {
     _MainTex ("Texture", 2D) = "white" {}
+    [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
 SubShader
 {
 
-Tags { "RenderType"="Opaque" }
+Tags { "RenderType"="Transparent" "IgnoreProjector"="True" "RenderType"="Transparent" "Queue" = "Transparent+1" }
 
+Cull [_Cull]
 ZWrite Off
-Offset -1, -1
+Offset -0.01, -0.01
 
 CGINCLUDE
 
