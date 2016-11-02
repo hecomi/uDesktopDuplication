@@ -30,7 +30,7 @@ public class MultipleMonitorCreator : MonoBehaviour
             var texture = go.GetComponent<uDesktopDuplication.Texture>();
             var halfWidth = texture.monitor.width * ratio * scale / 2;
             x += halfWidth;
-            go.transform.position = new Vector3(x, 0f, 0f);
+            go.transform.localPosition = new Vector3(x, 0f, 0f);
             x += halfWidth + margin;
         }
     }
