@@ -40,7 +40,7 @@ public:
     bool IsPrimary(int id) const;
     int GetWidth(int id) const;
     int GetHeight(int id) const;
-    int IsCursorVisible(int id) const;
+    bool IsCursorVisible(int id) const;
     int GetCursorX(int id) const;
     int GetCursorY(int id) const;
     int GetCursorShapeWidth(int id) const;

@@ -169,7 +169,7 @@ int MonitorManager::GetHeight(int id) const
 }
 
 
-int MonitorManager::IsCursorVisible(int id) const
+bool MonitorManager::IsCursorVisible(int id) const
 {
     if (auto monitor = GetMonitor(id))
     {
