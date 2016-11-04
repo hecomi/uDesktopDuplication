@@ -23,9 +23,9 @@ public static class Lib
     public delegate void MessageHandler(Message message);
 
     [DllImport("uDesktopDuplication")]
-    public static extern void Initialize();
+    public static extern void InitializeUDD();
     [DllImport("uDesktopDuplication")]
-    public static extern void Finalize();
+    public static extern void FinalizeUDD();
     [DllImport("uDesktopDuplication")]
     public static extern void Update();
     [DllImport("uDesktopDuplication")]

@@ -41,11 +41,10 @@ public class Manager : MonoBehaviour
     int timeout = 0;
 
     private Coroutine renderCoroutine_ = null;
-    Message message_ = Message.None;
 
     void Awake()
     {
-        Lib.Initialize();
+        Lib.InitializeUDD();
 
         if (instance_ != null) return;
         instance_ = this;
@@ -57,7 +56,7 @@ public class Manager : MonoBehaviour
 
     void OnApplicationQuit()
     {
-        Lib.Finalize();
+        Lib.FinalizeUDD();
     }
 
     void OnEnable()
@@ -89,8 +88,6 @@ public class Manager : MonoBehaviour
             }
             message = Lib.PopMessage();
         }
-
-        message_ = Message.None;
     }
 
     IEnumerator OnRender()
@@ -112,11 +109,6 @@ public class Manager : MonoBehaviour
         for (int i = 0; i < monitorCount; ++i) {
             monitors.Add(new Monitor(i));
         }
-    }
-
-    void OnMessage(Message message)
-    {
-        message_ = message;
     }
 
     void Reinitialize()
