@@ -162,7 +162,6 @@ public class Monitor
         }
 
         if (shouldCreate) {
-            Debug.Log(w + " " + h);
             texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
         }
     }
