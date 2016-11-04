@@ -47,7 +47,7 @@ public class Cursor : MonoBehaviour
 
     void Update()
     {
-        if (monitor.isPointerVisible) {
+        if (monitor.isCursorVisible) {
             UpdatePosition();
             UpdateTexture();
             UpdateMaterial();
@@ -76,7 +76,7 @@ public class Cursor : MonoBehaviour
             pointerTextures_.Add(scale, texture);
         }
         var pointerTexture = pointerTextures_[scale];
-        monitor.UpdatePointerTexture(pointerTexture.GetNativeTexturePtr());
+        monitor.UpdateCursorTexture(pointerTexture.GetNativeTexturePtr());
         cursorMaterial_.SetTexture("_MainTex", pointerTexture);
     }
 
