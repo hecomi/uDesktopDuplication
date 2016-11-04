@@ -131,8 +131,10 @@ public class Monitor
 
     public void Render()
     {
-        Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
-        GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
+        if (texture_) {
+            Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
+            GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
+        }
     }
 
     public void UpdateCursorTexture(System.IntPtr ptr)
@@ -155,7 +157,12 @@ public class Monitor
             }
         }
 
+        if (w <= 0 || h <= 0) {
+            shouldCreate = false;
+        }
+
         if (shouldCreate) {
+            Debug.Log(w + " " + h);
             texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
         }
     }
