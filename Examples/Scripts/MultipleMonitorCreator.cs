@@ -9,6 +9,8 @@ public class MultipleMonitorCreator : MonoBehaviour
     void Start()
     {
         var monitors = uDesktopDuplication.Manager.monitors;
+        monitors.Sort((a, b) => a.left - b.left);
+
         var n = monitors.Count;
 
         var totalWidth = 0f;
@@ -23,6 +25,7 @@ public class MultipleMonitorCreator : MonoBehaviour
             var scaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x * 2f;
             totalWidth += width * scaleX;
         }
+
 
         totalWidth += margin * (n - 1);
         var x = -totalWidth / 2;

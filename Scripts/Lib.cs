@@ -18,6 +18,15 @@ public enum CursorShapeType
     MaskedColor = 4,
 }
 
+public enum MonitorRotation
+{
+    Unspecified = 0,
+    Identity = 1,
+    Rotate90 = 2,
+    Rotate180 = 3,
+    Rotate270 = 4
+}
+
 public static class Lib
 {
     public delegate void MessageHandler(Message message);
@@ -33,15 +42,29 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]
+    public static extern int GetTotalWidth();
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetTotalHeight();
+    [DllImport("uDesktopDuplication")]
     public static extern void SetTimeout(int timeout);
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetRenderEventFunc();
     [DllImport("uDesktopDuplication")]
     public static extern void GetName(int id, StringBuilder buf, int len);
     [DllImport("uDesktopDuplication")]
+    public static extern int GetLeft(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetRight(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetTop(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetBottom(int id);
+    [DllImport("uDesktopDuplication")]
     public static extern int GetWidth(int id);
     [DllImport("uDesktopDuplication")]
     public static extern int GetHeight(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern MonitorRotation GetRotation(int id);
     [DllImport("uDesktopDuplication")]
     public static extern bool IsPrimary(int id);
     [DllImport("uDesktopDuplication")]
