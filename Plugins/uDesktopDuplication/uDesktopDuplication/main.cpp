@@ -49,7 +49,7 @@ void SendMessageToUnity(Message message)
 
 extern "C"
 {
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Initialize()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API InitializeUDD()
     {
 		if (g_unity && !g_manager)
 		{
@@ -57,7 +57,7 @@ extern "C"
 		}
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
 		g_manager.reset();
     }
@@ -65,13 +65,13 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
     {
         g_unity = unityInterfaces;
-		Initialize();
+		InitializeUDD();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
 		g_unity = nullptr;
-		Finalize();
+		FinalizeUDD();
     }
 
     void UNITY_INTERFACE_API OnRenderEvent(int id)
