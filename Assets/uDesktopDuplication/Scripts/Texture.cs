@@ -33,6 +33,14 @@ public class Texture : MonoBehaviour
         private set;
     }
 
+    void Awake()
+    {
+        if (!GetComponent<Cursor>())
+        {
+            gameObject.AddComponent<Cursor>();
+        }
+    }
+
     void OnEnable()
     {
         if (monitor == null) {
