@@ -68,10 +68,30 @@ public class Texture : MonoBehaviour
             material.DisableKeyword("INVERT_Y");
         }
 
-        if (monitor.isVertical) {
-            material.EnableKeyword("VERTICAL");
-        } else {
-            material.DisableKeyword("VERTICAL");
+        switch (monitor.rotation)
+        {
+            case MonitorRotation.Identity:
+                material.DisableKeyword("ROTATE90");
+                material.DisableKeyword("ROTATE180");
+                material.DisableKeyword("ROTATE270");
+                break;
+            case MonitorRotation.Rotate90:
+                material.EnableKeyword("ROTATE90");
+                material.DisableKeyword("ROTATE180");
+                material.DisableKeyword("ROTATE270");
+                break;
+            case MonitorRotation.Rotate180:
+                material.DisableKeyword("ROTATE90");
+                material.EnableKeyword("ROTATE180");
+                material.DisableKeyword("ROTATE270");
+                break;
+            case MonitorRotation.Rotate270:
+                material.DisableKeyword("ROTATE90");
+                material.DisableKeyword("ROTATE180");
+                material.EnableKeyword("ROTATE270");
+                break;
+            default:
+                break;
         }
     }
 }

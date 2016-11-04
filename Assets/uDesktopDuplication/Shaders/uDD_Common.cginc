@@ -20,22 +20,35 @@ struct Input
 	float2 uv_MainTex;
 };
 
-inline void uddInvertUV(inout float2 uv)
+float2 uddInvertUV(float2 uv)
 {
 #ifdef INVERT_X
-    uv.x = 1.0 - uv.x;
+	uv.x = 1.0 - uv.x;
 #endif
 #ifdef INVERT_Y
-    uv.y = 1.0 - uv.y;
+	uv.y = 1.0 - uv.y;
 #endif
-#ifdef VERTICAL
+	return uv;
+}
+
+float2 uddRotateUV(float2 uv)
+{
+#ifdef ROTATE90
     float2 tmp = uv;
     uv.x = tmp.y;
     uv.y = 1.0 - tmp.x;
+#elif ROTATE180
+	uv.x = 1.0 - uv.x;
+	uv.y = 1.0 - uv.y;
+#elif ROTATE270
+    float2 tmp = uv;
+    uv.x = 1.0 - tmp.y;
+    uv.y = tmp.x;
 #endif
+	return uv;
 }
 
-inline void uddToLinearIfNeeded(inout fixed3 rgb)
+inline void uddConvertToLinearIfNeeded(inout fixed3 rgb)
 {
     if (!IsGammaSpace()) {
         rgb = GammaToLinearSpace(rgb);
@@ -60,11 +73,11 @@ inline fixed4 uddGetCursorTexture(sampler2D tex, float2 uv, fixed4 cursorPosScal
 
 inline fixed4 uddGetScreenTextureWithCursor(sampler2D screenTex, sampler2D cursorTex, float2 uv, fixed4 cursorPosScale)
 {
-	uddInvertUV(uv);
-	fixed4 screen = uddGetScreenTexture(screenTex, uv);
+	uv = uddInvertUV(uv);
+	fixed4 screen = uddGetScreenTexture(screenTex, uddRotateUV(uv));
 	fixed4 cursor = uddGetCursorTexture(cursorTex, uv, cursorPosScale);
 	fixed4 color = lerp(screen, cursor, cursor.a);
-	uddToLinearIfNeeded(color.rgb);
+	uddConvertToLinearIfNeeded(color.rgb);
 	return color;
 }
 
