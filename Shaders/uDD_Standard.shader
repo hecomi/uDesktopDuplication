@@ -23,6 +23,7 @@ SubShader
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
     #pragma multi_compile ___ VERTICAL
+    #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
 
 	#define SURFACE_SHADER
     #include "./uDD_Common.cginc"
