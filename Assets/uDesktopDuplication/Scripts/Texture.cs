@@ -13,8 +13,8 @@ public class Texture : MonoBehaviour
         set 
         { 
             monitor_ = value;
-            material_ = GetComponent<Renderer>().material;
-            material_.mainTexture = monitor_.texture;
+            material = GetComponent<Renderer>().material;
+            material.mainTexture = monitor_.texture;
         }
     }
 
@@ -27,7 +27,11 @@ public class Texture : MonoBehaviour
     public bool invertX = false;
     public bool invertY = false;
 
-    private Material material_;
+    public Material material
+    {
+        get;
+        private set;
+    }
 
     void OnEnable()
     {
@@ -45,21 +49,21 @@ public class Texture : MonoBehaviour
     void UpdateMaterial()
     {
         if (invertX) {
-            material_.EnableKeyword("INVERT_X");
+            material.EnableKeyword("INVERT_X");
         } else {
-            material_.DisableKeyword("INVERT_X");
+            material.DisableKeyword("INVERT_X");
         }
 
         if (invertY) {
-            material_.EnableKeyword("INVERT_Y");
+            material.EnableKeyword("INVERT_Y");
         } else {
-            material_.DisableKeyword("INVERT_Y");
+            material.DisableKeyword("INVERT_Y");
         }
 
         if (monitor.isVertical) {
-            material_.EnableKeyword("VERTICAL");
+            material.EnableKeyword("VERTICAL");
         } else {
-            material_.DisableKeyword("VERTICAL");
+            material.DisableKeyword("VERTICAL");
         }
     }
 }
