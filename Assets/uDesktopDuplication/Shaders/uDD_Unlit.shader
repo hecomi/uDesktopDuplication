@@ -49,9 +49,9 @@ Pass
     CGPROGRAM
     #pragma vertex vert
     #pragma fragment frag
-    #pragma shader_feature ___ INVERT_X
-    #pragma shader_feature ___ INVERT_Y
-    #pragma shader_feature ___ VERTICAL
+    #pragma multi_compile ___ INVERT_X
+    #pragma multi_compile ___ INVERT_Y
+    #pragma multi_compile ___ VERTICAL
     #pragma shader_feature ___ USE_BEND
     ENDCG
 }

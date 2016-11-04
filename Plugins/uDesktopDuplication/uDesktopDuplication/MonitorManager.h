@@ -36,10 +36,17 @@ public:
 // Getters from Unity
 public:
     int GetMonitorCount() const;
+    int GetTotalWidth() const;
+    int GetTotalHeight() const;
     void GetName(int id, char* buf, int len) const;
     bool IsPrimary(int id) const;
+	int GetLeft(int id) const;
+	int GetRight(int id) const;
+	int GetTop(int id) const;
+	int GetBottom(int id) const;
     int GetWidth(int id) const;
     int GetHeight(int id) const;
+	int GetRotation(int id) const;
     bool IsCursorVisible(int id) const;
     int GetCursorX(int id) const;
     int GetCursorY(int id) const;

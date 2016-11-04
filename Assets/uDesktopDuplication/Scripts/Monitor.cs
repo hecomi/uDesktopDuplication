@@ -31,6 +31,26 @@ public class Monitor
         get { return Lib.IsPrimary(id); }
     }
 
+    public int left
+    { 
+        get { return Lib.GetLeft(id); }
+    }
+
+    public int right
+    { 
+        get { return Lib.GetRight(id); }
+    }
+
+    public int top
+    { 
+        get { return Lib.GetTop(id); }
+    }
+
+    public int bottom
+    { 
+        get { return Lib.GetBottom(id); }
+    }
+
     public int width 
     { 
         get { return Lib.GetWidth(id); }
@@ -39,6 +59,11 @@ public class Monitor
     public int height
     { 
         get { return Lib.GetHeight(id); }
+    }
+
+    public MonitorRotation rotation
+    { 
+        get { return Lib.GetRotation(id); }
     }
 
     public float aspect

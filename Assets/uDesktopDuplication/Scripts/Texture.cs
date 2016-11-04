@@ -52,6 +52,7 @@ public class Texture : MonoBehaviour
     {
         monitor.shouldBeUpdated = true;
         UpdateMaterial();
+        Debug.Log(Lib.GetTotalWidth() + " " + Lib.GetTotalHeight());
     }
 
     void UpdateMaterial()

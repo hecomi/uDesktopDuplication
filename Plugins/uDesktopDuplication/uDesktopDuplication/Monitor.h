@@ -18,8 +18,13 @@ public:
     ID3D11Texture2D* GetUnityTexture() const;
     void GetName(char* buf, int len) const;
     bool IsPrimary() const;
+	int GetLeft() const;
+	int GetRight() const;
+	int GetTop() const;
+	int GetBottom() const;
     int GetWidth() const;
     int GetHeight() const;
+	int GetRotation() const;
     IDXGIOutputDuplication* GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
 

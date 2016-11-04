@@ -106,6 +106,18 @@ extern "C"
         return g_manager->GetMonitorCount();
     }
 
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTotalWidth()
+    {
+		if (!g_manager) return 0;
+        return g_manager->GetTotalWidth();
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTotalHeight()
+    {
+		if (!g_manager) return 0;
+        return g_manager->GetTotalHeight();
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTimeout(int timeout)
     {
 		if (!g_manager) return;
@@ -124,6 +136,30 @@ extern "C"
         return g_manager->IsPrimary(id);
     }
 
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetLeft(int id)
+    {
+		if (!g_manager) return -1;
+        return g_manager->GetLeft(id);
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetRight(int id)
+    {
+		if (!g_manager) return -1;
+        return g_manager->GetRight(id);
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTop(int id)
+    {
+		if (!g_manager) return -1;
+        return g_manager->GetTop(id);
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetBottom(int id)
+    {
+		if (!g_manager) return -1;
+        return g_manager->GetBottom(id);
+    }
+
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetWidth(int id)
     {
 		if (!g_manager) return -1;
@@ -134,6 +170,12 @@ extern "C"
     {
 		if (!g_manager) return -1;
         return g_manager->GetHeight(id);
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetRotation(int id)
+    {
+		if (!g_manager) return -1;
+        return g_manager->GetRotation(id);
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsCursorVisible(int id)

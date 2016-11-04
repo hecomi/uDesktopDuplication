@@ -2,6 +2,7 @@
 #include <dxgi1_2.h>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 #include "IUnityInterface.h"
 #include "IUnityGraphicsD3D11.h"
@@ -129,6 +130,32 @@ int MonitorManager::GetMonitorCount() const
     return static_cast<int>(monitors_.size());
 }
 
+int MonitorManager::GetTotalWidth() const
+{
+	std::vector<int> lefts, rights;
+	for (const auto& monitor : monitors_)
+	{
+		lefts.push_back(monitor->GetLeft());
+		rights.push_back(monitor->GetRight());
+	}
+	const auto minLeft = *std::min_element(lefts.begin(), lefts.end());
+	const auto maxRight = *std::max_element(rights.begin(), rights.end());
+	return maxRight - minLeft;
+}
+
+int MonitorManager::GetTotalHeight() const
+{
+	std::vector<int> tops, bottoms;
+	for (const auto& monitor : monitors_)
+	{
+		tops.push_back(monitor->GetTop());
+		bottoms.push_back(monitor->GetBottom());
+	}
+	const auto minTop = *std::min_element(tops.begin(), tops.end());
+	const auto maxBottom = *std::max_element(bottoms.begin(), bottoms.end());
+	return maxBottom - minTop;
+}
+
 
 void MonitorManager::GetName(int id, char* buf, int len) const
 {
@@ -149,6 +176,46 @@ bool MonitorManager::IsPrimary(int id) const
 }
 
 
+int MonitorManager::GetLeft(int id) const
+{
+    if (auto monitor = GetMonitor(id))
+    {
+        return monitor->GetLeft();
+    }
+    return 0;
+}
+
+
+int MonitorManager::GetRight(int id) const
+{
+    if (auto monitor = GetMonitor(id))
+    {
+        return monitor->GetRight();
+    }
+    return 0;
+}
+
+
+int MonitorManager::GetTop(int id) const
+{
+    if (auto monitor = GetMonitor(id))
+    {
+        return monitor->GetTop();
+    }
+    return 0;
+}
+
+
+int MonitorManager::GetBottom(int id) const
+{
+    if (auto monitor = GetMonitor(id))
+    {
+        return monitor->GetBottom();
+    }
+    return 0;
+}
+
+
 int MonitorManager::GetWidth(int id) const
 {
     if (auto monitor = GetMonitor(id))
@@ -166,6 +233,16 @@ int MonitorManager::GetHeight(int id) const
         return monitor->GetHeight();
     }
     return -1;
+}
+
+
+int MonitorManager::GetRotation(int id) const
+{
+    if (auto monitor = GetMonitor(id))
+    {
+		return monitor->GetRotation();
+    }
+	return DXGI_MODE_ROTATION_UNSPECIFIED;
 }
 
 

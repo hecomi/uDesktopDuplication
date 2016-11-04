@@ -141,6 +141,36 @@ bool Monitor::IsPrimary() const
 }
 
 
+int Monitor::GetLeft() const
+{
+	return outputDesc_.DesktopCoordinates.left;
+}
+
+
+int Monitor::GetRight() const
+{
+	return outputDesc_.DesktopCoordinates.right;
+}
+
+
+int Monitor::GetTop() const
+{
+	return outputDesc_.DesktopCoordinates.top;
+}
+
+
+int Monitor::GetBottom() const
+{
+	return outputDesc_.DesktopCoordinates.bottom;
+}
+
+
+int Monitor::GetRotation() const
+{
+	return static_cast<int>(outputDesc_.Rotation);
+}
+
+
 int Monitor::GetWidth() const
 {
     const auto rect = monitorInfo_.rcMonitor;
