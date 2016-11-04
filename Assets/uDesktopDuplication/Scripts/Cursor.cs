@@ -33,8 +33,8 @@ public class Cursor : MonoBehaviour
 
     void UpdatePosition()
     {
-        var x = (1f * monitor.pointerX / monitor.width  - 0.5f) * modelScale.x;
-        var y = (1f * monitor.pointerY / monitor.height - 0.5f) * modelScale.y;
+        var x = (1f * monitor.cursorX / monitor.width  - 0.5f) * modelScale.x;
+        var y = (1f * monitor.cursorY / monitor.height - 0.5f) * modelScale.y;
         var iy = uddTexture_.invertY ? -1 : +1;
         var localPos = transform.right * x + iy * transform.up * y;
         worldPosition = transform.TransformPoint(localPos);
@@ -42,8 +42,8 @@ public class Cursor : MonoBehaviour
 
     void UpdateTexture()
     {
-        var w = monitor.pointerShapeWidth;
-        var h = monitor.pointerShapeHeight;
+        var w = monitor.cursorShapeWidth;
+        var h = monitor.cursorShapeHeight;
         if (w == 0 || h == 0) return;
 
         var scale = new Vector2(w, h);
@@ -53,17 +53,17 @@ public class Cursor : MonoBehaviour
             textures_.Add(scale, texture);
         }
 
-        var pointerTexture = textures_[scale];
-        monitor.UpdateCursorTexture(pointerTexture.GetNativeTexturePtr());
-        uddTexture_.material.SetTexture("_CursorTex", pointerTexture);
+        var cursorTexture = textures_[scale];
+        monitor.UpdateCursorTexture(cursorTexture.GetNativeTexturePtr());
+        uddTexture_.material.SetTexture("_CursorTex", cursorTexture);
     }
 
     void UpdateMaterial()
     {
-        var x = (float)monitor.pointerX / monitor.width;
-        var y = (float)monitor.pointerY / monitor.height;
-        var w = (float)monitor.pointerShapeWidth  / monitor.width;
-        var h = (float)monitor.pointerShapeHeight / monitor.height;
+        var x = (float)monitor.cursorX / monitor.width;
+        var y = (float)monitor.cursorY / monitor.height;
+        var w = (float)monitor.cursorShapeWidth  / monitor.width;
+        var h = (float)monitor.cursorShapeHeight / monitor.height;
         uddTexture_.material.SetVector("_CursorPositionScale", new Vector4(x, y, w, h));
     }
 }
