@@ -15,34 +15,12 @@ public class Cursor : MonoBehaviour
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
 
-    private Texture2D pointerTexture_;
-    private Material cursorMaterial_;
-
-    private Dictionary<Vector2, Texture2D> pointerTextures_ = new Dictionary<Vector2, Texture2D>();
-
-    void OnEnable()
-    {
-        uddTexture_ = GetComponent<Texture>();
-    }
+    private Texture2D currentTexture_;
+    private Dictionary<Vector2, Texture2D> textures_ = new Dictionary<Vector2, Texture2D>();
 
     void Start()
     {
-        var clone = new GameObject(name + " Cursor");
-        clone.transform.SetParent(transform);
-        clone.transform.localPosition = Vector3.zero;
-        clone.transform.localRotation = Quaternion.identity;
-        clone.transform.localScale = Vector3.one;
-
-        var filter = clone.AddComponent<MeshFilter>();
-        filter.mesh = GetComponent<MeshFilter>().sharedMesh;
-
-        var renderer = clone.AddComponent<MeshRenderer>();
-        var shader = Shader.Find("uDesktopDuplication/Cursor");
-        cursorMaterial_ = new Material(shader);
-        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-        renderer.receiveShadows = false;
-        renderer.motionVectors = false;
-        renderer.material = cursorMaterial_;
+        uddTexture_ = GetComponent<Texture>();
     }
 
     void Update()
@@ -70,41 +48,24 @@ public class Cursor : MonoBehaviour
         if (w == 0 || h == 0) return;
 
         var scale = new Vector2(w, h);
-        if (!pointerTextures_.ContainsKey(scale)) {
+        if (!textures_.ContainsKey(scale)) {
             var texture = new Texture2D(w, h, TextureFormat.BGRA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
-            pointerTextures_.Add(scale, texture);
+            textures_.Add(scale, texture);
         }
-        var pointerTexture = pointerTextures_[scale];
+
+        var pointerTexture = textures_[scale];
         monitor.UpdateCursorTexture(pointerTexture.GetNativeTexturePtr());
-        cursorMaterial_.SetTexture("_MainTex", pointerTexture);
+        uddTexture_.material.SetTexture("_CursorTex", pointerTexture);
     }
 
     void UpdateMaterial()
     {
-        if (uddTexture_.invertX) {
-            cursorMaterial_.EnableKeyword("INVERT_X");
-        } else {
-            cursorMaterial_.DisableKeyword("INVERT_X");
-        }
-
-        if (uddTexture_.invertY) {
-            cursorMaterial_.EnableKeyword("INVERT_Y");
-        } else {
-            cursorMaterial_.DisableKeyword("INVERT_Y");
-        }
-
-        if (monitor.isVertical) {
-            cursorMaterial_.EnableKeyword("VERTICAL");
-        } else {
-            cursorMaterial_.DisableKeyword("VERTICAL");
-        }
-
         var x = (float)monitor.pointerX / monitor.width;
         var y = (float)monitor.pointerY / monitor.height;
         var w = (float)monitor.pointerShapeWidth  / monitor.width;
         var h = (float)monitor.pointerShapeHeight / monitor.height;
-        cursorMaterial_.SetVector("_PositionScale", new Vector4(x, y, w, h));
+        uddTexture_.material.SetVector("_CursorPositionScale", new Vector4(x, y, w, h));
     }
 }
 

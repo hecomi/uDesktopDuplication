@@ -20,24 +20,9 @@ Blend SrcAlpha OneMinusSrcAlpha
 
 CGINCLUDE
 
-#include "UnityCG.cginc"
 #include "./uDD_Common.cginc"
+#include "./uDD_Params.cginc"
 
-struct appdata
-{
-    float4 vertex : POSITION;
-    float2 uv     : TEXCOORD0;
-};
-
-struct v2f
-{
-    float4 vertex : SV_POSITION;
-    float2 uv     : TEXCOORD0;
-};
-
-sampler2D _MainTex;
-float4 _MainTex_ST;
-fixed4 _Color;
 fixed _Mask;
 
 v2f vert(appdata v)
@@ -50,22 +35,22 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    fixed4 tex = uddGetTexture(_MainTex, i.uv);
-    fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
-    return fixed4(tex.rgb * _Color.rgb, alpha);
+	fixed4 tex = uddGetScreenTextureWithCursor(_MainTex, _CursorTex, i.uv, _CursorPositionScale);
+	fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
+	return fixed4(tex.rgb * _Color.rgb, alpha * _Color.a);
 }
 
 ENDCG
 
 Pass
 {
-    CGPROGRAM
-    #pragma vertex vert
-    #pragma fragment frag
-    #pragma multi_compile ___ INVERT_X
-    #pragma multi_compile ___ INVERT_Y
-    #pragma multi_compile ___ VERTICAL
-    ENDCG
+	CGPROGRAM
+	#pragma vertex vert
+	#pragma fragment frag
+	#pragma multi_compile ___ INVERT_X
+	#pragma multi_compile ___ INVERT_Y
+	#pragma multi_compile ___ VERTICAL
+	ENDCG
 }
 
 }
