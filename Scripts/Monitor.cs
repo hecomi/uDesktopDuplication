@@ -51,34 +51,34 @@ public class Monitor
         get { return height > width; }
     }
 
-    public bool isPointerVisible
+    public bool isCursorVisible
     { 
-        get { return Lib.IsPointerVisible(id); }
+        get { return Lib.IsCursorVisible(id); }
     }
 
     public int pointerX
     { 
-        get { return Lib.GetPointerX(id); }
+        get { return Lib.GetCursorX(id); }
     }
 
     public int pointerY
     { 
-        get { return Lib.GetPointerY(id); }
+        get { return Lib.GetCursorY(id); }
     }
 
     public int pointerShapeWidth
     { 
-        get { return Lib.GetPointerShapeWidth(id); }
+        get { return Lib.GetCursorShapeWidth(id); }
     }
 
     public int pointerShapeHeight
     { 
-        get { return Lib.GetPointerShapeHeight(id); }
+        get { return Lib.GetCursorShapeHeight(id); }
     }
 
-    public PointerShapeType pointerShapeType
+    public CursorShapeType pointerShapeType
     { 
-        get { return Lib.GetPointerShapeType(id); }
+        get { return Lib.GetCursorShapeType(id); }
     }
 
     public bool shouldBeUpdated
@@ -107,9 +107,9 @@ public class Monitor
         GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
     }
 
-    public void UpdatePointerTexture(System.IntPtr ptr)
+    public void UpdateCursorTexture(System.IntPtr ptr)
     {
-        Lib.UpdatePointerTexture(id, ptr);
+        Lib.UpdateCursorTexture(id, ptr);
     }
 }
 

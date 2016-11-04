@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace uDesktopDuplication
 {
 
-public enum PointerShapeType
+public enum CursorShapeType
 {
     MonoChrome = 1,
     Color = 2,
@@ -29,39 +29,28 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern bool IsPrimary(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern bool IsPointerVisible(int id);
+    public static extern bool IsCursorVisible(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetPointerX(int id);
+    public static extern int GetCursorX(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetPointerY(int id);
+    public static extern int GetCursorY(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetPointerShapeWidth(int id);
+    public static extern int GetCursorShapeWidth(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetPointerShapeHeight(int id);
+    public static extern int GetCursorShapeHeight(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetPointerShapePitch(int id);
+    public static extern int GetCursorShapePitch(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern PointerShapeType GetPointerShapeType(int id);
+    public static extern CursorShapeType GetCursorShapeType(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern void UpdatePointerTexture(int id, System.IntPtr ptr);
+    public static extern void UpdateCursorTexture(int id, System.IntPtr ptr);
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
-    [DllImport("uDesktopDuplication")]
-    public static extern int GetErrorCode();
-    [DllImport("uDesktopDuplication")]
-    public static extern void GetErrorMessage(StringBuilder buf, int len);
 
     public static string GetName(int id)
     {
         var buf = new StringBuilder(32);
         GetName(id, buf, buf.Capacity);
-        return buf.ToString();
-    }
-
-    public static string GetErrorMessage()
-    {
-        var buf = new StringBuilder(64);
-        GetErrorMessage(buf, buf.Capacity);
         return buf.ToString();
     }
 }
