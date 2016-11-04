@@ -16,6 +16,11 @@ public class Monitor
         private set; 
     }
 
+    public bool exists
+    { 
+        get { return id < Manager.monitorCount; } 
+    }
+
     public string name
     { 
         get { return Lib.GetName(id); }
@@ -93,10 +98,7 @@ public class Monitor
         get 
         { 
             if (texture_ == null) {
-                var w = isHorizontal ? width : height;
-                var h = isHorizontal ? height : width;
-                texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
-                Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
+                CreateTexture();
             }
             return texture_;
         }
@@ -104,12 +106,38 @@ public class Monitor
 
     public void Render()
     {
+        Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
         GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
     }
 
     public void UpdateCursorTexture(System.IntPtr ptr)
     {
         Lib.UpdateCursorTexture(id, ptr);
+    }
+
+    void CreateTexture()
+    {
+        var w = isHorizontal ? width : height;
+        var h = isHorizontal ? height : width;
+        bool shouldCreate = true;
+
+        if (texture_) {
+            if (texture_.width != w || texture_.height != h) {
+                if (texture_) Object.DestroyImmediate(texture_);
+                shouldCreate = true;
+            } else { 
+                shouldCreate = false;
+            }
+        }
+
+        if (shouldCreate) {
+            texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
+        }
+    }
+
+    public void Reinitialize()
+    {
+        CreateTexture();
     }
 }
 

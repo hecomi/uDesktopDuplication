@@ -26,7 +26,7 @@ public class Manager : MonoBehaviour
 
     static public int monitorCount
     {
-        get { return instance.monitors_.Count; }
+        get { return Lib.GetMonitorCount(); }
     }
 
     static public Monitor primary
@@ -41,17 +41,23 @@ public class Manager : MonoBehaviour
     int timeout = 0;
 
     private Coroutine renderCoroutine_ = null;
+    Message message_ = Message.None;
 
     void Awake()
     {
+        Lib.Initialize();
+
         if (instance_ != null) return;
         instance_ = this;
 
-        for (int i = 0; i < Lib.GetMonitorCount(); ++i) {
-            monitors.Add(new Monitor(i));
-        }
+        CreateMonitors();
 
         Lib.SetTimeout(timeout);
+    }
+
+    void OnApplicationQuit()
+    {
+        Lib.Finalize();
     }
 
     void OnEnable()
@@ -67,6 +73,26 @@ public class Manager : MonoBehaviour
         }
     }
 
+    void Update()
+    {
+        Lib.Update();
+
+        var message = Lib.PopMessage();
+        while (message != Message.None) {
+            switch (message) {
+                case Message.Reinitialized:
+                    Debug.Log("Reinitialize");
+                    Reinitialize();
+                    break;
+                default:
+                    break;
+            }
+            message = Lib.PopMessage();
+        }
+
+        message_ = Message.None;
+    }
+
     IEnumerator OnRender()
     {
         for (;;) {
@@ -78,6 +104,28 @@ public class Manager : MonoBehaviour
                 }
                 monitor.shouldBeUpdated = false;
             }
+        }
+    }
+
+    void CreateMonitors()
+    {
+        for (int i = 0; i < monitorCount; ++i) {
+            monitors.Add(new Monitor(i));
+        }
+    }
+
+    void OnMessage(Message message)
+    {
+        message_ = message;
+    }
+
+    void Reinitialize()
+    {
+        for (int i = 0; i < monitorCount; ++i) {
+            if (i == monitors.Count) {
+                monitors.Add(new Monitor(i));
+            }
+            monitors[i].Reinitialize();
         }
     }
 }
