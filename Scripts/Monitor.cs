@@ -86,27 +86,27 @@ public class Monitor
         get { return Lib.IsCursorVisible(id); }
     }
 
-    public int pointerX
+    public int cursorX
     { 
         get { return Lib.GetCursorX(id); }
     }
 
-    public int pointerY
+    public int cursorY
     { 
         get { return Lib.GetCursorY(id); }
     }
 
-    public int pointerShapeWidth
+    public int cursorShapeWidth
     { 
         get { return Lib.GetCursorShapeWidth(id); }
     }
 
-    public int pointerShapeHeight
+    public int cursorShapeHeight
     { 
         get { return Lib.GetCursorShapeHeight(id); }
     }
 
-    public CursorShapeType pointerShapeType
+    public CursorShapeType cursorShapeType
     { 
         get { return Lib.GetCursorShapeType(id); }
     }
