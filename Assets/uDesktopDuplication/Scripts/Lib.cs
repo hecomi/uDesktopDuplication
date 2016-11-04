@@ -5,6 +5,12 @@ using System.Runtime.InteropServices;
 namespace uDesktopDuplication
 {
 
+public enum Message
+{
+    None = -1,
+    Reinitialized = 0,
+}
+
 public enum CursorShapeType
 {
     MonoChrome = 1,
@@ -14,6 +20,16 @@ public enum CursorShapeType
 
 public static class Lib
 {
+    public delegate void MessageHandler(Message message);
+
+    [DllImport("uDesktopDuplication")]
+    public static extern void Initialize();
+    [DllImport("uDesktopDuplication")]
+    public static extern void Finalize();
+    [DllImport("uDesktopDuplication")]
+    public static extern void Update();
+    [DllImport("uDesktopDuplication")]
+    public static extern Message PopMessage();
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]

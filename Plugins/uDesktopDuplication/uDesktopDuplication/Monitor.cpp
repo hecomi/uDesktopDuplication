@@ -8,27 +8,64 @@
 Monitor::Monitor(int id, IDXGIOutput* output)
     : id_(id)
 {
-    // MEMO: 'output' will be released automatically after this ctor.
     output->GetDesc(&outputDesc_);
     monitorInfo_.cbSize = sizeof(MONITORINFOEX);
     GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_);
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
-    output1->DuplicateOutput(GetDevice(), &deskDupl_);
+    const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
+
+	auto error = 0;
+
+	// TODO: error check
+    switch (hr)
+    {
+        case S_OK:
+            break;
+        case E_INVALIDARG:
+			error = 1;
+            break;
+        case E_ACCESSDENIED:
+			error = 2;
+			// For example, when the user presses Ctrl + Alt + Delete and the screen
+			// switches to admin screen, this error occurs. 
+            break;
+        case DXGI_ERROR_UNSUPPORTED:
+			error = 3;
+            break;
+		case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
+			error = 4;
+			// Other application use Desktop Duplication API...
+            break;
+        case DXGI_ERROR_SESSION_DISCONNECTED:
+			error = 5;
+			break;
+    }
 
     cursor_ = std::make_unique<Cursor>(this);
+
+    // MEMO: 'output' will be released automatically after this ctor.
 }
 
 
 Monitor::~Monitor()
 {
-    deskDupl_->Release();
+	if (deskDupl_ != nullptr)
+	{
+		deskDupl_->Release();
+	}
 }
 
 
 HRESULT Monitor::Render(UINT timeout)
 {
-    if (deskDupl_ == nullptr || unityTexture_ == nullptr) return 0;
+	if (deskDupl_ == nullptr)
+	{
+		GetMonitorManager()->RequireReinitilization();
+		return 0;
+	}
+
+	if (unityTexture_ == nullptr) return 0;
 
     IDXGIResource* resource = nullptr;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;

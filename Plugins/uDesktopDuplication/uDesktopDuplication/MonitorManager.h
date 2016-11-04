@@ -14,6 +14,8 @@ public:
     explicit MonitorManager();
     ~MonitorManager();
 
+	void RequireReinitilization() { isReinitializationRequired_ = true; }
+
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
     int GetCursorMonitorId() const { return cursorMonitorId_; }
     std::shared_ptr<Monitor> GetMonitor(int id) const;
@@ -21,10 +23,12 @@ public:
 private:
     void Initialize();
     void Finalize();
+	void Reinitialize();
 
 // Setters from Unity
 public:
     void OnRender(int id);
+	void Update();
     void UpdateCursorTexture(int id, ID3D11Texture2D* ptr);
     void SetTimeout(int timeout);
     void SetTexturePtr(int id, void* texture);
@@ -49,4 +53,5 @@ private:
     std::vector<std::shared_ptr<Monitor>> monitors_;
     std::shared_ptr<Cursor> cursor_;
     int cursorMonitorId_ = -1;
+	bool isReinitializationRequired_ = false;
 };

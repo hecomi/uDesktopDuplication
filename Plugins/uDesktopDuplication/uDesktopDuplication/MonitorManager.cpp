@@ -6,6 +6,7 @@
 #include "IUnityInterface.h"
 #include "IUnityGraphicsD3D11.h"
 
+#include "Common.h"
 #include "Monitor.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
@@ -56,6 +57,13 @@ void MonitorManager::Finalize()
 }
 
 
+void MonitorManager::Reinitialize()
+{
+	Initialize();
+	SendMessageToUnity(Message::Reinitialized);
+}
+
+
 std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 {
     if (id >= 0 && id < monitors_.size())
@@ -63,6 +71,16 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
         return monitors_[id];
     }
     return nullptr;
+}
+
+
+void MonitorManager::Update()
+{
+	if (isReinitializationRequired_)
+	{
+		Reinitialize();
+		isReinitializationRequired_ = false;
+	}
 }
 
 
@@ -75,7 +93,7 @@ void MonitorManager::OnRender(int id)
         const auto hr = monitor->Render(timeout_);
         if (hr == DXGI_ERROR_ACCESS_LOST)
         {
-            Initialize();
+			isReinitializationRequired_ = true;
         }
     }
 }
