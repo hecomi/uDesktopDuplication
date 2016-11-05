@@ -23,7 +23,7 @@ public class Monitor
 
     public bool available
     {
-        get { return Lib.IsAvailable(); }
+        get { return Lib.IsAvailable(id); }
     }
 
     public string name
