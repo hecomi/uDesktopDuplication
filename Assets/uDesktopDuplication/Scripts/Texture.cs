@@ -50,6 +50,7 @@ public class Texture : MonoBehaviour
 
     void Update()
     {
+        Debug.Log(monitor.available);
         monitor.shouldBeUpdated = true;
         UpdateMaterial();
     }
