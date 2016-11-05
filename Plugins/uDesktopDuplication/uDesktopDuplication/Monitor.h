@@ -25,7 +25,7 @@ public:
     ~Monitor();
     HRESULT Initialize(IDXGIOutput* output);
     HRESULT Render(UINT timeout = 0);
-    void UpdateCursorTexture(ID3D11Texture2D* texture);
+    void GetCursorTexture(ID3D11Texture2D* texture);
 
 public:
     int GetId() const;

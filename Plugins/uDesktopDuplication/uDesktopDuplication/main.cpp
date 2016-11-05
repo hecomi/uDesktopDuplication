@@ -304,12 +304,12 @@ extern "C"
         return -1;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UpdateCursorTexture(int id, ID3D11Texture2D* texture)
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetCursorTexture(int id, ID3D11Texture2D* texture)
     {
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            monitor->UpdateCursorTexture(texture);
+            monitor->GetCursorTexture(texture);
         }
     }
 

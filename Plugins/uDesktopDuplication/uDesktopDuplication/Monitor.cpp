@@ -77,12 +77,20 @@ HRESULT Monitor::Render(UINT timeout)
     const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
     if (FAILED(hr))
     {
-        // If any monitor setting has changed (e.g. monitor size has changed),
-        // it is necessary to re-initialize monitors.
-        if (hr == DXGI_ERROR_ACCESS_LOST)
-        {
-			state_ = State::AccessLost;
-        }
+		switch (hr)
+		{
+			case DXGI_ERROR_ACCESS_LOST:
+				// If any monitor setting has changed (e.g. monitor size has changed),
+				// it is necessary to re-initialize monitors.
+				state_ = State::AccessLost;
+				break;
+			case DXGI_ERROR_WAIT_TIMEOUT:
+				break;
+			case DXGI_ERROR_INVALID_CALL:
+				break;
+			case E_INVALIDARG:
+				break;
+		}
 		return hr;
     }
 
@@ -94,7 +102,8 @@ HRESULT Monitor::Render(UINT timeout)
     context->CopyResource(unityTexture_, texture);
     context->Release();
 
-    cursor_->Update(frameInfo);
+    cursor_->UpdateBuffer(frameInfo);
+	cursor_->UpdateTexture();
 
     resource->Release();
     deskDupl_->ReleaseFrame();
@@ -139,9 +148,9 @@ const std::unique_ptr<Cursor>& Monitor::GetCursor()
 }
 
 
-void Monitor::UpdateCursorTexture(ID3D11Texture2D* texture)
+void Monitor::GetCursorTexture(ID3D11Texture2D* texture)
 {
-    cursor_->UpdateTexture(texture);
+    cursor_->GetTexture(texture);
 }
 
 

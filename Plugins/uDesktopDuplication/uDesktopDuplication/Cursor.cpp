@@ -26,54 +26,64 @@ Cursor::~Cursor()
 }
 
 
-void Cursor::Update(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
-    isVisible_ = frameInfo.PointerPosition.Visible != 0;
-    x_ = frameInfo.PointerPosition.Position.x;
-    y_ = frameInfo.PointerPosition.Position.y;
+	if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
+	{
+		return;
+	}
 
-    // TODO: see more information to check where the cursor is.
-    if (isVisible_)
-    {
-        GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
-    }
+	x_ = frameInfo.PointerPosition.Position.x;
+	y_ = frameInfo.PointerPosition.Position.y;
+	if (frameInfo.PointerPosition.Visible != 0) {
+		GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
+		timestamp_ = frameInfo.LastMouseUpdateTime;
+		isVisible_ = frameInfo.PointerPosition.Visible != 0;
+	}
 
-    if (GetMonitorManager()->GetCursorMonitorId() != monitor_->GetId()) {
-        return;
-    }
+	if (frameInfo.PointerShapeBufferSize == 0)
+	{
+		return;
+	}
 
-    // Increase the buffer size if needed
-    if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
-    {
-        if (apiBuffer_) delete[] apiBuffer_;
-        apiBuffer_ = new BYTE[frameInfo.PointerShapeBufferSize];
-        apiBufferSize_ = frameInfo.PointerShapeBufferSize;
-    }
-    if (apiBuffer_ == nullptr) return;
+	// Increase the buffer size if needed
+	if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
+	{
+		if (apiBuffer_) delete[] apiBuffer_;
+		apiBuffer_ = new BYTE[frameInfo.PointerShapeBufferSize];
+		apiBufferSize_ = frameInfo.PointerShapeBufferSize;
+	}
+	if (apiBuffer_ == nullptr) return;
 
-    // Get information about the mouse pointer if needed
-    if (frameInfo.PointerShapeBufferSize != 0)
-    {
-        UINT bufferSize;
-        monitor_->GetDeskDupl()->GetFramePointerShape(
-            frameInfo.PointerShapeBufferSize,
-            reinterpret_cast<void*>(apiBuffer_),
-            &bufferSize,
-            &shapeInfo_);
-    }
+	// Get mouse pointer information
+	UINT bufferSize;
+	const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
+		frameInfo.PointerShapeBufferSize,
+		reinterpret_cast<void*>(apiBuffer_),
+		&bufferSize,
+		&shapeInfo_);
+	if (FAILED(hr))
+	{
+		delete[] apiBuffer_;
+		apiBuffer_ = nullptr;
+		apiBufferSize_ = 0;
+	}
+}
 
+
+void Cursor::UpdateTexture()
+{
     // cursor type
-    const auto cursorType = shapeInfo_.Type;
-    const bool isMono = cursorType == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME;
-    const bool isColorMask = cursorType == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
+    const bool isMono = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME;
+    const bool isColorMask = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
 
     // Size
-    const auto w = shapeInfo_.Width;
-    const auto h = shapeInfo_.Height / (isMono ? 2 : 1);
-    const auto p = shapeInfo_.Pitch; 
+	const auto w = GetWidth();
+	const auto h = GetHeight();
+	const auto p = GetPitch();
 
     // Convert the buffer given by API into BGRA32
-    const auto bgraBufferSize = w * h * 4;
+    const UINT bgraBufferSize = w * h * 4;
     if (bgraBufferSize > bgra32BufferSize_)
     {
         if (bgra32Buffer_) delete[] bgra32Buffer_;
@@ -145,10 +155,10 @@ void Cursor::Update(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 
         if (isMono)
         {
-            for (UINT row = 0; row < h; ++row) 
+            for (int row = 0; row < h; ++row) 
             {
                 BYTE mask = 0x80;
-                for (UINT col = 0; col < w; ++col) 
+                for (int col = 0; col < w; ++col) 
                 {
                     const int i = row * w + col;
                     const BYTE andMask = apiBuffer_[col / 8 + row * p] & mask;
@@ -164,9 +174,9 @@ void Cursor::Update(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         {
             const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_);
 
-            for (UINT row = 0; row < h; ++row) 
+            for (int row = 0; row < h; ++row) 
             {
-                for (UINT col = 0; col < w; ++col) 
+                for (int col = 0; col < w; ++col) 
                 {
                     const int i = row * w + col;
                     const int j = row * p / sizeof(UINT) + col;
@@ -195,7 +205,7 @@ void Cursor::Update(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     {
         auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_);
         const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_);
-        for (UINT i = 0; i < w * h; ++i) 
+        for (int i = 0; i < w * h; ++i) 
         {
             output32[i] = buffer32[i];
         }
@@ -205,7 +215,7 @@ void Cursor::Update(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 }
 
 
-void Cursor::UpdateTexture(ID3D11Texture2D* texture)
+void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
     if (bgra32Buffer_ == nullptr) return;
     ID3D11DeviceContext* context;

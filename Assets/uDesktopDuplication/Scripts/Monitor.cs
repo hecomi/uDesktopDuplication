@@ -8,6 +8,27 @@ public class Monitor
     public Monitor(int id)
     {
         this.id = id;
+
+        switch (state)
+        {
+            case MonitorState.InvalidArg:
+                Debug.LogErrorFormat("[{0}:{1}] Invalid.", id, name);
+                break;
+            case MonitorState.AccessDenied:
+                Debug.LogErrorFormat("[{0}:{1}] Access Denied.", id, name);
+                break;
+            case MonitorState.Unsupported:
+                Debug.LogErrorFormat("[{0}:{1}] Unsupported.", id, name);
+                break;
+            case MonitorState.SessionDisconnected:
+                Debug.LogErrorFormat("[{0}:{1}] Disconnected.", id, name);
+                break;
+            case MonitorState.NotSet:
+                Debug.LogErrorFormat("[{0}:{1}] Something wrong.", id, name);
+                break;
+            default:
+                break;
+        }
     }
 
     public int id 
@@ -150,9 +171,9 @@ public class Monitor
         }
     }
 
-    public void UpdateCursorTexture(System.IntPtr ptr)
+    public void GetCursorTexture(System.IntPtr ptr)
     {
-        Lib.UpdateCursorTexture(id, ptr);
+        Lib.GetCursorTexture(id, ptr);
     }
 
     void CreateTexture()
