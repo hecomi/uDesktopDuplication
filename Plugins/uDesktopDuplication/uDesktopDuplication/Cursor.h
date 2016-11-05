@@ -10,7 +10,7 @@ public:
     explicit Cursor(Monitor* monitor);
     ~Cursor();
     void UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-	void UpdateTexture();
+    void UpdateTexture();
     void GetTexture(ID3D11Texture2D* texture);
 
     bool IsVisible() const;
@@ -31,5 +31,5 @@ private:
     BYTE* bgra32Buffer_ = nullptr;
     UINT bgra32BufferSize_ = 0;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_;
-	LARGE_INTEGER timestamp_;
+    LARGE_INTEGER timestamp_;
 };

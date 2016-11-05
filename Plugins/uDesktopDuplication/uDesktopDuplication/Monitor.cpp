@@ -21,32 +21,32 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
     const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
 
-	// TODO: error check
+    // TODO: error check
     switch (hr)
     {
         case S_OK:
-			state_ = State::Available;
+            state_ = State::Available;
             break;
         case E_INVALIDARG:
-			state_ = State::InvalidArg;
+            state_ = State::InvalidArg;
             break;
         case E_ACCESSDENIED:
-			// For example, when the user presses Ctrl + Alt + Delete and the screen
-			// switches to admin screen, this error occurs. 
-			state_ = State::AccessDenied;
+            // For example, when the user presses Ctrl + Alt + Delete and the screen
+            // switches to admin screen, this error occurs. 
+            state_ = State::AccessDenied;
             break;
         case DXGI_ERROR_UNSUPPORTED:
             // If the display adapter on the computer is running under the Microsoft Hybrid system,
             // this error occurs.
-			state_ = State::Unsupported;
+            state_ = State::Unsupported;
             break;
-		case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
-			// When other application use Desktop Duplication API, this error occurs.
-			state_ = State::CurrentlyNotAvailable;
+        case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
+            // When other application use Desktop Duplication API, this error occurs.
+            state_ = State::CurrentlyNotAvailable;
             break;
         case DXGI_ERROR_SESSION_DISCONNECTED:
-			state_ = State::SessionDisconnected;
-			break;
+            state_ = State::SessionDisconnected;
+            break;
     }
 
     return hr;
@@ -55,21 +55,21 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
 
 Monitor::~Monitor()
 {
-	if (deskDupl_ != nullptr)
-	{
-		deskDupl_->Release();
-	}
+    if (deskDupl_ != nullptr)
+    {
+        deskDupl_->Release();
+    }
 }
 
 
 HRESULT Monitor::Render(UINT timeout)
 {
-	if (deskDupl_ == nullptr)
-	{
-		return S_OK;
-	}
+    if (deskDupl_ == nullptr)
+    {
+        return S_OK;
+    }
 
-	if (unityTexture_ == nullptr) return 0;
+    if (unityTexture_ == nullptr) return 0;
 
     IDXGIResource* resource = nullptr;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
@@ -77,21 +77,21 @@ HRESULT Monitor::Render(UINT timeout)
     const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
     if (FAILED(hr))
     {
-		switch (hr)
-		{
-			case DXGI_ERROR_ACCESS_LOST:
-				// If any monitor setting has changed (e.g. monitor size has changed),
-				// it is necessary to re-initialize monitors.
-				state_ = State::AccessLost;
-				break;
-			case DXGI_ERROR_WAIT_TIMEOUT:
-				break;
-			case DXGI_ERROR_INVALID_CALL:
-				break;
-			case E_INVALIDARG:
-				break;
-		}
-		return hr;
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+                // If any monitor setting has changed (e.g. monitor size has changed),
+                // it is necessary to re-initialize monitors.
+                state_ = State::AccessLost;
+                break;
+            case DXGI_ERROR_WAIT_TIMEOUT:
+                break;
+            case DXGI_ERROR_INVALID_CALL:
+                break;
+            case E_INVALIDARG:
+                break;
+        }
+        return hr;
     }
 
     ID3D11Texture2D* texture;
@@ -103,7 +103,7 @@ HRESULT Monitor::Render(UINT timeout)
     context->Release();
 
     cursor_->UpdateBuffer(frameInfo);
-	cursor_->UpdateTexture();
+    cursor_->UpdateTexture();
 
     resource->Release();
     deskDupl_->ReleaseFrame();
@@ -120,7 +120,7 @@ int Monitor::GetId() const
 
 MonitorState Monitor::GetState() const
 {
-	return state_;
+    return state_;
 }
 
 
@@ -168,31 +168,31 @@ bool Monitor::IsPrimary() const
 
 int Monitor::GetLeft() const
 {
-	return outputDesc_.DesktopCoordinates.left;
+    return outputDesc_.DesktopCoordinates.left;
 }
 
 
 int Monitor::GetRight() const
 {
-	return outputDesc_.DesktopCoordinates.right;
+    return outputDesc_.DesktopCoordinates.right;
 }
 
 
 int Monitor::GetTop() const
 {
-	return outputDesc_.DesktopCoordinates.top;
+    return outputDesc_.DesktopCoordinates.top;
 }
 
 
 int Monitor::GetBottom() const
 {
-	return outputDesc_.DesktopCoordinates.bottom;
+    return outputDesc_.DesktopCoordinates.bottom;
 }
 
 
 int Monitor::GetRotation() const
 {
-	return static_cast<int>(outputDesc_.Rotation);
+    return static_cast<int>(outputDesc_.Rotation);
 }
 
 

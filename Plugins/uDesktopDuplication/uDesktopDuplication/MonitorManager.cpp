@@ -61,14 +61,14 @@ void MonitorManager::Finalize()
 
 void MonitorManager::RequireReinitilization()
 {
-	isReinitializationRequired_ = true;
+    isReinitializationRequired_ = true;
 }
 
 
 void MonitorManager::Reinitialize()
 {
-	Initialize();
-	SendMessageToUnity(Message::Reinitialized);
+    Initialize();
+    SendMessageToUnity(Message::Reinitialized);
 }
 
 
@@ -84,11 +84,11 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 
 void MonitorManager::Update()
 {
-	if (isReinitializationRequired_)
-	{
-		Reinitialize();
-		isReinitializationRequired_ = false;
-	}
+    if (isReinitializationRequired_)
+    {
+        Reinitialize();
+        isReinitializationRequired_ = false;
+    }
 }
 
 
@@ -111,26 +111,26 @@ int MonitorManager::GetMonitorCount() const
 
 int MonitorManager::GetTotalWidth() const
 {
-	std::vector<int> lefts, rights;
-	for (const auto& monitor : monitors_)
-	{
-		lefts.push_back(monitor->GetLeft());
-		rights.push_back(monitor->GetRight());
-	}
-	const auto minLeft = *std::min_element(lefts.begin(), lefts.end());
-	const auto maxRight = *std::max_element(rights.begin(), rights.end());
-	return maxRight - minLeft;
+    std::vector<int> lefts, rights;
+    for (const auto& monitor : monitors_)
+    {
+        lefts.push_back(monitor->GetLeft());
+        rights.push_back(monitor->GetRight());
+    }
+    const auto minLeft = *std::min_element(lefts.begin(), lefts.end());
+    const auto maxRight = *std::max_element(rights.begin(), rights.end());
+    return maxRight - minLeft;
 }
 
 int MonitorManager::GetTotalHeight() const
 {
-	std::vector<int> tops, bottoms;
-	for (const auto& monitor : monitors_)
-	{
-		tops.push_back(monitor->GetTop());
-		bottoms.push_back(monitor->GetBottom());
-	}
-	const auto minTop = *std::min_element(tops.begin(), tops.end());
-	const auto maxBottom = *std::max_element(bottoms.begin(), bottoms.end());
-	return maxBottom - minTop;
+    std::vector<int> tops, bottoms;
+    for (const auto& monitor : monitors_)
+    {
+        tops.push_back(monitor->GetTop());
+        bottoms.push_back(monitor->GetBottom());
+    }
+    const auto minTop = *std::min_element(tops.begin(), tops.end());
+    const auto maxBottom = *std::max_element(bottoms.begin(), bottoms.end());
+    return maxBottom - minTop;
 }

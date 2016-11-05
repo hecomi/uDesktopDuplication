@@ -21,7 +21,7 @@ namespace
 {
     IUnityInterfaces* g_unity = nullptr;
     std::unique_ptr<MonitorManager> g_manager;
-	std::queue<Message> g_messages;
+    std::queue<Message> g_messages;
 }
 
 
@@ -45,7 +45,7 @@ const std::unique_ptr<MonitorManager>& GetMonitorManager()
 
 void SendMessageToUnity(Message message)
 {
-	g_messages.push(message);
+    g_messages.push(message);
 }
 
 
@@ -53,32 +53,32 @@ extern "C"
 {
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API InitializeUDD()
     {
-		if (g_unity && !g_manager)
-		{
-			g_manager = std::make_unique<MonitorManager>();
-		}
+        if (g_unity && !g_manager)
+        {
+            g_manager = std::make_unique<MonitorManager>();
+        }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
-		g_manager.reset();
+        g_manager.reset();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
     {
         g_unity = unityInterfaces;
-		InitializeUDD();
+        InitializeUDD();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
-		g_unity = nullptr;
-		FinalizeUDD();
+        g_unity = nullptr;
+        FinalizeUDD();
     }
 
     void UNITY_INTERFACE_API OnRenderEvent(int id)
     {
-		if (!g_manager) return;
+        if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
             monitor->Render(g_manager->GetTimeout());
@@ -92,52 +92,52 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize()
     {
-		if (!g_manager) return;
-		return g_manager->Reinitialize();
+        if (!g_manager) return;
+        return g_manager->Reinitialize();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Update()
     {
-		if (!g_manager) return;
-		g_manager->Update();
+        if (!g_manager) return;
+        g_manager->Update();
     }
 
-	UNITY_INTERFACE_EXPORT Message PopMessage()
-	{
-		if (g_messages.empty()) return Message::None;
+    UNITY_INTERFACE_EXPORT Message PopMessage()
+    {
+        if (g_messages.empty()) return Message::None;
 
-		const auto message = g_messages.front();
-		g_messages.pop();
-		return message;
-	}
+        const auto message = g_messages.front();
+        g_messages.pop();
+        return message;
+    }
 
     UNITY_INTERFACE_EXPORT size_t UNITY_INTERFACE_API GetMonitorCount()
     {
-		if (!g_manager) return 0;
+        if (!g_manager) return 0;
         return g_manager->GetMonitorCount();
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTotalWidth()
     {
-		if (!g_manager) return 0;
+        if (!g_manager) return 0;
         return g_manager->GetTotalWidth();
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTotalHeight()
     {
-		if (!g_manager) return 0;
+        if (!g_manager) return 0;
         return g_manager->GetTotalHeight();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTimeout(int timeout)
     {
-		if (!g_manager) return;
+        if (!g_manager) return;
         g_manager->SetTimeout(timeout);
     }
 
     UNITY_INTERFACE_EXPORT MonitorState UNITY_INTERFACE_API GetState(int id)
     {
-		if (!g_manager) return MonitorState::NotSet;
+        if (!g_manager) return MonitorState::NotSet;
         if (auto monitor = g_manager->GetMonitor(id))
         {
             return monitor->GetState();
@@ -147,7 +147,7 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)
     {
-		if (!g_manager) return;
+        if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
             monitor->GetName(buf, len);
@@ -156,7 +156,7 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsPrimary(int id)
     {
-		if (!g_manager) return false;
+        if (!g_manager) return false;
         if (auto monitor = g_manager->GetMonitor(id))
         {
             return monitor->IsPrimary();

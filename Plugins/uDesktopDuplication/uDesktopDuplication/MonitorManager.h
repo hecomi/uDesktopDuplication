@@ -13,8 +13,8 @@ class MonitorManager
 public:
     explicit MonitorManager();
     ~MonitorManager();
-	void Reinitialize();
-	void RequireReinitilization();
+    void Reinitialize();
+    void RequireReinitilization();
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
     int GetCursorMonitorId() const { return cursorMonitorId_; }
     std::shared_ptr<Monitor> GetMonitor(int id) const;
@@ -25,7 +25,7 @@ private:
 
 // Setters from Unity
 public:
-	void Update();
+    void Update();
     void SetTimeout(int timeout);
     int GetTimeout() const;
 
@@ -40,5 +40,5 @@ private:
     std::vector<std::shared_ptr<Monitor>> monitors_;
     std::shared_ptr<Cursor> cursor_;
     int cursorMonitorId_ = -1;
-	bool isReinitializationRequired_ = false;
+    bool isReinitializationRequired_ = false;
 };

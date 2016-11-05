@@ -28,46 +28,46 @@ Cursor::~Cursor()
 
 void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
-	if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
-	{
-		return;
-	}
+    if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
+    {
+        return;
+    }
 
-	x_ = frameInfo.PointerPosition.Position.x;
-	y_ = frameInfo.PointerPosition.Position.y;
-	if (frameInfo.PointerPosition.Visible != 0) {
-		GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
-		timestamp_ = frameInfo.LastMouseUpdateTime;
-		isVisible_ = frameInfo.PointerPosition.Visible != 0;
-	}
+    x_ = frameInfo.PointerPosition.Position.x;
+    y_ = frameInfo.PointerPosition.Position.y;
+    if (frameInfo.PointerPosition.Visible != 0) {
+        GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
+        timestamp_ = frameInfo.LastMouseUpdateTime;
+        isVisible_ = frameInfo.PointerPosition.Visible != 0;
+    }
 
-	if (frameInfo.PointerShapeBufferSize == 0)
-	{
-		return;
-	}
+    if (frameInfo.PointerShapeBufferSize == 0)
+    {
+        return;
+    }
 
-	// Increase the buffer size if needed
-	if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
-	{
-		if (apiBuffer_) delete[] apiBuffer_;
-		apiBuffer_ = new BYTE[frameInfo.PointerShapeBufferSize];
-		apiBufferSize_ = frameInfo.PointerShapeBufferSize;
-	}
-	if (apiBuffer_ == nullptr) return;
+    // Increase the buffer size if needed
+    if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
+    {
+        if (apiBuffer_) delete[] apiBuffer_;
+        apiBuffer_ = new BYTE[frameInfo.PointerShapeBufferSize];
+        apiBufferSize_ = frameInfo.PointerShapeBufferSize;
+    }
+    if (apiBuffer_ == nullptr) return;
 
-	// Get mouse pointer information
-	UINT bufferSize;
-	const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
-		frameInfo.PointerShapeBufferSize,
-		reinterpret_cast<void*>(apiBuffer_),
-		&bufferSize,
-		&shapeInfo_);
-	if (FAILED(hr))
-	{
-		delete[] apiBuffer_;
-		apiBuffer_ = nullptr;
-		apiBufferSize_ = 0;
-	}
+    // Get mouse pointer information
+    UINT bufferSize;
+    const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
+        frameInfo.PointerShapeBufferSize,
+        reinterpret_cast<void*>(apiBuffer_),
+        &bufferSize,
+        &shapeInfo_);
+    if (FAILED(hr))
+    {
+        delete[] apiBuffer_;
+        apiBuffer_ = nullptr;
+        apiBufferSize_ = 0;
+    }
 }
 
 
@@ -78,9 +78,9 @@ void Cursor::UpdateTexture()
     const bool isColorMask = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
 
     // Size
-	const auto w = GetWidth();
-	const auto h = GetHeight();
-	const auto p = GetPitch();
+    const auto w = GetWidth();
+    const auto h = GetHeight();
+    const auto p = GetPitch();
 
     // Convert the buffer given by API into BGRA32
     const UINT bgraBufferSize = w * h * 4;
