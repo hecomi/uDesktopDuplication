@@ -21,6 +21,11 @@ public class Monitor
         get { return id < Manager.monitorCount; } 
     }
 
+    public bool available
+    {
+        get { return Lib.IsAvailable(); }
+    }
+
     public string name
     { 
         get { return Lib.GetName(id); }
@@ -122,6 +127,9 @@ public class Monitor
     {
         get 
         { 
+            if (!available) {
+                return Resources.Load<Texture2D>("uDesktopDuplication/Textures/NotAvailable");   
+            }
             if (texture_ == null) {
                 CreateTexture();
             }
@@ -131,7 +139,7 @@ public class Monitor
 
     public void Render()
     {
-        if (texture_) {
+        if (texture_ && available) {
             Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
             GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
         }
@@ -144,6 +152,8 @@ public class Monitor
 
     void CreateTexture()
     {
+        if (!available) return;
+
         var w = isHorizontal ? width : height;
         var h = isHorizontal ? height : width;
         bool shouldCreate = true;

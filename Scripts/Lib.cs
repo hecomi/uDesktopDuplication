@@ -50,6 +50,8 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetRenderEventFunc();
     [DllImport("uDesktopDuplication")]
+    public static extern bool IsAvailable();
+    [DllImport("uDesktopDuplication")]
     public static extern void GetName(int id, StringBuilder buf, int len);
     [DllImport("uDesktopDuplication")]
     public static extern int GetLeft(int id);
