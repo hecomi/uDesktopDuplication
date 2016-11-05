@@ -5,8 +5,13 @@
 #include "Monitor.h"
 
 
-Monitor::Monitor(int id, IDXGIOutput* output)
+Monitor::Monitor(int id)
     : id_(id)
+    , cursor_(std::make_unique<Cursor>(this))
+{
+}
+
+HRESULT Monitor::Initialize(IDXGIOutput* output)
 {
     output->GetDesc(&outputDesc_);
     monitorInfo_.cbSize = sizeof(MONITORINFOEX);
@@ -15,36 +20,31 @@ Monitor::Monitor(int id, IDXGIOutput* output)
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
     const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
 
-	auto error = 0;
-
 	// TODO: error check
     switch (hr)
     {
         case S_OK:
+            available_ = true;
             break;
         case E_INVALIDARG:
-			error = 1;
             break;
         case E_ACCESSDENIED:
-			error = 2;
 			// For example, when the user presses Ctrl + Alt + Delete and the screen
 			// switches to admin screen, this error occurs. 
+            // GetMonitorManager()->RequireReinitilization();
             break;
         case DXGI_ERROR_UNSUPPORTED:
-			error = 3;
+            // If the display adapter on the computer is running under the Microsoft Hybrid system,
+            // this error occurs.
             break;
 		case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
-			error = 4;
-			// Other application use Desktop Duplication API...
+			// When other application use Desktop Duplication API, this error occurs.
             break;
         case DXGI_ERROR_SESSION_DISCONNECTED:
-			error = 5;
 			break;
     }
 
-    cursor_ = std::make_unique<Cursor>(this);
-
-    // MEMO: 'output' will be released automatically after this ctor.
+    return hr;
 }
 
 
@@ -61,7 +61,6 @@ HRESULT Monitor::Render(UINT timeout)
 {
 	if (deskDupl_ == nullptr)
 	{
-		GetMonitorManager()->RequireReinitilization();
 		return 0;
 	}
 
@@ -89,13 +88,19 @@ HRESULT Monitor::Render(UINT timeout)
     resource->Release();
     deskDupl_->ReleaseFrame();
 
-    return 0;
+    return S_OK;
 }
 
 
 int Monitor::GetId() const
 {
     return id_;
+}
+
+
+bool Monitor::IsAvailable() const
+{
+    return available_;
 }
 
 

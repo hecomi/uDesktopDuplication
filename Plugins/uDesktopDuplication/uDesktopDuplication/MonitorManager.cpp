@@ -42,7 +42,8 @@ void MonitorManager::Initialize()
         IDXGIOutput* output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
-            auto monitor = std::make_shared<Monitor>(id++, output);
+            auto monitor = std::make_shared<Monitor>(id++);
+            monitor->Initialize(output);
             monitors_.push_back(monitor);
             output->Release();
         }
@@ -89,22 +90,16 @@ void MonitorManager::OnRender(int id)
 {
     if (auto monitor = GetMonitor(id))
     {
+        if (!monitor->IsAvailable()) return;
+
+        const auto hr = monitor->Render(timeout_);
+
         // If any monitor setting has changed (e.g. monitor size has changed),
         // it is necessary to re-initialize monitors.
-        const auto hr = monitor->Render(timeout_);
         if (hr == DXGI_ERROR_ACCESS_LOST)
         {
 			isReinitializationRequired_ = true;
         }
-    }
-}
-
-
-void MonitorManager::UpdateCursorTexture(int id, ID3D11Texture2D* texture)
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        monitor->UpdateCursorTexture(texture);
     }
 }
 
@@ -115,13 +110,9 @@ void MonitorManager::SetTimeout(int timeout)
 }
 
 
-void MonitorManager::SetTexturePtr(int id, void* texture)
+int MonitorManager::GetTimeout() const
 {
-    if (auto monitor = GetMonitor(id))
-    {
-        auto d3d11Texture = reinterpret_cast<ID3D11Texture2D*>(texture);
-        monitor->SetUnityTexture(d3d11Texture);
-    }
+    return timeout_;
 }
 
 
@@ -154,163 +145,4 @@ int MonitorManager::GetTotalHeight() const
 	const auto minTop = *std::min_element(tops.begin(), tops.end());
 	const auto maxBottom = *std::max_element(bottoms.begin(), bottoms.end());
 	return maxBottom - minTop;
-}
-
-
-void MonitorManager::GetName(int id, char* buf, int len) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        monitor->GetName(buf, len);
-    }
-}
-
-
-bool MonitorManager::IsPrimary(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->IsPrimary();
-    }
-    return false;
-}
-
-
-int MonitorManager::GetLeft(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetLeft();
-    }
-    return 0;
-}
-
-
-int MonitorManager::GetRight(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetRight();
-    }
-    return 0;
-}
-
-
-int MonitorManager::GetTop(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetTop();
-    }
-    return 0;
-}
-
-
-int MonitorManager::GetBottom(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetBottom();
-    }
-    return 0;
-}
-
-
-int MonitorManager::GetWidth(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetWidth();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetHeight(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetHeight();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetRotation(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-		return monitor->GetRotation();
-    }
-	return DXGI_MODE_ROTATION_UNSPECIFIED;
-}
-
-
-bool MonitorManager::IsCursorVisible(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->IsVisible();
-    }
-    return false;
-}
-
-
-int MonitorManager::GetCursorX(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetX();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetCursorY(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetY();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetCursorShapeWidth(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetWidth();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetCursorShapeHeight(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetHeight();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetCursorShapePitch(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetPitch();
-    }
-    return -1;
-}
-
-
-int MonitorManager::GetCursorShapeType(int id) const
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        return monitor->GetCursor()->GetType();
-    }
-    return -1;
 }

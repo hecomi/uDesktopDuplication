@@ -10,6 +10,8 @@
 #include "IUnityGraphicsD3D11.h"
 
 #include "Common.h"
+#include "Monitor.h"
+#include "Cursor.h"
 #include "MonitorManager.h"
 
 #pragma comment(lib, "dxgi.lib")
@@ -127,108 +129,178 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)
     {
 		if (!g_manager) return;
-        g_manager->GetName(id, buf, len);
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            monitor->GetName(buf, len);
+        }
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsPrimary(int id)
     {
 		if (!g_manager) return false;
-        return g_manager->IsPrimary(id);
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->IsPrimary();
+        }
+        return false;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetLeft(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetLeft(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetLeft();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetRight(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetRight(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetRight();
+        }
+        return 0;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetTop(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetTop(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetTop();
+        }
+        return 0;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetBottom(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetBottom(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetBottom();
+        }
+        return 0;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetWidth(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetWidth(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetWidth();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetHeight(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetHeight(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetHeight();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetRotation(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetRotation(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetRotation();
+        }
+        return DXGI_MODE_ROTATION_UNSPECIFIED;
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsCursorVisible(int id)
     {
-		if (!g_manager) return false;
-        return g_manager->IsCursorVisible(id);
+        if (!g_manager) return false;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->IsVisible();
+        }
+        return false;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorX(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorX(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetX();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorY(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorY(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetY();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorShapeWidth(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorShapeWidth(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetWidth();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorShapeHeight(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorShapeHeight(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetHeight();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorShapePitch(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorShapePitch(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetPitch();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorShapeType(int id)
     {
-		if (!g_manager) return -1;
-        return g_manager->GetCursorShapeType(id);
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetCursor()->GetType();
+        }
+        return -1;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UpdateCursorTexture(int id, ID3D11Texture2D* ptr)
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UpdateCursorTexture(int id, ID3D11Texture2D* texture)
     {
-		if (!g_manager) return;
-        g_manager->UpdateCursorTexture(id, ptr);
+        if (!g_manager) return;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            monitor->UpdateCursorTexture(texture);
+        }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTexturePtr(int id, void* texture)
     {
-		if (!g_manager) return;
-        g_manager->SetTexturePtr(id, texture);
+        if (!g_manager) return;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            auto d3d11Texture = reinterpret_cast<ID3D11Texture2D*>(texture);
+            monitor->SetUnityTexture(d3d11Texture);
+        }
     }
 }

@@ -7,13 +7,15 @@ class Cursor;
 class Monitor
 {
 public:
-    Monitor(int id, IDXGIOutput* output);
+    explicit Monitor(int id);
     ~Monitor();
+    HRESULT Initialize(IDXGIOutput* output);
     HRESULT Render(UINT timeout = 0);
     void UpdateCursorTexture(ID3D11Texture2D* texture);
 
 public:
     int GetId() const;
+    bool IsAvailable() const;
     void SetUnityTexture(ID3D11Texture2D* texture);
     ID3D11Texture2D* GetUnityTexture() const;
     void GetName(char* buf, int len) const;
@@ -30,6 +32,7 @@ public:
 
 private:
     int id_ = -1;
+    bool available_ = false;
     std::unique_ptr<Cursor> cursor_;
     IDXGIOutputDuplication* deskDupl_ = nullptr;
     ID3D11Texture2D* unityTexture_ = nullptr;
