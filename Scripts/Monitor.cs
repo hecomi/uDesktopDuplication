@@ -21,9 +21,14 @@ public class Monitor
         get { return id < Manager.monitorCount; } 
     }
 
+    public MonitorState state
+    {
+        get { return Lib.GetState(id); }
+    }
+
     public bool available
     {
-        get { return Lib.IsAvailable(id); }
+        get { return state == MonitorState.Available; }
     }
 
     public string name
