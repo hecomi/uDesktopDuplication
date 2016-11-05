@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
@@ -6,7 +7,21 @@ public class MultipleMonitorCreator : MonoBehaviour
     [SerializeField] float width = 0.3f;
     [SerializeField] float margin = 1f;
 
-    void Start()
+    private List<GameObject> monitors_ = new List<GameObject>();
+
+    void OnEnable()
+    {
+        Create();
+        uDesktopDuplication.Manager.instance.onReinitialized += Recreate;
+    }
+
+    void OnDisable()
+    {
+        Clear();
+        uDesktopDuplication.Manager.instance.onReinitialized -= Recreate;
+    }
+
+    void Create()
     {
         // Sort monitors in coordinate order
         var monitors = uDesktopDuplication.Manager.monitors;
@@ -19,6 +34,7 @@ public class MultipleMonitorCreator : MonoBehaviour
             // Create monitor obeject
             var go = Instantiate(monitorPrefab);
             go.name = "Monitor " + i;
+            monitors_.Add(go);
 
             // Assign monitor
             var texture = go.GetComponent<uDesktopDuplication.Texture>();
@@ -41,9 +57,7 @@ public class MultipleMonitorCreator : MonoBehaviour
         // Set positions with margin
         totalWidth += margin * (n - 1);
         var x = -totalWidth / 2;
-        for (int i = 0 ; i < n; ++i) {
-            // 
-            var go = transform.FindChild("Monitor " + i);
+        foreach (var go in monitors_) {
             var texture = go.GetComponent<uDesktopDuplication.Texture>();
             var halfScaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x;
             var w = texture.monitor.isHorizontal ? width : (width * texture.monitor.aspect);
@@ -52,6 +66,20 @@ public class MultipleMonitorCreator : MonoBehaviour
             go.transform.localPosition = new Vector3(x, 0f, 0f);
             x += halfWidth + margin;
         }
+    }
+
+    void Clear()
+    {
+        foreach (var go in monitors_) {
+            Destroy(go);
+        }
+        monitors_.Clear();
+    }
+
+    void Recreate()
+    {
+        Clear();
+        Create();
     }
 }
 
