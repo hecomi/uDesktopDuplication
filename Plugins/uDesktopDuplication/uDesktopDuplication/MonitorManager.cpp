@@ -59,6 +59,12 @@ void MonitorManager::Finalize()
 }
 
 
+void MonitorManager::RequireReinitilization()
+{
+	isReinitializationRequired_ = true;
+}
+
+
 void MonitorManager::Reinitialize()
 {
 	Initialize();
@@ -83,24 +89,6 @@ void MonitorManager::Update()
 		Reinitialize();
 		isReinitializationRequired_ = false;
 	}
-}
-
-
-void MonitorManager::OnRender(int id)
-{
-    if (auto monitor = GetMonitor(id))
-    {
-        if (!monitor->IsAvailable()) return;
-
-        const auto hr = monitor->Render(timeout_);
-
-        // If any monitor setting has changed (e.g. monitor size has changed),
-        // it is necessary to re-initialize monitors.
-        if (hr == DXGI_ERROR_ACCESS_LOST)
-        {
-			isReinitializationRequired_ = true;
-        }
-    }
 }
 
 

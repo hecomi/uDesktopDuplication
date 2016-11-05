@@ -79,12 +79,21 @@ extern "C"
     void UNITY_INTERFACE_API OnRenderEvent(int id)
     {
 		if (!g_manager) return;
-        g_manager->OnRender(id);
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            monitor->Render(g_manager->GetTimeout());
+        }
     }
 
     UNITY_INTERFACE_EXPORT UnityRenderingEvent UNITY_INTERFACE_API GetRenderEventFunc()
     {
         return OnRenderEvent;
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize()
+    {
+		if (!g_manager) return;
+		return g_manager->Reinitialize();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Update()
@@ -126,14 +135,14 @@ extern "C"
         g_manager->SetTimeout(timeout);
     }
 
-    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsAvailable(int id)
+    UNITY_INTERFACE_EXPORT MonitorState UNITY_INTERFACE_API GetState(int id)
     {
-		if (!g_manager) return false;
+		if (!g_manager) return MonitorState::NotSet;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            return monitor->IsAvailable();
+            return monitor->GetState();
         }
-        return false;
+        return MonitorState::NotSet;
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)

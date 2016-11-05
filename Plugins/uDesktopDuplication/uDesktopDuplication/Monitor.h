@@ -4,9 +4,23 @@
 
 class Cursor;
 
+enum class MonitorState
+{
+	NotSet = -1,
+	Available = 0,
+	InvalidArg = 1,
+	AccessDenied = 2,
+	Unsupported = 3,
+	CurrentlyNotAvailable = 4,
+	SessionDisconnected = 5,
+	AccessLost = 6,
+};
+
 class Monitor
 {
 public:
+	using State = MonitorState;
+
     explicit Monitor(int id);
     ~Monitor();
     HRESULT Initialize(IDXGIOutput* output);
@@ -15,7 +29,7 @@ public:
 
 public:
     int GetId() const;
-    bool IsAvailable() const;
+	State GetState() const;
     void SetUnityTexture(ID3D11Texture2D* texture);
     ID3D11Texture2D* GetUnityTexture() const;
     void GetName(char* buf, int len) const;
@@ -32,7 +46,7 @@ public:
 
 private:
     int id_ = -1;
-    bool available_ = false;
+	State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
     IDXGIOutputDuplication* deskDupl_ = nullptr;
     ID3D11Texture2D* unityTexture_ = nullptr;

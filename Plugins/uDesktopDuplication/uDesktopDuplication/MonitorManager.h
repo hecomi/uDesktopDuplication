@@ -13,9 +13,8 @@ class MonitorManager
 public:
     explicit MonitorManager();
     ~MonitorManager();
-
-	void RequireReinitilization() { isReinitializationRequired_ = true; }
-
+	void Reinitialize();
+	void RequireReinitilization();
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
     int GetCursorMonitorId() const { return cursorMonitorId_; }
     std::shared_ptr<Monitor> GetMonitor(int id) const;
@@ -23,11 +22,9 @@ public:
 private:
     void Initialize();
     void Finalize();
-	void Reinitialize();
 
 // Setters from Unity
 public:
-    void OnRender(int id);
 	void Update();
     void SetTimeout(int timeout);
     int GetTimeout() const;

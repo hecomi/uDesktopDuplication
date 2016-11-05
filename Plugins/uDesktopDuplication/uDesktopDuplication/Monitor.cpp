@@ -11,6 +11,7 @@ Monitor::Monitor(int id)
 {
 }
 
+
 HRESULT Monitor::Initialize(IDXGIOutput* output)
 {
     output->GetDesc(&outputDesc_);
@@ -24,23 +25,27 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
     switch (hr)
     {
         case S_OK:
-            available_ = true;
+			state_ = State::Available;
             break;
         case E_INVALIDARG:
+			state_ = State::InvalidArg;
             break;
         case E_ACCESSDENIED:
 			// For example, when the user presses Ctrl + Alt + Delete and the screen
 			// switches to admin screen, this error occurs. 
-            // GetMonitorManager()->RequireReinitilization();
+			state_ = State::AccessDenied;
             break;
         case DXGI_ERROR_UNSUPPORTED:
             // If the display adapter on the computer is running under the Microsoft Hybrid system,
             // this error occurs.
+			state_ = State::Unsupported;
             break;
 		case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
 			// When other application use Desktop Duplication API, this error occurs.
+			state_ = State::CurrentlyNotAvailable;
             break;
         case DXGI_ERROR_SESSION_DISCONNECTED:
+			state_ = State::SessionDisconnected;
 			break;
     }
 
@@ -61,7 +66,7 @@ HRESULT Monitor::Render(UINT timeout)
 {
 	if (deskDupl_ == nullptr)
 	{
-		return 0;
+		return S_OK;
 	}
 
 	if (unityTexture_ == nullptr) return 0;
@@ -72,7 +77,13 @@ HRESULT Monitor::Render(UINT timeout)
     const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
     if (FAILED(hr))
     {
-        return hr;
+        // If any monitor setting has changed (e.g. monitor size has changed),
+        // it is necessary to re-initialize monitors.
+        if (hr == DXGI_ERROR_ACCESS_LOST)
+        {
+			state_ = State::AccessLost;
+        }
+		return hr;
     }
 
     ID3D11Texture2D* texture;
@@ -98,9 +109,9 @@ int Monitor::GetId() const
 }
 
 
-bool Monitor::IsAvailable() const
+MonitorState Monitor::GetState() const
 {
-    return available_;
+	return state_;
 }
 
 

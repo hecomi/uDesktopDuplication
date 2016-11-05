@@ -37,10 +37,12 @@ public class Manager : MonoBehaviour
         }
     }
 
-    [SerializeField, Tooltip("Set Desktop Duplication API timeout (milliseconds).")] 
-    int timeout = 0;
+    [SerializeField] int desktopDuplicationApiTimeout = 0;
+    [SerializeField] float retryReinitializationDuration = 0.5f;
 
     private Coroutine renderCoroutine_ = null;
+    private bool shouldReinitialize = false;
+    private float reinitializationTimer = 0f;
 
     void Awake()
     {
@@ -51,7 +53,7 @@ public class Manager : MonoBehaviour
 
         CreateMonitors();
 
-        Lib.SetTimeout(timeout);
+        Lib.SetTimeout(desktopDuplicationApiTimeout);
     }
 
     void OnApplicationQuit()
@@ -75,7 +77,35 @@ public class Manager : MonoBehaviour
     void Update()
     {
         Lib.Update();
+        ReinitializeIfNeeded();
+        UpdateMessage();
+    }
 
+    void ReinitializeIfNeeded()
+    {
+        for (int i = 0; i < monitors.Count; ++i) {
+            var monitor = monitors[i];
+            if (monitor.state == MonitorState.AccessLost || 
+                monitor.state == MonitorState.AccessDenied) {
+                if (!shouldReinitialize) {
+                    shouldReinitialize = true;
+                    reinitializationTimer = 0f;
+                    break;
+                }
+            }
+        }
+
+        if (shouldReinitialize) {
+            if (reinitializationTimer > retryReinitializationDuration) {
+                Lib.Reinitialize();
+                shouldReinitialize = false;
+            }
+            reinitializationTimer += Time.deltaTime;
+        }
+    }
+
+    void UpdateMessage()
+    {
         var message = Lib.PopMessage();
         while (message != Message.None) {
             switch (message) {
