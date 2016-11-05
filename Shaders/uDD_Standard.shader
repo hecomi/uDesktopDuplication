@@ -25,12 +25,12 @@ SubShader
     #pragma multi_compile ___ VERTICAL
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
 
-	#define SURFACE_SHADER
+    #define SURFACE_SHADER
     #include "./uDD_Common.cginc"
-	#include "./uDD_Params.cginc"
+    #include "./uDD_Params.cginc"
 
-	half _Glossiness;
-	half _Metallic;
+    half _Glossiness;
+    half _Metallic;
 
     void surf(Input IN, inout SurfaceOutputStandard o) 
     {
