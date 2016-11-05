@@ -126,6 +126,16 @@ extern "C"
         g_manager->SetTimeout(timeout);
     }
 
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsAvailable(int id)
+    {
+		if (!g_manager) return false;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->IsAvailable();
+        }
+        return false;
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)
     {
 		if (!g_manager) return;
