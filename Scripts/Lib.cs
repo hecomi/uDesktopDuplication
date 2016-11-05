@@ -98,7 +98,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern CursorShapeType GetCursorShapeType(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern void UpdateCursorTexture(int id, System.IntPtr ptr);
+    public static extern void GetCursorTexture(int id, System.IntPtr ptr);
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
 

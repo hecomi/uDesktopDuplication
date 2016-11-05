@@ -12,7 +12,17 @@ public class Manager : MonoBehaviour
     {
         get 
         { 
-            if (instance_) return instance_;
+            if (instance_) {
+                return instance_;
+            }
+
+            var manager = FindObjectOfType<Manager>();
+            if (manager) {
+                manager.Awake();
+                instance_ = manager;
+                return instance_;
+            }
+
             var go = new GameObject("uDesktopDuplicationManager");
             return go.AddComponent<Manager>();
         }
@@ -81,12 +91,19 @@ public class Manager : MonoBehaviour
         UpdateMessage();
     }
 
+    [ContextMenu("Reinitialize")]
+    void Reinitialize()
+    {
+        Lib.Reinitialize();
+    }
+
     void ReinitializeIfNeeded()
     {
         for (int i = 0; i < monitors.Count; ++i) {
             var monitor = monitors[i];
             if (monitor.state == MonitorState.AccessLost || 
-                monitor.state == MonitorState.AccessDenied) {
+                monitor.state == MonitorState.AccessDenied ||
+                monitor.state == MonitorState.SessionDisconnected) {
                 if (!shouldReinitialize) {
                     shouldReinitialize = true;
                     reinitializationTimer = 0f;
@@ -97,7 +114,7 @@ public class Manager : MonoBehaviour
 
         if (shouldReinitialize) {
             if (reinitializationTimer > retryReinitializationDuration) {
-                Lib.Reinitialize();
+                Reinitialize();
                 shouldReinitialize = false;
             }
             reinitializationTimer += Time.deltaTime;
@@ -110,8 +127,7 @@ public class Manager : MonoBehaviour
         while (message != Message.None) {
             switch (message) {
                 case Message.Reinitialized:
-                    Debug.Log("Reinitialize");
-                    Reinitialize();
+                    ReinitializeMonitors();
                     break;
                 default:
                     break;
@@ -141,7 +157,7 @@ public class Manager : MonoBehaviour
         }
     }
 
-    void Reinitialize()
+    void ReinitializeMonitors()
     {
         for (int i = 0; i < monitorCount; ++i) {
             if (i == monitors.Count) {
