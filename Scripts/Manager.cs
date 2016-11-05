@@ -19,8 +19,7 @@ public class Manager : MonoBehaviour
             var manager = FindObjectOfType<Manager>();
             if (manager) {
                 manager.Awake();
-                instance_ = manager;
-                return instance_;
+                return manager;
             }
 
             var go = new GameObject("uDesktopDuplicationManager");
@@ -48,11 +47,14 @@ public class Manager : MonoBehaviour
     }
 
     [SerializeField] int desktopDuplicationApiTimeout = 0;
-    [SerializeField] float retryReinitializationDuration = 0.5f;
+    [SerializeField] float retryReinitializationDuration = 1f;
 
     private Coroutine renderCoroutine_ = null;
     private bool shouldReinitialize = false;
     private float reinitializationTimer = 0f;
+
+    public delegate void ReinitializeHandler();
+    public event ReinitializeHandler onReinitialized;
 
     void Awake()
     {
@@ -89,19 +91,26 @@ public class Manager : MonoBehaviour
         Lib.Update();
         ReinitializeIfNeeded();
         UpdateMessage();
+
+        foreach (var monitor in monitors_) {
+            Debug.LogFormat("[{0}] {1}", monitor.id, monitor.state);
+        }
     }
 
     [ContextMenu("Reinitialize")]
     void Reinitialize()
     {
+        Debug.Log("[uDesktopDuplication] Reinitialize");
         Lib.Reinitialize();
+        if (onReinitialized != null) onReinitialized();
     }
 
     void ReinitializeIfNeeded()
     {
         for (int i = 0; i < monitors.Count; ++i) {
             var monitor = monitors[i];
-            if (monitor.state == MonitorState.AccessLost || 
+            if (monitor.state == MonitorState.NotSet ||
+                monitor.state == MonitorState.AccessLost || 
                 monitor.state == MonitorState.AccessDenied ||
                 monitor.state == MonitorState.SessionDisconnected) {
                 if (!shouldReinitialize) {

@@ -60,7 +60,6 @@ public class Cursor : MonoBehaviour
 
     void UpdateMaterial()
     {
-        Debug.Log(monitor.isCursorVisible);
         var x = monitor.isCursorVisible ? (float)monitor.cursorX / monitor.width : -9999f;
         var y = monitor.isCursorVisible ? (float)monitor.cursorY / monitor.height : -9999f;
         var w = (float)monitor.cursorShapeWidth  / monitor.width;
