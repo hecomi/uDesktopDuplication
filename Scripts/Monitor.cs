@@ -196,7 +196,7 @@ public class Monitor
         Lib.GetCursorTexture(id, ptr);
     }
 
-    void CreateTexture()
+    public void CreateTexture()
     {
         if (!available) return;
 

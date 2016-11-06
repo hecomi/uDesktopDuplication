@@ -22,19 +22,19 @@ SubShader
     #pragma surface surf Standard fullforwardshadows
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
-    #pragma multi_compile ___ VERTICAL
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
+    #pragma multi_compile ___ USE_BEND
+    #pragma multi_compile ___ USE_CLIP
 
     #define SURFACE_SHADER
     #include "./uDD_Common.cginc"
-    #include "./uDD_Params.cginc"
 
     half _Glossiness;
     half _Metallic;
 
     void surf(Input IN, inout SurfaceOutputStandard o) 
     {
-        fixed4 c = uddGetScreenTextureWithCursor(_MainTex, _CursorTex, IN.uv_MainTex, _CursorPositionScale) * _Color;
+        fixed4 c = uddGetScreenTextureWithCursor(IN.uv_MainTex) * _Color;
         o.Albedo = c.rgb;
         o.Metallic = _Metallic;
         o.Smoothness = _Glossiness;
