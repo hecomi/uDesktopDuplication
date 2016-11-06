@@ -54,7 +54,7 @@ public class Manager : MonoBehaviour
     private float reinitializationTimer = 0f;
 
     public delegate void ReinitializeHandler();
-    public event ReinitializeHandler onReinitialized;
+    public static event ReinitializeHandler onReinitialized;
 
     void Awake()
     {
@@ -92,9 +92,11 @@ public class Manager : MonoBehaviour
         ReinitializeIfNeeded();
         UpdateMessage();
 
+        /*
         foreach (var monitor in monitors_) {
             Debug.LogFormat("[{0}] {1}", monitor.id, monitor.state);
         }
+        */
     }
 
     [ContextMenu("Reinitialize")]
