@@ -8,20 +8,30 @@ public class MultipleMonitorCreator : MonoBehaviour
     [SerializeField] float margin = 1f;
 
     private List<GameObject> monitors_ = new List<GameObject>();
+    private float totalWidth_ = 0f;
+
+    void Start()
+    {
+        Create();
+    }
 
     void OnEnable()
     {
-        Create();
-        uDesktopDuplication.Manager.instance.onReinitialized += Recreate;
+        uDesktopDuplication.Manager.onReinitialized += Recreate;
     }
 
     void OnDisable()
     {
-        Clear();
-        uDesktopDuplication.Manager.instance.onReinitialized -= Recreate;
+        uDesktopDuplication.Manager.onReinitialized -= Recreate;
     }
 
     void Create()
+    {
+        CreateMonitors();
+        LayoutMonitors();
+    }
+
+    void CreateMonitors()
     {
         // Sort monitors in coordinate order
         var monitors = uDesktopDuplication.Manager.monitors;
@@ -29,7 +39,7 @@ public class MultipleMonitorCreator : MonoBehaviour
 
         // Create monitors
         var n = monitors.Count;
-        var totalWidth = 0f;
+        totalWidth_ = 0f;
         for (int i = 0 ; i < n; ++i) {
             // Create monitor obeject
             var go = Instantiate(monitorPrefab);
@@ -51,12 +61,15 @@ public class MultipleMonitorCreator : MonoBehaviour
 
             // Calc actual size considering mesh size
             var scaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x * 2f;
-            totalWidth += w * scaleX;
+            totalWidth_ += w * scaleX;
         }
+    }
 
+    void LayoutMonitors()
+    {
         // Set positions with margin
-        totalWidth += margin * (n - 1);
-        var x = -totalWidth / 2;
+        totalWidth_ += margin * (monitors_.Count - 1);
+        var x = -totalWidth_ / 2;
         foreach (var go in monitors_) {
             var texture = go.GetComponent<uDesktopDuplication.Texture>();
             var halfScaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x;

@@ -6,7 +6,7 @@ Properties
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
     [Toggle(USE_BEND)] _UseBend("UseBend", Float) = 0
-    [PowerSlider(10.0)]_Radius ("Radius", Range(3, 100)) = 10
+    [PowerSlider(10.0)]_Radius ("Radius", Range(10, 100)) = 30
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
