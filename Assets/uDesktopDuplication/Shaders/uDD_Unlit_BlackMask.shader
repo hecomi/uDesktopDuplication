@@ -21,7 +21,6 @@ Blend SrcAlpha OneMinusSrcAlpha
 CGINCLUDE
 
 #include "./uDD_Common.cginc"
-#include "./uDD_Params.cginc"
 
 fixed _Mask;
 
@@ -35,7 +34,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    fixed4 tex = uddGetScreenTextureWithCursor(_MainTex, _CursorTex, i.uv, _CursorPositionScale);
+    fixed4 tex = uddGetScreenTextureWithCursor(i.uv);
     fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
     return fixed4(tex.rgb * _Color.rgb, alpha * _Color.a);
 }
@@ -49,8 +48,9 @@ Pass
     #pragma fragment frag
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
-    #pragma multi_compile ___ VERTICAL
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
+    #pragma multi_compile ___ USE_BEND
+    #pragma multi_compile ___ USE_CLIP
     ENDCG
 }
 

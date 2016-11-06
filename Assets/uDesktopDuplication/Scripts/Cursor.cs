@@ -60,9 +60,8 @@ public class Cursor : MonoBehaviour
 
     void UpdateMaterial()
     {
-        bool isVisible = monitor.isCursorVisible;
-        var x = isVisible ? (float)monitor.cursorX / monitor.width : -9999f;
-        var y = isVisible ? (float)monitor.cursorY / monitor.height : -9999f;
+        var x = monitor.isCursorVisible ? (float)monitor.cursorX / monitor.width : -9999f;
+        var y = monitor.isCursorVisible ? (float)monitor.cursorY / monitor.height : -9999f;
         var w = (float)monitor.cursorShapeWidth  / monitor.width;
         var h = (float)monitor.cursorShapeHeight / monitor.height;
         uddTexture_.material.SetVector("_CursorPositionScale", new Vector4(x, y, w, h));

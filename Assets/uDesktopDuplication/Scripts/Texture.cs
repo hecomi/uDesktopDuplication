@@ -24,8 +24,14 @@ public class Texture : MonoBehaviour
         set { monitor = Manager.monitors[Mathf.Clamp(value, 0, Manager.monitorCount - 1)]; }
     }
 
+    [Header("Invert UVs")]
     public bool invertX = false;
     public bool invertY = false;
+
+    [Header("Clip")]
+    public bool useClip = false;
+    public Vector2 clipPos = Vector2.zero;
+    public Vector2 clipScale = new Vector2(0.2f, 0.2f);
 
     public Material material
     {
@@ -56,6 +62,13 @@ public class Texture : MonoBehaviour
 
     void UpdateMaterial()
     {
+        Invert();
+        Rotate();
+        Clip();
+    }
+
+    void Invert()
+    {
         if (invertX) {
             material.EnableKeyword("INVERT_X");
         } else {
@@ -67,7 +80,10 @@ public class Texture : MonoBehaviour
         } else {
             material.DisableKeyword("INVERT_Y");
         }
+    }
 
+    void Rotate()
+    {
         switch (monitor.rotation)
         {
             case MonitorRotation.Identity:
@@ -92,6 +108,16 @@ public class Texture : MonoBehaviour
                 break;
             default:
                 break;
+        }
+    }
+
+    void Clip()
+    {
+        if (useClip) {
+            material.EnableKeyword("USE_CLIP");
+            material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
+        } else {
+            material.DisableKeyword("USE_CLIP");
         }
     }
 }

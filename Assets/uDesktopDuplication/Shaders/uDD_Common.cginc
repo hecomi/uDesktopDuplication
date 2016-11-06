@@ -2,6 +2,7 @@
 #define UDD_COMMON_CGINC
 
 #include "UnityCG.cginc"
+#include "./uDD_Params.cginc"
 
 struct appdata
 {
@@ -48,6 +49,13 @@ float2 uddRotateUV(float2 uv)
     return uv;
 }
 
+float2 uddClipUV(float2 uv)
+{
+    uv.x = _ClipX + uv.x * _ClipWidth;
+    uv.y = _ClipY + uv.y * _ClipHeight;
+    return uv;
+}
+
 inline void uddConvertToLinearIfNeeded(inout fixed3 rgb)
 {
     if (!IsGammaSpace()) {
@@ -55,27 +63,30 @@ inline void uddConvertToLinearIfNeeded(inout fixed3 rgb)
     }
 }
 
-inline fixed4 uddGetScreenTexture(sampler2D tex, float2 uv)
+inline fixed4 uddGetScreenTexture(float2 uv)
 {
-    fixed4 c = tex2D(tex, uv);
+    fixed4 c = tex2D(_MainTex, uv);
     return c;
 }
 
-inline fixed4 uddGetCursorTexture(sampler2D tex, float2 uv, fixed4 cursorPosScale)
+inline fixed4 uddGetCursorTexture(float2 uv)
 {
-    uv.x = (uv.x - cursorPosScale.x) / cursorPosScale.z;
-    uv.y = (uv.y - cursorPosScale.y) / cursorPosScale.w;
-    fixed4 c = tex2D(tex, uv);
+    uv.x = (uv.x - _CursorX) / _CursorWidth;
+    uv.y = (uv.y - _CursorY) / _CursorHeight;
+    fixed4 c = tex2D(_CursorTex, uv);
     fixed a = c.a * step(0, uv.x) * step(0, uv.y) * step(uv.x, 1) * step(uv.y, 1);
     c *= step(0.01, a);
     return c;
 }
 
-inline fixed4 uddGetScreenTextureWithCursor(sampler2D screenTex, sampler2D cursorTex, float2 uv, fixed4 cursorPosScale)
+inline fixed4 uddGetScreenTextureWithCursor(float2 uv)
 {
     uv = uddInvertUV(uv);
-    fixed4 screen = uddGetScreenTexture(screenTex, uddRotateUV(uv));
-    fixed4 cursor = uddGetCursorTexture(cursorTex, uv, cursorPosScale);
+#ifdef USE_CLIP
+    uv = uddClipUV(uv);
+#endif
+    fixed4 screen = uddGetScreenTexture(uddRotateUV(uv));
+    fixed4 cursor = uddGetCursorTexture(uv);
     fixed4 color = lerp(screen, cursor, cursor.a);
     uddConvertToLinearIfNeeded(color.rgb);
     return color;

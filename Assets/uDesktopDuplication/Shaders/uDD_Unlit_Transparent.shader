@@ -20,7 +20,6 @@ Blend SrcAlpha OneMinusSrcAlpha
 CGINCLUDE
 
 #include "./uDD_Common.cginc"
-#include "./uDD_Params.cginc"
 
 v2f vert(appdata v)
 {
@@ -32,7 +31,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    return fixed4(uddGetScreenTextureWithCursor(_MainTex, _CursorTex, i.uv, _CursorPositionScale).rgb, 1.0) * _Color;
+    return fixed4(uddGetScreenTextureWithCursor(i.uv).rgb, 1.0) * _Color;
 }
 
 ENDCG
@@ -44,8 +43,9 @@ Pass
     #pragma fragment frag
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
-    #pragma multi_compile ___ VERTICAL
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
+    #pragma multi_compile ___ USE_BEND
+    #pragma multi_compile ___ USE_CLIP
     ENDCG
 }
 

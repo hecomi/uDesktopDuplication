@@ -38,6 +38,11 @@ public class Manager : MonoBehaviour
         get { return Lib.GetMonitorCount(); }
     }
 
+    static public int cursorMonitorId 
+    {
+        get { return Lib.GetCursorMonitorId(); }
+    }
+
     static public Monitor primary
     {
         get 

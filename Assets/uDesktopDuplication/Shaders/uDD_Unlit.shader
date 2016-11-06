@@ -20,7 +20,6 @@ Cull [_Cull]
 CGINCLUDE
 
 #include "./uDD_Common.cginc"
-#include "./uDD_Params.cginc"
 
 fixed _Radius;
 
@@ -39,7 +38,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    return uddGetScreenTextureWithCursor(_MainTex, _CursorTex, i.uv, _CursorPositionScale);
+    return uddGetScreenTextureWithCursor(i.uv);
 }
 
 ENDCG
@@ -51,9 +50,9 @@ Pass
     #pragma fragment frag
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
-    #pragma multi_compile ___ VERTICAL
-    #pragma shader_feature ___ USE_BEND
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
+    #pragma multi_compile ___ USE_BEND
+    #pragma multi_compile ___ USE_CLIP
     ENDCG
 }
 

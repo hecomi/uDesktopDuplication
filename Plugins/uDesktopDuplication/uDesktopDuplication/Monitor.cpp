@@ -72,8 +72,6 @@ HRESULT Monitor::Render(UINT timeout)
         return S_OK;
     }
 
-    if (unityTexture_ == nullptr) return 0;
-
     IDXGIResource* resource = nullptr;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
@@ -97,18 +95,22 @@ HRESULT Monitor::Render(UINT timeout)
         return hr;
     }
 
-    ID3D11Texture2D* texture;
-    resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
+    if (unityTexture_)
+    {
+        ID3D11Texture2D* texture;
+        resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
 
-    ID3D11DeviceContext* context;
-    GetDevice()->GetImmediateContext(&context);
-    context->CopyResource(unityTexture_, texture);
-    context->Release();
+        ID3D11DeviceContext* context;
+        GetDevice()->GetImmediateContext(&context);
+        context->CopyResource(unityTexture_, texture);
+        context->Release();
+
+        resource->Release();
+    }
 
     cursor_->UpdateBuffer(frameInfo);
     cursor_->UpdateTexture();
 
-    resource->Release();
     deskDupl_->ReleaseFrame();
 
     return S_OK;
