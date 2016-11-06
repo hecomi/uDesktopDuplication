@@ -35,10 +35,11 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 
     x_ = frameInfo.PointerPosition.Position.x;
     y_ = frameInfo.PointerPosition.Position.y;
+    isVisible_ = frameInfo.PointerPosition.Visible != 0;
+    timestamp_ = frameInfo.LastMouseUpdateTime;
+
     if (frameInfo.PointerPosition.Visible != 0) {
         GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
-        timestamp_ = frameInfo.LastMouseUpdateTime;
-        isVisible_ = frameInfo.PointerPosition.Visible != 0;
     }
 
     if (frameInfo.PointerShapeBufferSize == 0)
