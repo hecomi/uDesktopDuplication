@@ -52,14 +52,14 @@ public class MultipleMonitorCreator : MonoBehaviour
             var monitor = texture.monitor;
 
             // Set width / height
-            go.transform.localScale = new Vector3(monitor.widthMeter, go.transform.localScale.y, monitor.heightMeter);
+            go.transform.localScale = new Vector3(monitor.widthMeter, go.transform.localScale.y, monitor.heightMeter) * scale;
 
             // Set parent as this object
             go.transform.SetParent(transform);
 
             // Calc actual size considering mesh size
             var scaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x * 2f;
-            totalWidth_ += monitor.widthMeter * scaleX;
+            totalWidth_ += monitor.widthMeter * scale * scaleX;
         }
     }
 
@@ -71,7 +71,7 @@ public class MultipleMonitorCreator : MonoBehaviour
         foreach (var go in monitors_) {
             var monitor = go.GetComponent<uDesktopDuplication.Texture>().monitor;
             var halfScaleX = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents.x;
-            var width = monitor.widthMeter;
+            var width = monitor.widthMeter * scale;
             var halfWidth = width * halfScaleX;
             x += halfWidth;
             go.transform.localPosition = new Vector3(x, 0f, 0f);
