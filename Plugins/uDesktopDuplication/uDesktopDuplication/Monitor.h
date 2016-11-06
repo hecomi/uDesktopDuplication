@@ -41,11 +41,14 @@ public:
     int GetWidth() const;
     int GetHeight() const;
     int GetRotation() const;
+    int GetDpiX() const;
+    int GetDpiY() const;
     IDXGIOutputDuplication* GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
 
 private:
     int id_ = -1;
+    UINT dpiX_ = -1, dpiY_ = -1;
     State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
     IDXGIOutputDuplication* deskDupl_ = nullptr;

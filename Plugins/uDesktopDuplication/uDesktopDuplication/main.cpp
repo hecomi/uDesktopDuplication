@@ -15,6 +15,7 @@
 #include "MonitorManager.h"
 
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "Shcore.lib")
 
 
 namespace
@@ -232,6 +233,26 @@ extern "C"
             return monitor->GetRotation();
         }
         return DXGI_MODE_ROTATION_UNSPECIFIED;
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetDpiX(int id)
+    {
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetDpiX();
+        }
+        return -1;
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetDpiY(int id)
+    {
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetDpiY();
+        }
+        return -1;
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsCursorVisible(int id)

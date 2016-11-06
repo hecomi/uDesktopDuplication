@@ -92,6 +92,26 @@ public class Monitor
         get { return Lib.GetHeight(id); }
     }
 
+    public int dpiX
+    { 
+        get { return Lib.GetDpiX(id); }
+    }
+
+    public int dpiY
+    { 
+        get { return Lib.GetDpiY(id); }
+    }
+
+    public float widthMeter
+    { 
+        get { return width / dpiX * 0.0254f; }
+    }
+
+    public float heightMeter
+    { 
+        get { return height / dpiY * 0.0254f; }
+    }
+
     public MonitorRotation rotation
     { 
         get { return Lib.GetRotation(id); }

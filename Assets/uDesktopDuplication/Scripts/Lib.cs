@@ -80,6 +80,10 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern int GetHeight(int id);
     [DllImport("uDesktopDuplication")]
+    public static extern int GetDpiX(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetDpiY(int id);
+    [DllImport("uDesktopDuplication")]
     public static extern MonitorRotation GetRotation(int id);
     [DllImport("uDesktopDuplication")]
     public static extern bool IsPrimary(int id);

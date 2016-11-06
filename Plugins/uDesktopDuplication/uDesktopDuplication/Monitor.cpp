@@ -1,4 +1,5 @@
 #include <d3d11.h>
+#include <ShellScalingAPI.h>
 #include "Common.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
@@ -17,6 +18,8 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
     output->GetDesc(&outputDesc_);
     monitorInfo_.cbSize = sizeof(MONITORINFOEX);
     GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_);
+
+    GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_);
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
     const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
@@ -193,6 +196,18 @@ int Monitor::GetBottom() const
 int Monitor::GetRotation() const
 {
     return static_cast<int>(outputDesc_.Rotation);
+}
+
+
+int Monitor::GetDpiX() const
+{
+    return static_cast<int>(dpiX_);
+}
+
+
+int Monitor::GetDpiY() const
+{
+    return static_cast<int>(dpiY_);
 }
 
 
