@@ -219,7 +219,7 @@ void Cursor::UpdateTexture()
 
 void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
-    if (bgra32Buffer_ == nullptr) return;
+    if (bgra32Buffer_ == nullptr || texture == nullptr) return;
     ID3D11DeviceContext* context;
     GetDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_, shapeInfo_.Width * 4, 0);
