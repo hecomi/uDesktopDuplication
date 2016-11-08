@@ -53,6 +53,7 @@ public class MultipleMonitorCreator : MonoBehaviour
                         Destroy(info.gameObject);
                     }
                 }
+                monitors_.RemoveAll(info => info.uddTexture.monitor.state == uDesktopDuplication.MonitorState.Unsupported);
             }
         }
     }
