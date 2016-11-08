@@ -14,7 +14,7 @@ public class Cursor : MonoBehaviour
 
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
-    private Dictionary<Vector2, Texture2D> textures_ = new Dictionary<Vector2, Texture2D>();
+    private Dictionary<int, Texture2D> textures_ = new Dictionary<int, Texture2D>();
 
     void Start()
     {
@@ -45,14 +45,14 @@ public class Cursor : MonoBehaviour
         var h = monitor.cursorShapeHeight;
         if (w == 0 || h == 0) return;
 
-        var scale = new Vector2(w, h);
-        if (!textures_.ContainsKey(scale)) {
+        var key = w + h * 100;
+        if (!textures_.ContainsKey(key)) {
             var texture = new Texture2D(w, h, TextureFormat.BGRA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
-            textures_.Add(scale, texture);
+            textures_.Add(key, texture);
         }
 
-        var cursorTexture = textures_[scale];
+        var cursorTexture = textures_[key];
         monitor.GetCursorTexture(cursorTexture.GetNativeTexturePtr());
         uddTexture_.material.SetTexture("_CursorTex", cursorTexture);
     }
