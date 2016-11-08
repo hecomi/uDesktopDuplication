@@ -8,14 +8,13 @@ namespace uDesktopDuplication
  RequireComponent(typeof(Texture))]
 public class Cursor : MonoBehaviour
 {
+    [SerializeField] Vector2 modelScale = Vector2.one;
+
     Vector3 worldPosition { get; set; }
 
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
-
-    private Texture2D currentTexture_;
     private Dictionary<Vector2, Texture2D> textures_ = new Dictionary<Vector2, Texture2D>();
-    [SerializeField] Vector2 modelScale = Vector2.one;
 
     void Start()
     {

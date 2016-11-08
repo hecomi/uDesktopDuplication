@@ -165,8 +165,8 @@ void Cursor::UpdateTexture()
                     const int i = row * w + col;
                     const BYTE andMask = apiBuffer_[col / 8 + row * p] & mask;
                     const BYTE xorMask = apiBuffer_[col / 8 + (row + h) * p] & mask;
-                    const UINT andMask32 = andMask ? 0xFFFFFFFF : 0xFF000000;
-                    const UINT xorMask32 = xorMask ? 0x00FFFFFF : 0x00000000;
+                    const UINT andMask32 = andMask ? 0xFFFFFFFF : 0x00000000;
+                    const UINT xorMask32 = xorMask ? 0xFFFFFFFF : 0x00000000;
                     output32[i] = (desktop32[row * desktopPitch + col] & andMask32) ^ xorMask32;
                     mask = (mask == 0x01) ? 0x80 : (mask >> 1);
                 }

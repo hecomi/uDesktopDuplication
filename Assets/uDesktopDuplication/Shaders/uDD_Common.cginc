@@ -74,8 +74,8 @@ inline fixed4 uddGetCursorTexture(float2 uv)
     uv.x = (uv.x - _CursorX) / _CursorWidth;
     uv.y = (uv.y - _CursorY) / _CursorHeight;
     fixed4 c = tex2D(_CursorTex, uv);
-    fixed a = c.a * step(0, uv.x) * step(0, uv.y) * step(uv.x, 1) * step(uv.y, 1);
-    c *= step(0.01, a);
+    fixed a = step(0, uv.x) * step(0, uv.y) * step(uv.x, 1) * step(uv.y, 1);
+    c.a *= step(0.01, a);
     return c;
 }
 
