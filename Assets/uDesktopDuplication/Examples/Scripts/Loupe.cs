@@ -14,14 +14,12 @@ public class Loupe : MonoBehaviour
 
     void Update()
     {
+        uddTexture_.monitorId = uDesktopDuplication.Manager.cursorMonitorId;
+
         // To get other monitor textures, set dirty flag.
         foreach (var monitor in uDesktopDuplication.Manager.monitors) {
             monitor.CreateTexture();
             monitor.shouldBeUpdated = true;
-        }
-
-        if (!uddTexture_.monitor.isCursorVisible) {
-            uddTexture_.monitorId = uDesktopDuplication.Manager.cursorMonitorId;
         }
 
         var x = (float)uddTexture_.monitor.cursorX / uddTexture_.monitor.width;
