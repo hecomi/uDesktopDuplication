@@ -42,6 +42,7 @@ public enum MonitorState
 public static class Lib
 {
     public delegate void MessageHandler(Message message);
+    public delegate void DebugLogDelegate(string str);
 
     [DllImport("uDesktopDuplication")]
     public static extern void InitializeUDD();
@@ -53,6 +54,14 @@ public static class Lib
     public static extern void Update();
     [DllImport("uDesktopDuplication")]
     public static extern Message PopMessage();
+    [DllImport("uDesktopDuplication")]
+    public static extern void EnableDebug();
+    [DllImport("uDesktopDuplication")]
+    public static extern void DisableDebug();
+    [DllImport("uDesktopDuplication")]
+    public static extern void SetLogFunc(DebugLogDelegate func);
+    [DllImport("uDesktopDuplication")]
+    public static extern void SetErrorFunc(DebugLogDelegate func);
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]
