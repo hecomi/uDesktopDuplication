@@ -1,5 +1,6 @@
 #include <d3d11.h>
 #include "Common.h"
+#include "Debug.h"
 #include "MonitorManager.h"
 #include "Monitor.h"
 #include "Cursor.h"
@@ -53,8 +54,10 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         reinterpret_cast<void*>(apiBuffer_.get()),
         &bufferSize,
         &shapeInfo_);
+
     if (FAILED(hr))
     {
+        Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
         apiBuffer_.reset();
         apiBufferSize_ = 0;
     }
@@ -103,8 +106,10 @@ void Cursor::UpdateTexture()
         hr = GetDevice()->CreateTexture2D(&desc, nullptr, &texture);
         if (FAILED(hr)) 
         {
+            Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
         }
+        const auto textureReleaser = MakeUniqueWithReleaser(texture);
 
         D3D11_BOX box;
         box.front = 0;
@@ -114,6 +119,24 @@ void Cursor::UpdateTexture()
         box.right = x_ + w;
         box.bottom = y_ + h;
 
+        const UINT mw = monitor_->GetWidth();
+        const UINT mh = monitor_->GetHeight();
+        if (box.left < 0 || box.top < 0 || box.right >= mw || box.bottom >= mh)
+        {
+            char buf[256];
+            sprintf_s(buf, 256,
+                "Cursor::UpdateTexture() => D3D11_BOX is out of area (%d, %d) ~ (%d, %d).",
+                box.left, box.top, box.right, box.bottom);
+            Debug::Error(buf);
+            return;
+        }
+
+        if (monitor_->GetUnityTexture() == nullptr) 
+        {
+            Debug::Error("Cursor::UpdateTexture() => Monitor::GetUnityTexture() is null.");
+            return;
+        }
+
         ID3D11DeviceContext* context;
         GetDevice()->GetImmediateContext(&context);
         context->CopySubresourceRegion(texture, 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
@@ -121,17 +144,18 @@ void Cursor::UpdateTexture()
 
         IDXGISurface* surface = nullptr;
         hr = texture->QueryInterface(__uuidof(IDXGISurface), (void**)&surface);
-        texture->Release();
         if (FAILED(hr))
         {
+            Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
             return;
         }
+        const auto surfaceReleaser = MakeUniqueWithReleaser(surface);
 
         DXGI_MAPPED_RECT mappedSurface;
         hr = surface->Map(&mappedSurface, DXGI_MAP_READ);
         if (FAILED(hr))
         {
-            surface->Release();
+            Debug::Error("Cursor::UpdateTexture() => surface->Map() failed.");
             return;
         }
 
@@ -184,7 +208,6 @@ void Cursor::UpdateTexture()
         }
 
         hr = surface->Unmap();
-        surface->Release();
         if (FAILED(hr))
         {
             return;
@@ -206,10 +229,34 @@ void Cursor::UpdateTexture()
 
 void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
-    if (bgra32Buffer_ == nullptr || texture == nullptr) return;
+    if (bgra32Buffer_ == nullptr)
+    {
+        Debug::Error("Cursor::GetTexture() => bgra32Buffer is null.");
+        return;
+    }
+
+    if (texture == nullptr)
+    {
+        Debug::Error("Cursor::GetTexture() => The given texture is null.");
+        return;
+    }
+
+    D3D11_TEXTURE2D_DESC desc;
+    texture->GetDesc(&desc);
+    if ((int)desc.Width < GetWidth() || (int)desc.Height < GetHeight())
+    {
+        char buf[256];
+        sprintf_s(buf, 256,
+            "Cursor::GetTexture() => The given texture has smaller width / height.\n"
+            "Given => (%d, %d)  Buffer => (%d, %d)",
+            desc.Width, desc.Height, GetWidth(), GetHeight());
+        Debug::Error(buf);
+        return;
+    }
+
     ID3D11DeviceContext* context;
     GetDevice()->GetImmediateContext(&context);
-    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), shapeInfo_.Width * 4, 0);
+    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), GetWidth() * 4, 0);
     context->Release();
 }
 

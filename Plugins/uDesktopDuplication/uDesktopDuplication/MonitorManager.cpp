@@ -32,24 +32,24 @@ void MonitorManager::Initialize()
     // Get factory
     IDXGIFactory1* factory;
     CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory));
+    const auto factoryReleaser = MakeUniqueWithReleaser(factory);
 
     // Check all display adapters
     int id = 0;
     IDXGIAdapter1* adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
+        const auto adapterReleaser = MakeUniqueWithReleaser(adapter);
         // Search the main monitor from all outputs
         IDXGIOutput* output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
+            const auto outputReleaser = MakeUniqueWithReleaser(output);
             auto monitor = std::make_shared<Monitor>(id++);
             monitor->Initialize(output);
             monitors_.push_back(monitor);
-            output->Release();
         }
-        adapter->Release();
     }
-    factory->Release();
 }
 
 

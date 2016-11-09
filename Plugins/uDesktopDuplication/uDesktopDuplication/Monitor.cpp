@@ -98,6 +98,7 @@ void Monitor::Render(UINT timeout)
         }
         return;
     }
+    const auto resourceReleaser = MakeUniqueWithReleaser(resource);
 
     if (unityTexture_)
     {
@@ -108,8 +109,6 @@ void Monitor::Render(UINT timeout)
         GetDevice()->GetImmediateContext(&context);
         context->CopyResource(unityTexture_, texture);
         context->Release();
-
-        resource->Release();
     }
 
     cursor_->UpdateBuffer(frameInfo);
