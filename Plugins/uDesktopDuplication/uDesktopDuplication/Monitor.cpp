@@ -73,6 +73,7 @@ void Monitor::Render(UINT timeout)
     HRESULT hr;
 
     hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
+    const auto resourceReleaser = MakeUniqueWithReleaser(resource);
     if (FAILED(hr))
     {
         switch (hr)
@@ -98,7 +99,6 @@ void Monitor::Render(UINT timeout)
         }
         return;
     }
-    const auto resourceReleaser = MakeUniqueWithReleaser(resource);
 
     if (unityTexture_)
     {

@@ -24,6 +24,8 @@ public:
     int GetType() const;
 
 private:
+    bool IsCursorOnParentMonitor() const;
+
     Monitor* monitor_;
     bool isVisible_ = false;
     int x_ = -1;

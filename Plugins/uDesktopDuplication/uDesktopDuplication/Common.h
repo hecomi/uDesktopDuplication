@@ -17,7 +17,10 @@ ID3D11Device* GetDevice();
 template <class T>
 auto MakeUniqueWithReleaser(T* ptr)
 {
-    const auto deleter = [](T* ptr) { ptr->Release(); };
+    const auto deleter = [](T* ptr) 
+    { 
+        if (ptr != nullptr) ptr->Release();
+    };
     return std::unique_ptr<T, decltype(deleter)>(ptr, deleter);
 }
 

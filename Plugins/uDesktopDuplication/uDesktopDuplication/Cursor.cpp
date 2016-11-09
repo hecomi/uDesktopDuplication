@@ -34,6 +34,11 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
     }
 
+    if (!IsCursorOnParentMonitor())
+    {
+        return;
+    }
+
     if (frameInfo.PointerShapeBufferSize == 0)
     {
         return;
@@ -49,11 +54,12 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 
     // Get mouse pointer information
     UINT bufferSize;
+    DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
     const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
         apiBufferSize_,
         reinterpret_cast<void*>(apiBuffer_.get()),
         &bufferSize,
-        &shapeInfo_);
+        &shapeInfo);
 
     if (FAILED(hr))
     {
@@ -61,22 +67,31 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         apiBuffer_.reset();
         apiBufferSize_ = 0;
     }
+
+    shapeInfo_ = shapeInfo;
 }
 
 
 void Cursor::UpdateTexture()
 {
+    if (!IsCursorOnParentMonitor())
+    {
+        return;
+    }
+
     // cursor type
     const bool isMono = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME;
     const bool isColorMask = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
 
     // Size
-    const auto w = GetWidth();
-    const auto h = GetHeight();
+    const auto w0 = GetWidth();
+    const auto h0 = GetHeight();
     const auto p = GetPitch();
+    auto w = w0;
+    auto h = h0;
 
     // Convert the buffer given by API into BGRA32
-    const UINT bgraBufferSize = w * h * 4;
+    const UINT bgraBufferSize = w0 * h0 * 4;
     if (bgraBufferSize > bgra32BufferSize_)
     {
         bgra32BufferSize_ = bgraBufferSize;
@@ -88,6 +103,42 @@ void Cursor::UpdateTexture()
     if (isMono || isColorMask)
     {
         HRESULT hr;
+
+        const auto mw = monitor_->GetWidth();
+        const auto mh = monitor_->GetHeight();
+        auto x = x_;
+        auto y = y_;
+        auto colMin = 0;
+        auto colMax = w0;
+        auto rowMin = 0;
+        auto rowMax = h0;
+
+        if (x < 0)
+        {
+            x = 0;
+            w = w0 + x_;
+            colMin = w0 - w;
+        }
+        if (x + w >= mw) 
+        {
+            w = mw - x_;
+            colMax = w;
+        }
+        if (y < 0)
+        {
+            y = 0;
+            h = h0 + y_;
+            rowMin = h0 - h;
+        }
+        if (y + h >= mh) 
+        {
+            h = mh - y_;
+            rowMax = h;
+        }
+
+        char buf[256];
+        sprintf_s(buf, 256, "%d %d %d %d | %d %d %d %d", x_, y_, w, h, colMin, colMax, rowMin, rowMax);
+        Debug::Log(buf);
 
         D3D11_TEXTURE2D_DESC desc;
         desc.Width = w;
@@ -104,32 +155,20 @@ void Cursor::UpdateTexture()
 
         ID3D11Texture2D* texture = nullptr;
         hr = GetDevice()->CreateTexture2D(&desc, nullptr, &texture);
+        const auto textureReleaser = MakeUniqueWithReleaser(texture);
         if (FAILED(hr)) 
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
         }
-        const auto textureReleaser = MakeUniqueWithReleaser(texture);
 
         D3D11_BOX box;
         box.front = 0;
         box.back = 1;
-        box.left = x_;
-        box.top = y_;
-        box.right = x_ + w;
-        box.bottom = y_ + h;
-
-        const UINT mw = monitor_->GetWidth();
-        const UINT mh = monitor_->GetHeight();
-        if (box.left < 0 || box.top < 0 || box.right >= mw || box.bottom >= mh)
-        {
-            char buf[256];
-            sprintf_s(buf, 256,
-                "Cursor::UpdateTexture() => D3D11_BOX is out of area (%d, %d) ~ (%d, %d).",
-                box.left, box.top, box.right, box.bottom);
-            Debug::Error(buf);
-            return;
-        }
+        box.left = x;
+        box.top = y;
+        box.right = x + w;
+        box.bottom = y + h;
 
         if (monitor_->GetUnityTexture() == nullptr) 
         {
@@ -144,12 +183,12 @@ void Cursor::UpdateTexture()
 
         IDXGISurface* surface = nullptr;
         hr = texture->QueryInterface(__uuidof(IDXGISurface), (void**)&surface);
+        const auto surfaceReleaser = MakeUniqueWithReleaser(surface);
         if (FAILED(hr))
         {
             Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
             return;
         }
-        const auto surfaceReleaser = MakeUniqueWithReleaser(surface);
 
         DXGI_MAPPED_RECT mappedSurface;
         hr = surface->Map(&mappedSurface, DXGI_MAP_READ);
@@ -168,18 +207,17 @@ void Cursor::UpdateTexture()
 
         if (isMono)
         {
-            for (int row = 0; row < h; ++row) 
+            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y) 
             {
-                BYTE mask = 0x80;
-                for (int col = 0; col < w; ++col) 
+                for (int col = colMin, x = 0; col < colMax; ++col, ++x) 
                 {
-                    const int i = row * w + col;
+                    BYTE mask = 0b10000000 >> (col % 8);
+                    const int i = row * w0 + col;
                     const BYTE andMask = apiBuffer_[col / 8 + row * p] & mask;
                     const BYTE xorMask = apiBuffer_[col / 8 + (row + h) * p] & mask;
                     const UINT andMask32 = andMask ? 0xFFFFFFFF : 0x00000000;
                     const UINT xorMask32 = xorMask ? 0xFFFFFFFF : 0x00000000;
-                    output32[i] = (desktop32[row * desktopPitch + col] & andMask32) ^ xorMask32;
-                    mask = (mask == 0x01) ? 0x80 : (mask >> 1);
+                    output32[i] = (desktop32[y * desktopPitch + x] & andMask32) ^ xorMask32;
                 }
             }
         }
@@ -187,17 +225,17 @@ void Cursor::UpdateTexture()
         {
             const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.get());
 
-            for (int row = 0; row < h; ++row) 
+            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y) 
             {
-                for (int col = 0; col < w; ++col) 
+                for (int col = colMin, x = 0; col < colMax; ++col, ++x) 
                 {
-                    const int i = row * w + col;
-                    const int j = row * p / sizeof(UINT) + col;
+                    const int i = col + row * w0;
+                    const int j = col + row * p / sizeof(UINT);
 
                     UINT mask = 0xFF000000 & buffer32[j];
                     if (mask)
                     {
-                        output32[i] = (desktop32[row * desktopPitch + col] ^ buffer32[j]) | 0xFF000000;
+                        output32[i] = (desktop32[y * desktopPitch + x] ^ buffer32[j]) | 0xFF000000;
                     }
                     else
                     {
@@ -222,8 +260,6 @@ void Cursor::UpdateTexture()
             output32[i] = buffer32[i];
         }
     }
-
-    return;
 }
 
 
@@ -302,4 +338,10 @@ int Cursor::GetPitch() const
 int Cursor::GetType() const
 {
     return shapeInfo_.Type;
+}
+
+
+bool Cursor::IsCursorOnParentMonitor() const
+{
+    return GetMonitorManager()->GetCursorMonitorId() == monitor_->GetId();
 }
