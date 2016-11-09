@@ -19,11 +19,14 @@
     <ClInclude Include="Cursor.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="MonitorManager.h" />
+    <ClInclude Include="Debug.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Monitor.cpp" />
     <ClCompile Include="Cursor.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MonitorManager.cpp" />
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="Debug.cpp" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #include <d3d11.h>
 #include <ShellScalingAPI.h>
 #include "Common.h"
+#include "Debug.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
 #include "Monitor.h"
@@ -13,7 +14,7 @@ Monitor::Monitor(int id)
 }
 
 
-HRESULT Monitor::Initialize(IDXGIOutput* output)
+void Monitor::Initialize(IDXGIOutput* output)
 {
     output->GetDesc(&outputDesc_);
     monitorInfo_.cbSize = sizeof(MONITORINFOEX);
@@ -22,7 +23,11 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
     GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_);
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
-    const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
+    IDXGIOutputDuplication* deskDupl;
+    const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl);
+    deskDupl_ = std::shared_ptr<IDXGIOutputDuplication>(
+        deskDupl,
+        [](IDXGIOutputDuplication* ptr) { ptr->Release(); });
 
     // TODO: error check
     switch (hr)
@@ -51,31 +56,23 @@ HRESULT Monitor::Initialize(IDXGIOutput* output)
             state_ = State::SessionDisconnected;
             break;
     }
-
-    return hr;
 }
 
 
 Monitor::~Monitor()
 {
-    if (deskDupl_ != nullptr)
-    {
-        deskDupl_->Release();
-    }
 }
 
 
-HRESULT Monitor::Render(UINT timeout)
+void Monitor::Render(UINT timeout)
 {
-    if (deskDupl_ == nullptr)
-    {
-        return S_OK;
-    }
+    if (!deskDupl_) return;
 
     IDXGIResource* resource = nullptr;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
+    HRESULT hr;
 
-    const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
+    hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
     if (FAILED(hr))
     {
         switch (hr)
@@ -83,16 +80,23 @@ HRESULT Monitor::Render(UINT timeout)
             case DXGI_ERROR_ACCESS_LOST:
                 // If any monitor setting has changed (e.g. monitor size has changed),
                 // it is necessary to re-initialize monitors.
+                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
                 state_ = State::AccessLost;
                 break;
             case DXGI_ERROR_WAIT_TIMEOUT:
+                // This often occurs when timeout value is small and it is not problem. 
+                // Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
                 break;
             case DXGI_ERROR_INVALID_CALL:
+                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
                 break;
             case E_INVALIDARG:
+                Debug::Error("Monitor::Render() => E_INVALIDARG.");
+                break;
+            default:
                 break;
         }
-        return hr;
+        return;
     }
 
     if (unityTexture_)
@@ -111,9 +115,11 @@ HRESULT Monitor::Render(UINT timeout)
     cursor_->UpdateBuffer(frameInfo);
     cursor_->UpdateTexture();
 
-    deskDupl_->ReleaseFrame();
-
-    return S_OK;
+    hr = deskDupl_->ReleaseFrame();
+    if (FAILED(hr))
+    {
+        Debug::Error("Monitor::Render() => ReleaseFrame() failed.");
+    }
 }
 
 
@@ -141,7 +147,7 @@ ID3D11Texture2D* Monitor::GetUnityTexture() const
 }
 
 
-IDXGIOutputDuplication* Monitor::GetDeskDupl() 
+const std::shared_ptr<IDXGIOutputDuplication>& Monitor::GetDeskDupl() 
 { 
     return deskDupl_; 
 }

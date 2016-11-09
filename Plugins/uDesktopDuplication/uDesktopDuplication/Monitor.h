@@ -1,3 +1,5 @@
+#pragma once
+
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <memory>
@@ -23,8 +25,8 @@ public:
 
     explicit Monitor(int id);
     ~Monitor();
-    HRESULT Initialize(IDXGIOutput* output);
-    HRESULT Render(UINT timeout = 0);
+    void Initialize(IDXGIOutput* output);
+    void Render(UINT timeout = 0);
     void GetCursorTexture(ID3D11Texture2D* texture);
 
 public:
@@ -43,7 +45,7 @@ public:
     int GetRotation() const;
     int GetDpiX() const;
     int GetDpiY() const;
-    IDXGIOutputDuplication* GetDeskDupl();
+    const std::shared_ptr<IDXGIOutputDuplication>& GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
 
 private:
@@ -51,7 +53,7 @@ private:
     UINT dpiX_ = -1, dpiY_ = -1;
     State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
-    IDXGIOutputDuplication* deskDupl_ = nullptr;
+    std::shared_ptr<IDXGIOutputDuplication> deskDupl_;
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;

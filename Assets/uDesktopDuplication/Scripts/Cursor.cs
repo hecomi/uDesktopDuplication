@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections.Generic;
 
 namespace uDesktopDuplication
@@ -53,6 +54,7 @@ public class Cursor : MonoBehaviour
         }
 
         var cursorTexture = textures_[key];
+        Assert.IsNotNull(cursorTexture);
         monitor.GetCursorTexture(cursorTexture.GetNativeTexturePtr());
         uddTexture_.material.SetTexture("_CursorTex", cursorTexture);
     }

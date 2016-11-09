@@ -61,6 +61,9 @@ public class Manager : MonoBehaviour
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
 
+    private Lib.DebugLogDelegate logFunc = msg => Debug.Log(msg);
+    private Lib.DebugLogDelegate errorFunc = msg => Debug.LogError(msg);
+
     void Awake()
     {
         Lib.InitializeUDD();
@@ -81,10 +84,16 @@ public class Manager : MonoBehaviour
     void OnEnable()
     {
         renderCoroutine_ = StartCoroutine(OnRender());
+
+        Lib.SetLogFunc(logFunc);
+        Lib.SetErrorFunc(errorFunc);
     }
 
     void OnDisable()
     {
+        Lib.SetLogFunc(null);
+        Lib.SetErrorFunc(null);
+
         if (renderCoroutine_ != null) {
             StopCoroutine(renderCoroutine_);
             renderCoroutine_ = null;
@@ -96,12 +105,6 @@ public class Manager : MonoBehaviour
         Lib.Update();
         ReinitializeIfNeeded();
         UpdateMessage();
-
-        /*
-        foreach (var monitor in monitors_) {
-            Debug.LogFormat("[{0}] {1}", monitor.id, monitor.state);
-        }
-        */
     }
 
     [ContextMenu("Reinitialize")]
@@ -168,6 +171,7 @@ public class Manager : MonoBehaviour
 
     void CreateMonitors()
     {
+        monitors.Clear();
         for (int i = 0; i < monitorCount; ++i) {
             monitors.Add(new Monitor(i));
         }

@@ -13,16 +13,6 @@ Cursor::Cursor(Monitor* monitor)
 
 Cursor::~Cursor()
 {
-    if (apiBuffer_ != nullptr)
-    {
-        delete[] apiBuffer_;
-        apiBuffer_ = nullptr;
-    }
-    if (bgra32Buffer_ != nullptr)
-    {
-        delete[] bgra32Buffer_;
-        bgra32Buffer_ = nullptr;
-    }
 }
 
 
@@ -51,23 +41,21 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     // Increase the buffer size if needed
     if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
     {
-        if (apiBuffer_) delete[] apiBuffer_;
-        apiBuffer_ = new BYTE[frameInfo.PointerShapeBufferSize];
         apiBufferSize_ = frameInfo.PointerShapeBufferSize;
+        apiBuffer_ = std::make_unique<BYTE[]>(apiBufferSize_);
     }
-    if (apiBuffer_ == nullptr) return;
+    if (!apiBuffer_) return;
 
     // Get mouse pointer information
     UINT bufferSize;
     const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
-        frameInfo.PointerShapeBufferSize,
-        reinterpret_cast<void*>(apiBuffer_),
+        apiBufferSize_,
+        reinterpret_cast<void*>(apiBuffer_.get()),
         &bufferSize,
         &shapeInfo_);
     if (FAILED(hr))
     {
-        delete[] apiBuffer_;
-        apiBuffer_ = nullptr;
+        apiBuffer_.reset();
         apiBufferSize_ = 0;
     }
 }
@@ -88,11 +76,10 @@ void Cursor::UpdateTexture()
     const UINT bgraBufferSize = w * h * 4;
     if (bgraBufferSize > bgra32BufferSize_)
     {
-        if (bgra32Buffer_) delete[] bgra32Buffer_;
-        bgra32Buffer_ = new BYTE[bgraBufferSize];
         bgra32BufferSize_ = bgraBufferSize;
+        bgra32Buffer_ = std::make_unique<BYTE[]>(bgra32BufferSize_);
     }
-    if (bgra32Buffer_ == nullptr) return;
+    if (!bgra32Buffer_) return;
 
     // If masked, copy the desktop image and merge it with masked image.
     if (isMono || isColorMask)
@@ -153,7 +140,7 @@ void Cursor::UpdateTexture()
         const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
 
         // Access RGBA values at the same time
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_);
+        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.get());
 
         if (isMono)
         {
@@ -174,7 +161,7 @@ void Cursor::UpdateTexture()
         }
         else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR
         {
-            const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_);
+            const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.get());
 
             for (int row = 0; row < h; ++row) 
             {
@@ -205,8 +192,8 @@ void Cursor::UpdateTexture()
     }
     else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR
     {
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_);
-        const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_);
+        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.get());
+        const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.get());
         for (int i = 0; i < w * h; ++i) 
         {
             output32[i] = buffer32[i];
@@ -222,7 +209,7 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
     if (bgra32Buffer_ == nullptr || texture == nullptr) return;
     ID3D11DeviceContext* context;
     GetDevice()->GetImmediateContext(&context);
-    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_, shapeInfo_.Width * 4, 0);
+    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), shapeInfo_.Width * 4, 0);
     context->Release();
 }
 

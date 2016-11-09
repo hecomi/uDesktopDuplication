@@ -1,3 +1,5 @@
+#pragma once
+
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <memory>
@@ -26,9 +28,9 @@ private:
     bool isVisible_ = false;
     int x_ = -1;
     int y_ = -1;
-    BYTE* apiBuffer_ = nullptr;
+    std::unique_ptr<BYTE[]> apiBuffer_ = nullptr;
     UINT apiBufferSize_ = 0;
-    BYTE* bgra32Buffer_ = nullptr;
+    std::unique_ptr<BYTE[]> bgra32Buffer_ = nullptr;
     UINT bgra32BufferSize_ = 0;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_;
     LARGE_INTEGER timestamp_;

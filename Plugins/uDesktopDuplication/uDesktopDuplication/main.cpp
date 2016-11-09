@@ -7,9 +7,9 @@
 
 #include "IUnityInterface.h"
 #include "IUnityGraphics.h"
-#include "IUnityGraphicsD3D11.h"
 
 #include "Common.h"
+#include "Debug.h"
 #include "Monitor.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
@@ -18,36 +18,10 @@
 #pragma comment(lib, "Shcore.lib")
 
 
-namespace
-{
-    IUnityInterfaces* g_unity = nullptr;
-    std::unique_ptr<MonitorManager> g_manager;
-    std::queue<Message> g_messages;
-}
-
-
-IUnityInterfaces* GetUnity()
-{
-    return g_unity;
-}
-
-
-ID3D11Device* GetDevice()
-{
-    return GetUnity()->Get<IUnityGraphicsD3D11>()->GetDevice();
-}
-
-
-const std::unique_ptr<MonitorManager>& GetMonitorManager()
-{
-    return g_manager;
-}
-
-
-void SendMessageToUnity(Message message)
-{
-    g_messages.push(message);
-}
+IUnityInterfaces* g_unity = nullptr;
+std::unique_ptr<MonitorManager> g_manager;
+std::unique_ptr<Debug> g_debug;
+std::queue<Message> g_messages;
 
 
 extern "C"
@@ -57,12 +31,14 @@ extern "C"
         if (g_unity && !g_manager)
         {
             g_manager = std::make_unique<MonitorManager>();
+            g_debug = std::make_unique<Debug>();
         }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
         g_manager.reset();
+        g_debug.reset();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
@@ -103,13 +79,37 @@ extern "C"
         g_manager->Update();
     }
 
-    UNITY_INTERFACE_EXPORT Message PopMessage()
+    UNITY_INTERFACE_EXPORT Message UNITY_INTERFACE_API PopMessage()
     {
         if (g_messages.empty()) return Message::None;
 
         const auto message = g_messages.front();
         g_messages.pop();
         return message;
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EnableDebug()
+    {
+        if (!g_debug) return;
+        g_debug->Enable();
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API DisableDebug()
+    {
+        if (!g_debug) return;
+        g_debug->Disable();
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetLogFunc(Debug::DebugLogFuncPtr func)
+    {
+        if (!g_debug) return;
+        g_debug->SetLogFunc(func);
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetErrorFunc(Debug::DebugLogFuncPtr func)
+    {
+        if (!g_debug) return;
+        g_debug->SetErrorFunc(func);
     }
 
     UNITY_INTERFACE_EXPORT size_t UNITY_INTERFACE_API GetMonitorCount()
