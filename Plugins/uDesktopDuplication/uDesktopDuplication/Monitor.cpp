@@ -30,15 +30,15 @@ void Monitor::Initialize(IDXGIOutput* output)
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
     IDXGIOutputDuplication* deskDupl;
     const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl);
-    deskDupl_ = std::shared_ptr<IDXGIOutputDuplication>(
-        deskDupl,
-        [](IDXGIOutputDuplication* ptr) { ptr->Release(); });
 
     // TODO: error check
     switch (hr)
     {
         case S_OK:
             state_ = State::Available;
+            deskDupl_ = std::shared_ptr<IDXGIOutputDuplication>(
+                deskDupl,
+                [](IDXGIOutputDuplication* ptr) { if (ptr != nullptr) ptr->Release(); });
             break;
         case E_INVALIDARG:
             state_ = State::InvalidArg;
