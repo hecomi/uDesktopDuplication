@@ -20,7 +20,6 @@
 
 IUnityInterfaces* g_unity = nullptr;
 std::unique_ptr<MonitorManager> g_manager;
-std::unique_ptr<Debug> g_debug;
 std::queue<Message> g_messages;
 
 
@@ -31,14 +30,20 @@ extern "C"
         if (g_unity && !g_manager)
         {
             g_manager = std::make_unique<MonitorManager>();
-            g_debug = std::make_unique<Debug>();
+            Debug::Initialize();
         }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
         g_manager.reset();
-        g_debug.reset();
+
+        std::queue<Message> empty;
+        g_messages.swap(empty);
+
+        Debug::SetLogFunc(nullptr);
+        Debug::SetErrorFunc(nullptr);
+        Debug::Finalize();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
@@ -49,8 +54,8 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
-        g_unity = nullptr;
         FinalizeUDD();
+        g_unity = nullptr;
     }
 
     void UNITY_INTERFACE_API OnRenderEvent(int id)
@@ -88,28 +93,19 @@ extern "C"
         return message;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API EnableDebug()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetDebugMode(Debug::Mode mode)
     {
-        if (!g_debug) return;
-        g_debug->Enable();
-    }
-
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API DisableDebug()
-    {
-        if (!g_debug) return;
-        g_debug->Disable();
+        Debug::SetMode(mode);
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetLogFunc(Debug::DebugLogFuncPtr func)
     {
-        if (!g_debug) return;
-        g_debug->SetLogFunc(func);
+        Debug::SetLogFunc(func);
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetErrorFunc(Debug::DebugLogFuncPtr func)
     {
-        if (!g_debug) return;
-        g_debug->SetErrorFunc(func);
+        Debug::SetErrorFunc(func);
     }
 
     UNITY_INTERFACE_EXPORT size_t UNITY_INTERFACE_API GetMonitorCount()

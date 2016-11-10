@@ -136,10 +136,6 @@ void Cursor::UpdateTexture()
             rowMax = h;
         }
 
-        char buf[256];
-        sprintf_s(buf, 256, "%d %d %d %d | %d %d %d %d", x_, y_, w, h, colMin, colMax, rowMin, rowMax);
-        Debug::Log(buf);
-
         D3D11_TEXTURE2D_DESC desc;
         desc.Width = w;
         desc.Height = h;

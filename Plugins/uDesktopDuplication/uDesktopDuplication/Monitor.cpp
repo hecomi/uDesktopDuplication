@@ -14,6 +14,11 @@ Monitor::Monitor(int id)
 }
 
 
+Monitor::~Monitor()
+{
+}
+
+
 void Monitor::Initialize(IDXGIOutput* output)
 {
     output->GetDesc(&outputDesc_);
@@ -37,30 +42,30 @@ void Monitor::Initialize(IDXGIOutput* output)
             break;
         case E_INVALIDARG:
             state_ = State::InvalidArg;
+            Debug::Error("Monitor::Initialize() => Invalid arguments.");
             break;
         case E_ACCESSDENIED:
             // For example, when the user presses Ctrl + Alt + Delete and the screen
             // switches to admin screen, this error occurs. 
             state_ = State::AccessDenied;
+            Debug::Error("Monitor::Initialize() => Access denied.");
             break;
         case DXGI_ERROR_UNSUPPORTED:
             // If the display adapter on the computer is running under the Microsoft Hybrid system,
             // this error occurs.
             state_ = State::Unsupported;
+            Debug::Error("Monitor::Initialize() => Unsupported display.");
             break;
         case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
             // When other application use Desktop Duplication API, this error occurs.
             state_ = State::CurrentlyNotAvailable;
+            Debug::Error("Monitor::Initialize() => Currently not available.");
             break;
         case DXGI_ERROR_SESSION_DISCONNECTED:
             state_ = State::SessionDisconnected;
+            Debug::Error("Monitor::Initialize() => Session disconnected.");
             break;
     }
-}
-
-
-Monitor::~Monitor()
-{
 }
 
 

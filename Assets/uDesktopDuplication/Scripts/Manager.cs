@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace uDesktopDuplication
 {
@@ -51,21 +52,20 @@ public class Manager : MonoBehaviour
         }
     }
 
+    [SerializeField] DebugMode debugMode = DebugMode.File;
     [SerializeField] int desktopDuplicationApiTimeout = 0;
     [SerializeField] float retryReinitializationDuration = 1f;
 
     private Coroutine renderCoroutine_ = null;
-    private bool shouldReinitialize = false;
-    private float reinitializationTimer = 0f;
+    private bool shouldReinitialize_ = false;
+    private float reinitializationTimer_ = 0f;
 
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
 
-    private Lib.DebugLogDelegate logFunc = msg => Debug.Log(msg);
-    private Lib.DebugLogDelegate errorFunc = msg => Debug.LogError(msg);
-
     void Awake()
     {
+        Lib.SetDebugMode(debugMode);
         Lib.InitializeUDD();
 
         if (instance_ != null) return;
@@ -84,16 +84,10 @@ public class Manager : MonoBehaviour
     void OnEnable()
     {
         renderCoroutine_ = StartCoroutine(OnRender());
-
-        Lib.SetLogFunc(logFunc);
-        Lib.SetErrorFunc(errorFunc);
     }
 
     void OnDisable()
     {
-        Lib.SetLogFunc(null);
-        Lib.SetErrorFunc(null);
-
         if (renderCoroutine_ != null) {
             StopCoroutine(renderCoroutine_);
             renderCoroutine_ = null;
@@ -123,20 +117,20 @@ public class Manager : MonoBehaviour
                 monitor.state == MonitorState.AccessLost || 
                 monitor.state == MonitorState.AccessDenied ||
                 monitor.state == MonitorState.SessionDisconnected) {
-                if (!shouldReinitialize) {
-                    shouldReinitialize = true;
-                    reinitializationTimer = 0f;
+                if (!shouldReinitialize_) {
+                    shouldReinitialize_ = true;
+                    reinitializationTimer_ = 0f;
                     break;
                 }
             }
         }
 
-        if (shouldReinitialize) {
-            if (reinitializationTimer > retryReinitializationDuration) {
+        if (shouldReinitialize_) {
+            if (reinitializationTimer_ > retryReinitializationDuration) {
                 Reinitialize();
-                shouldReinitialize = false;
+                shouldReinitialize_ = false;
             }
-            reinitializationTimer += Time.deltaTime;
+            reinitializationTimer_ += Time.deltaTime;
         }
     }
 
