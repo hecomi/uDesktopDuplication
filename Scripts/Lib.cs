@@ -39,9 +39,17 @@ public enum MonitorState
 	AccessLost = 6,
 }
 
+public enum DebugMode
+{
+    None = 0,
+    File = 1,
+    UnityLog = 2, /* currently has bug when app exits. */
+}
+
 public static class Lib
 {
     public delegate void MessageHandler(Message message);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void DebugLogDelegate(string str);
 
     [DllImport("uDesktopDuplication")]
@@ -59,9 +67,11 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern void DisableDebug();
     [DllImport("uDesktopDuplication")]
-    public static extern void SetLogFunc(DebugLogDelegate func);
+    public static extern void SetDebugMode(DebugMode mode);
     [DllImport("uDesktopDuplication")]
-    public static extern void SetErrorFunc(DebugLogDelegate func);
+    public static extern void SetLogFunc(IntPtr func);
+    [DllImport("uDesktopDuplication")]
+    public static extern void SetErrorFunc(IntPtr func);
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]
