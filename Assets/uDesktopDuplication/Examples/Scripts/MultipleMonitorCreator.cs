@@ -14,7 +14,7 @@ public class MultipleMonitorCreator : MonoBehaviour
         public GameObject gameObject { get; set; }
         public Quaternion originalRotation { get; set; }
         public uDesktopDuplication.Texture uddTexture { get; set; }
-        public Vector3 meshBounds;
+        public Mesh mesh { get; set; }
     }
 
     private List<MonitorInfo> monitors_ = new List<MonitorInfo>();
@@ -78,6 +78,13 @@ public class MultipleMonitorCreator : MonoBehaviour
             var go = Instantiate(monitorPrefab);
             go.name = "Monitor " + i;
 
+            // Expand AABB
+            var mesh = go.GetComponent<MeshFilter>().mesh; // clone
+            var aabbScale = mesh.bounds.size;
+            aabbScale.y = Mathf.Max(aabbScale.y, aabbScale.x);
+            aabbScale.z = Mathf.Max(aabbScale.z, aabbScale.x);
+            mesh.bounds = new Bounds(mesh.bounds.center, aabbScale);
+
             // Assign monitor
             var texture = go.GetComponent<uDesktopDuplication.Texture>();
             texture.monitorId = i;
@@ -89,15 +96,12 @@ public class MultipleMonitorCreator : MonoBehaviour
             // Set parent as this object
             go.transform.SetParent(transform);
 
-            // Calc actual size considering mesh size
-            var bounds = go.GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2f;
-
             // Save
             var info = new MonitorInfo();
             info.gameObject = go;
             info.originalRotation = go.transform.rotation;
             info.uddTexture = texture;
-            info.meshBounds = bounds;
+            info.mesh = mesh;
             monitors_.Add(info);
         }
     }
