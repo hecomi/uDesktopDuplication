@@ -18,7 +18,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 
         var totalWidth = 0f;
         foreach (var info in monitors) {
-            var width = info.uddTexture.monitor.widthMeter * info.meshBounds.x;
+            var width = info.uddTexture.monitor.widthMeter * (info.mesh.bounds.extents.x * 2f);
             totalWidth += width;
         }
         totalWidth += margin * (n - 1);
@@ -29,7 +29,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         float angle = -totalAngle / 2;
         foreach (var info in monitors) {
             var uddTex = info.uddTexture;
-            var width = uddTex.monitor.widthMeter * info.meshBounds.x;
+            var width = uddTex.monitor.widthMeter * (info.mesh.bounds.extents.x * 2f);
 
             angle += (width / radius) * 0.5f;
             uddTex.transform.localPosition = radius * new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle) - 1f);
