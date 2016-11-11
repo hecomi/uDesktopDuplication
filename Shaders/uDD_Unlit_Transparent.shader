@@ -21,9 +21,13 @@ CGINCLUDE
 
 #include "./uDD_Common.cginc"
 
+half _Radius;
+half _Width;
+
 v2f vert(appdata v)
 {
     v2f o;
+    uddBendVertex(v.vertex, _Radius, _Width);
     o.vertex = UnityObjectToClipPos(v.vertex);
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     return o;
@@ -46,6 +50,7 @@ Pass
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
     #pragma multi_compile ___ USE_BEND
     #pragma multi_compile ___ USE_CLIP
+    #pragma multi_compile _BEND_OFF _BEND_Y _BEND_Z
     ENDCG
 }
 
