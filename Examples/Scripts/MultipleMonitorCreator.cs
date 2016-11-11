@@ -68,10 +68,6 @@ public class MultipleMonitorCreator : MonoBehaviour
     {
         ResetRemoveTimer();
 
-        // Sort monitors in coordinate order
-        var monitors = uDesktopDuplication.Manager.monitors;
-        monitors.Sort((a, b) => a.left - b.left);
-
         // Create monitors
         for (int i = 0; i < uDesktopDuplication.Manager.monitorCount; ++i) {
             // Create monitor obeject
@@ -104,6 +100,9 @@ public class MultipleMonitorCreator : MonoBehaviour
             info.mesh = mesh;
             monitors_.Add(info);
         }
+
+        // Sort monitors in coordinate order
+        monitors_.Sort((a, b) => a.uddTexture.monitor.left - b.uddTexture.monitor.left);
     }
 
     void Clear()

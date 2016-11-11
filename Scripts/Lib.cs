@@ -85,6 +85,8 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetRenderEventFunc();
     [DllImport("uDesktopDuplication")]
+    public static extern int GetId(int id);
+    [DllImport("uDesktopDuplication")]
     public static extern MonitorState GetState(int id);
     [DllImport("uDesktopDuplication")]
     public static extern void GetName(int id, StringBuilder buf, int len);
