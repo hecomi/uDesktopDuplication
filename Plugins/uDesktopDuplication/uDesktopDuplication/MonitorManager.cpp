@@ -1,5 +1,6 @@
 #include <d3d11.h>
 #include <dxgi1_2.h>
+#include <wrl/client.h>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -11,6 +12,8 @@
 #include "Monitor.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
+
+using namespace Microsoft::WRL;
 
 
 MonitorManager::MonitorManager()
@@ -30,23 +33,20 @@ void MonitorManager::Initialize()
     Finalize();
 
     // Get factory
-    IDXGIFactory1* factory;
-    CreateDXGIFactory1(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&factory));
-    const auto factoryReleaser = MakeUniqueWithReleaser(factory);
+    ComPtr<IDXGIFactory1> factory;
+    CreateDXGIFactory1(IID_PPV_ARGS(&factory));
 
     // Check all display adapters
     int id = 0;
-    IDXGIAdapter1* adapter;
+    ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
-        const auto adapterReleaser = MakeUniqueWithReleaser(adapter);
         // Search the main monitor from all outputs
-        IDXGIOutput* output;
+        ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
-            const auto outputReleaser = MakeUniqueWithReleaser(output);
             auto monitor = std::make_shared<Monitor>(id++);
-            monitor->Initialize(output);
+            monitor->Initialize(output.Get());
             monitors_.push_back(monitor);
         }
     }

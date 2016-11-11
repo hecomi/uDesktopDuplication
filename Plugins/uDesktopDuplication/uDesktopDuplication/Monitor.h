@@ -2,6 +2,7 @@
 
 #include <d3d11.h>
 #include <dxgi1_2.h>
+#include <wrl/client.h>
 #include <memory>
 
 class Cursor;
@@ -45,7 +46,7 @@ public:
     int GetRotation() const;
     int GetDpiX() const;
     int GetDpiY() const;
-    const std::shared_ptr<IDXGIOutputDuplication>& GetDeskDupl();
+    const Microsoft::WRL::ComPtr<IDXGIOutputDuplication>& GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
 
 private:
@@ -53,7 +54,7 @@ private:
     UINT dpiX_ = -1, dpiY_ = -1;
     State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
-    std::shared_ptr<IDXGIOutputDuplication> deskDupl_;
+    Microsoft::WRL::ComPtr<IDXGIOutputDuplication> deskDupl_;
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;

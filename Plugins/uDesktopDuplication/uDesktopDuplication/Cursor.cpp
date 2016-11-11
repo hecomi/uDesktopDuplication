@@ -1,9 +1,12 @@
 #include <d3d11.h>
+#include <wrl/client.h>
 #include "Common.h"
 #include "Debug.h"
 #include "MonitorManager.h"
 #include "Monitor.h"
 #include "Cursor.h"
+
+using namespace Microsoft::WRL;
 
 
 Cursor::Cursor(Monitor* monitor)
@@ -149,9 +152,8 @@ void Cursor::UpdateTexture()
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags = 0;
 
-        ID3D11Texture2D* texture = nullptr;
+        ComPtr<ID3D11Texture2D> texture;
         hr = GetDevice()->CreateTexture2D(&desc, nullptr, &texture);
-        const auto textureReleaser = MakeUniqueWithReleaser(texture);
         if (FAILED(hr)) 
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
@@ -172,14 +174,14 @@ void Cursor::UpdateTexture()
             return;
         }
 
-        ID3D11DeviceContext* context;
-        GetDevice()->GetImmediateContext(&context);
-        context->CopySubresourceRegion(texture, 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
-        context->Release();
+        {
+            ComPtr<ID3D11DeviceContext> context;
+            GetDevice()->GetImmediateContext(&context);
+            context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+        }
 
-        IDXGISurface* surface = nullptr;
-        hr = texture->QueryInterface(__uuidof(IDXGISurface), (void**)&surface);
-        const auto surfaceReleaser = MakeUniqueWithReleaser(surface);
+        ComPtr<IDXGISurface> surface;
+        hr = texture.As<IDXGISurface>(&surface);
         if (FAILED(hr))
         {
             Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
@@ -286,10 +288,9 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
         return;
     }
 
-    ID3D11DeviceContext* context;
+    ComPtr<ID3D11DeviceContext> context;
     GetDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), GetWidth() * 4, 0);
-    context->Release();
 }
 
 

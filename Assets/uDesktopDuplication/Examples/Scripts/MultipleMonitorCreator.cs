@@ -69,8 +69,6 @@ public class MultipleMonitorCreator : MonoBehaviour
     {
         ResetRemoveTimer();
 
-        Debug.Log(uDesktopDuplication.Manager.monitorCount);
-
         // Create monitors
         for (int i = 0; i < uDesktopDuplication.Manager.monitorCount; ++i) {
             // Create monitor obeject

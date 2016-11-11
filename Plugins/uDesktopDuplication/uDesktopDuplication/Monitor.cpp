@@ -6,6 +6,8 @@
 #include "MonitorManager.h"
 #include "Monitor.h"
 
+using namespace Microsoft::WRL;
+
 
 Monitor::Monitor(int id)
     : id_(id)
@@ -28,17 +30,14 @@ void Monitor::Initialize(IDXGIOutput* output)
     GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_);
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
-    IDXGIOutputDuplication* deskDupl;
-    const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl);
+    const auto hr = output1->DuplicateOutput(GetDevice(), &deskDupl_);
 
     // TODO: error check
     switch (hr)
     {
         case S_OK:
             state_ = State::Available;
-            deskDupl_ = std::shared_ptr<IDXGIOutputDuplication>(
-                deskDupl,
-                [](IDXGIOutputDuplication* ptr) { if (ptr != nullptr) ptr->Release(); });
+            Debug::Log("Monitor::Initialize() => OK.");
             break;
         case E_INVALIDARG:
             state_ = State::InvalidArg;
@@ -73,12 +72,11 @@ void Monitor::Render(UINT timeout)
 {
     if (!deskDupl_) return;
 
-    IDXGIResource* resource = nullptr;
+    ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
     HRESULT hr;
 
     hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
-    const auto resourceReleaser = MakeUniqueWithReleaser(resource);
     if (FAILED(hr))
     {
         switch (hr)
@@ -107,13 +105,12 @@ void Monitor::Render(UINT timeout)
 
     if (unityTexture_)
     {
-        ID3D11Texture2D* texture;
-        resource->QueryInterface(__uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
+        ComPtr<ID3D11Texture2D> texture;
+        resource.As<ID3D11Texture2D>(&texture);
 
-        ID3D11DeviceContext* context;
+        ComPtr<ID3D11DeviceContext> context;
         GetDevice()->GetImmediateContext(&context);
-        context->CopyResource(unityTexture_, texture);
-        context->Release();
+        context->CopyResource(unityTexture_, texture.Get());
     }
 
     cursor_->UpdateBuffer(frameInfo);
@@ -151,7 +148,7 @@ ID3D11Texture2D* Monitor::GetUnityTexture() const
 }
 
 
-const std::shared_ptr<IDXGIOutputDuplication>& Monitor::GetDeskDupl() 
+const ComPtr<IDXGIOutputDuplication>& Monitor::GetDeskDupl() 
 { 
     return deskDupl_; 
 }
