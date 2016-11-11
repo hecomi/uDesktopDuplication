@@ -11,21 +11,7 @@ public class Manager : MonoBehaviour
     private static Manager instance_;
     public static Manager instance 
     {
-        get 
-        { 
-            if (instance_) {
-                return instance_;
-            }
-
-            var manager = FindObjectOfType<Manager>();
-            if (manager) {
-                manager.Awake();
-                return manager;
-            }
-
-            var go = new GameObject("uDesktopDuplicationManager");
-            return go.AddComponent<Manager>();
-        }
+        get { return CreateInstance(); }
     }
 
     private List<Monitor> monitors_ = new List<Monitor>();
@@ -62,6 +48,22 @@ public class Manager : MonoBehaviour
 
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
+
+    public static Manager CreateInstance()
+    {
+        if (instance_) {
+            return instance_;
+        }
+
+        var manager = FindObjectOfType<Manager>();
+        if (manager) {
+            manager.Awake();
+            return manager;
+        }
+
+        var go = new GameObject("uDesktopDuplicationManager");
+        return go.AddComponent<Manager>();
+    }
 
     void Awake()
     {
