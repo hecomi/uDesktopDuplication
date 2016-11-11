@@ -42,7 +42,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
                 uddTex.bend = uDesktopDuplication.Texture.Bend.Z;
             }
             uddTex.radius = radius;
-            uddTex.width = uddTex.monitor.widthMeter;
+            uddTex.width = uddTex.transform.localScale.x;
         }
     }
 

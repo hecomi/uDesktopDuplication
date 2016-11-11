@@ -95,18 +95,15 @@ inline fixed4 uddGetScreenTextureWithCursor(float2 uv)
 inline void uddBendVertex(inout float4 v, half radius, half width)
 {
 #if !defined(_BEND_OFF)
-    #ifdef _BEND_Y
-    radius = radius - v.y;
-    #elif _BEND_Z
-    radius = radius - v.z;
-    #endif
     half angle = width * v.x / radius;
-    v.x = radius * sin(angle) / width;
     #ifdef _BEND_Y
+    radius -= v.y;
     v.y += radius * (1 - cos(angle));
     #elif _BEND_Z
-    v.z -= radius * (1 - cos(angle));
+    radius -= v.z;
+    v.z += radius * (1 - cos(angle));
     #endif
+    v.x = radius * sin(angle) / width;
 #endif
 }
 

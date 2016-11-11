@@ -5,6 +5,9 @@ Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
+    _CursorTex ("Cursor Texture", 2D) = "white" {}
+    [KeywordEnum(Off, Y, Z)] _Bend("Bending", Int) = 0
+    [PowerSlider(10.0)] _Radius("Radius", Range(1, 100)) = 30
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
