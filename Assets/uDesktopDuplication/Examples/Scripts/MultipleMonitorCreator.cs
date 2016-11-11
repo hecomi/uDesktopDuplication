@@ -9,6 +9,10 @@ public class MultipleMonitorCreator : MonoBehaviour
     bool hasMonitorUnsupportStateChecked = false;
     float removeWaitTimer_ = 0f;
 
+    public enum MeshForwardDirection { Y, Z }
+    [Tooltip("Please specify the upper vector direction of the mesh (e.g. Plane's upper direction is Y.)")]
+    public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
+
     public class MonitorInfo
     {
         public GameObject gameObject { get; set; }
@@ -88,7 +92,11 @@ public class MultipleMonitorCreator : MonoBehaviour
             var monitor = texture.monitor;
 
             // Set width / height
-            go.transform.localScale = new Vector3(monitor.widthMeter, go.transform.localScale.y, monitor.heightMeter);
+            if (meshForwardDirection == MeshForwardDirection.Y) {
+                go.transform.localScale = new Vector3(monitor.widthMeter, go.transform.localScale.y, monitor.heightMeter);
+            } else {
+                go.transform.localScale = new Vector3(monitor.widthMeter, monitor.heightMeter, go.transform.localScale.z);
+            }
 
             // Set parent as this object
             go.transform.SetParent(transform);

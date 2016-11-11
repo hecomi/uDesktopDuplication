@@ -36,7 +36,11 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
             uddTex.transform.localRotation = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, Vector3.up) * info.originalRotation;
             angle += (width * 0.5f + margin) / radius;
 
-            uddTex.bend = uDesktopDuplication.Texture.Bend.Y;
+            if (creator_.meshForwardDirection == MultipleMonitorCreator.MeshForwardDirection.Y) {
+                uddTex.bend = uDesktopDuplication.Texture.Bend.Y;
+            } else {
+                uddTex.bend = uDesktopDuplication.Texture.Bend.Z;
+            }
             uddTex.radius = radius;
             uddTex.width = uddTex.monitor.widthMeter;
         }

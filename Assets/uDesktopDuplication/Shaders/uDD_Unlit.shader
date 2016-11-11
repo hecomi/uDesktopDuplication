@@ -7,7 +7,7 @@ Properties
     _MainTex ("Texture", 2D) = "white" {}
     _CursorTex ("Cursor Texture", 2D) = "white" {}
     [KeywordEnum(Off, Y, Z)] _Bend("Bending", Int) = 0
-    [PowerSlider(10.0)]_Radius ("Radius", Range(1, 100)) = 30
+    [PowerSlider(10.0)] _Radius("Radius", Range(1, 100)) = 30
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
@@ -28,15 +28,7 @@ half _Width;
 v2f vert(appdata v)
 {
     v2f o;
-#if defined(_BEND_Z) || defined(_BEND_Y)
-    half a = _Width * v.vertex.x / _Radius;
-    v.vertex.x = _Radius * sin(a) / _Width;
-    #ifdef _BEND_Y
-    v.vertex.y += _Radius * (1 - cos(a));
-    #elif _BEND_Z
-    v.vertex.z += _Radius * (1 - cos(a));
-    #endif
-#endif
+    uddBendVertex(v.vertex, _Radius, _Width);
     o.vertex = UnityObjectToClipPos(v.vertex);
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     return o;
