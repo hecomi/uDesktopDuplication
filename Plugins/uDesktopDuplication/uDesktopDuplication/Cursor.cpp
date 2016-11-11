@@ -24,15 +24,15 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         return;
     }
 
-    x_ = frameInfo.PointerPosition.Position.x;
-    y_ = frameInfo.PointerPosition.Position.y;
     isVisible_ = frameInfo.PointerPosition.Visible != 0;
-    timestamp_ = frameInfo.LastMouseUpdateTime;
-
     if (isVisible_) 
     {
         GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
     }
+
+    x_ = frameInfo.PointerPosition.Position.x;
+    y_ = frameInfo.PointerPosition.Position.y;
+    timestamp_ = frameInfo.LastMouseUpdateTime;
 
     if (!IsCursorOnParentMonitor())
     {

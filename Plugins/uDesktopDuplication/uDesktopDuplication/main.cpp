@@ -138,6 +138,15 @@ extern "C"
         g_manager->SetTimeout(timeout);
     }
 
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetId(int id)
+    {
+        if (!g_manager) return;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            monitor->GetId();
+        }
+    }
+
     UNITY_INTERFACE_EXPORT MonitorState UNITY_INTERFACE_API GetState(int id)
     {
         if (!g_manager) return MonitorState::NotSet;
