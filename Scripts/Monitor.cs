@@ -94,12 +94,22 @@ public class Monitor
 
     public int dpiX
     { 
-        get { return Lib.GetDpiX(id); }
+        get 
+        {
+            var dpi = Lib.GetDpiX(id); 
+            if (dpi == 0) dpi = 100; // when monitors are duplicated
+            return dpi;
+        }
     }
 
     public int dpiY
     { 
-        get { return Lib.GetDpiY(id); }
+        get 
+        {
+            var dpi = Lib.GetDpiY(id); 
+            if (dpi == 0) dpi = 100; // when monitors are duplicated
+            return dpi;
+        }
     }
 
     public float widthMeter
