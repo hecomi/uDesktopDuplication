@@ -14,6 +14,9 @@ public class Loupe : MonoBehaviour
 
     void Update()
     {
+        CheckVariables();
+
+        if (uDesktopDuplication.Manager.cursorMonitorId < 0) return;
         uddTexture_.monitorId = uDesktopDuplication.Manager.cursorMonitorId;
 
         // To get other monitor textures, set dirty flag.
@@ -30,6 +33,12 @@ public class Loupe : MonoBehaviour
         y = Mathf.Clamp(y - h / 2, 0f, 1f - h);
         uddTexture_.clipPos = new Vector2(x, y);
         uddTexture_.clipScale = new Vector2(w, h);
+    }
+
+    void CheckVariables()
+    {
+        if (zoom < 1f) zoom = 1f;
+        if (aspect < 0.01f) aspect = 0.01f;
     }
 }
 

@@ -118,7 +118,9 @@ public class Manager : MonoBehaviour
         Debug.Log("[uDesktopDuplication] Reinitialize");
         Lib.Reinitialize();
         CreateMonitors();
-        onReinitialized();
+        if (onReinitialized != null) {
+            onReinitialized();
+        }
     }
 
     void ReinitializeIfNeeded()
