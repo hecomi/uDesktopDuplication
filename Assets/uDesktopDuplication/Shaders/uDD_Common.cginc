@@ -21,7 +21,7 @@ struct Input
     float2 uv_MainTex;
 };
 
-float2 uddInvertUV(float2 uv)
+inline float2 uddInvertUV(float2 uv)
 {
 #ifdef INVERT_X
     uv.x = 1.0 - uv.x;
@@ -32,7 +32,7 @@ float2 uddInvertUV(float2 uv)
     return uv;
 }
 
-float2 uddRotateUV(float2 uv)
+inline float2 uddRotateUV(float2 uv)
 {
 #ifdef ROTATE90
     float2 tmp = uv;
@@ -49,7 +49,7 @@ float2 uddRotateUV(float2 uv)
     return uv;
 }
 
-float2 uddClipUV(float2 uv)
+inline float2 uddClipUV(float2 uv)
 {
     uv.x = _ClipX + uv.x * _ClipWidth;
     uv.y = _ClipY + uv.y * _ClipHeight;
