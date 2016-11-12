@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Runtime.InteropServices;
 
 namespace uDesktopDuplication
 {
@@ -155,6 +156,24 @@ public class Monitor
     public int cursorY
     { 
         get { return Lib.GetCursorY(id); }
+    }
+
+    public int systemCursorX
+    { 
+        get 
+        { 
+            var p = Utility.GetCursorPos();
+            return p.x - left;
+        }
+    }
+
+    public int systemCursorY
+    { 
+        get 
+        { 
+            var p = Utility.GetCursorPos();
+            return p.y - top;
+        }
     }
 
     public int cursorShapeWidth
