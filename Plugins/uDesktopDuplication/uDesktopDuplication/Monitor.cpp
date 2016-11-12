@@ -64,6 +64,10 @@ void Monitor::Initialize(IDXGIOutput* output)
             state_ = State::SessionDisconnected;
             Debug::Error("Monitor::Initialize() => Session disconnected.");
             break;
+        default:
+            state_ = State::Unknown;
+            Debug::Error("Monitor::Render() => Unknown Error.");
+            break;
     }
 }
 
@@ -98,6 +102,8 @@ void Monitor::Render(UINT timeout)
                 Debug::Error("Monitor::Render() => E_INVALIDARG.");
                 break;
             default:
+                state_ = State::Unknown;
+                Debug::Error("Monitor::Render() => Unknown Error.");
                 break;
         }
         return;

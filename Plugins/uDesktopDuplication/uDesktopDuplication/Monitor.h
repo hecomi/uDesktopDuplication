@@ -17,6 +17,7 @@ enum class MonitorState
     CurrentlyNotAvailable = 4,
     SessionDisconnected = 5,
     AccessLost = 6,
+    Unknown = 999,
 };
 
 class Monitor
