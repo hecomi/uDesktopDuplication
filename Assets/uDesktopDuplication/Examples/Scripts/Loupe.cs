@@ -20,15 +20,19 @@ public class Loupe : MonoBehaviour
         uddTexture_.monitorId = uDesktopDuplication.Manager.cursorMonitorId;
 
         // To get other monitor textures, set dirty flag.
-        foreach (var monitor in uDesktopDuplication.Manager.monitors) {
-            monitor.CreateTexture();
-            monitor.shouldBeUpdated = true;
+        foreach (var target in uDesktopDuplication.Manager.monitors) {
+            target.CreateTexture();
+            target.shouldBeUpdated = true;
         }
 
-        var x = (float)uddTexture_.monitor.cursorX / uddTexture_.monitor.width;
-        var y = (float)uddTexture_.monitor.cursorY / uddTexture_.monitor.height;
+        var monitor = uddTexture_.monitor;
+        var cursorX = monitor.isCursorVisible ? monitor.cursorX : monitor.systemCursorX;
+        var cursorY = monitor.isCursorVisible ? monitor.cursorY : monitor.systemCursorY;
+
+        var x = (float)cursorX / monitor.width;
+        var y = (float)cursorY / monitor.height;
         var w = 1f / zoom;
-        var h = w / aspect * uddTexture_.monitor.aspect;
+        var h = w / aspect * monitor.aspect;
         x = Mathf.Clamp(x - w / 2, 0f, 1f - w);
         y = Mathf.Clamp(y - h / 2, 0f, 1f - h);
         uddTexture_.clipPos = new Vector2(x, y);
