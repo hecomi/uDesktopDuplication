@@ -65,6 +65,15 @@ public class Manager : MonoBehaviour
         return go.AddComponent<Manager>();
     }
 
+    public static Monitor GetMonitor(int id)
+    {
+        if (id < 0 || id >= Manager.monitors.Count) {
+            Debug.LogErrorFormat("[uDD::Error] there is no monitor whose id is {0}.", id);
+            return Manager.primary;
+        }
+        return monitors[Mathf.Clamp(id, 0, Manager.monitorCount - 1)];
+    }
+
     void Awake()
     {
         Lib.SetDebugMode(debugMode);
@@ -108,7 +117,8 @@ public class Manager : MonoBehaviour
     {
         Debug.Log("[uDesktopDuplication] Reinitialize");
         Lib.Reinitialize();
-        if (onReinitialized != null) onReinitialized();
+        CreateMonitors();
+        onReinitialized();
     }
 
     void ReinitializeIfNeeded()
@@ -181,6 +191,17 @@ public class Manager : MonoBehaviour
             }
             monitors[i].Reinitialize();
         }
+    }
+
+    void WaitThenDo(System.Action func, float sec)
+    {
+        StartCoroutine(_WaitThenDo(func, sec));
+    }
+
+    IEnumerator _WaitThenDo(System.Action func, float sec)
+    {
+        yield return new WaitForSeconds(sec);
+        func();
     }
 }
 
