@@ -22,7 +22,7 @@ public class Texture : MonoBehaviour
     public int monitorId
     { 
         get { return monitor.id; }
-        set { monitor = Manager.monitors[Mathf.Clamp(value, 0, Manager.monitorCount - 1)]; }
+        set { monitor = Manager.GetMonitor(value); }
     }
 
     [Header("Invert UVs")]
