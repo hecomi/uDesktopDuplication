@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
@@ -9,8 +10,7 @@ public class MultipleMonitorCreator : MonoBehaviour
     bool hasMonitorUnsupportStateChecked = false;
     float removeWaitTimer_ = 0f;
 
-    public enum MeshForwardDirection { Y, Z }
-    [Tooltip("Please specify the upper vector direction of the mesh (e.g. Plane's upper direction is Y.)")]
+    [Tooltip("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
     public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
 
     public class MonitorInfo

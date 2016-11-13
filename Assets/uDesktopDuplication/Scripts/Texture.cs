@@ -34,37 +34,44 @@ public class Texture : MonoBehaviour
     public Vector2 clipPos = Vector2.zero;
     public Vector2 clipScale = new Vector2(0.2f, 0.2f);
 
-    public enum Bend
+    public enum MeshForwardDirection
     {
-        Off = 0,
-        Y = 1,
-        Z = 2,
+        Y = 0,
+        Z = 1,
     }
 
-    public Bend bend
+    public bool bend
     {
         get 
         {
-            return (Bend)material.GetInt("_Bend");
+            return material.GetInt("_Bend") != 0;
+        }
+        set 
+        {
+            if (value) {
+                material.EnableKeyword("BEND_ON");
+            } else {
+                material.DisableKeyword("BEND_ON");
+            }
+        }
+    }
+
+    public MeshForwardDirection meshForwardDirection
+    {
+        get 
+        {
+            return (MeshForwardDirection)material.GetInt("_Forward");
         }
         set 
         {
             switch (value) {
-                case Bend.Off:
-                    material.SetInt("_Bend", 0);
-                    material.DisableKeyword("_BEND_OFF");
-                    material.DisableKeyword("_BEND_Y");
-                    material.DisableKeyword("_BEND_Z");
-                    break;
-                case Bend.Y:
-                    material.SetInt("_Bend", 1);
-                    material.DisableKeyword("_BEND_OFF");
+                case MeshForwardDirection.Y:
+                    material.SetInt("_Forward", 0);
                     material.EnableKeyword("_BEND_Y");
                     material.DisableKeyword("_BEND_Z");
                     break;
-                case Bend.Z:
-                    material.SetInt("_Bend", 2);
-                    material.DisableKeyword("_BEND_OFF");
+                case MeshForwardDirection.Z:
+                    material.SetInt("_Forward", 1);
                     material.DisableKeyword("_BEND_Y");
                     material.EnableKeyword("_BEND_Z");
                     break;
@@ -82,6 +89,12 @@ public class Texture : MonoBehaviour
     {
         get { return material.GetFloat("_Width"); }
         set { material.SetFloat("_Width", value); }
+    }
+
+    public float thickness
+    {
+        get { return material.GetFloat("_Thickness"); }
+        set { material.SetFloat("_Thickness", value); }
     }
 
     public Material material
