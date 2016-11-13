@@ -3,7 +3,7 @@
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
     [SerializeField] float radius = 10f;
-    [SerializeField][Range(-180f, 180f)] float offsetAngle = 0f;
+    [SerializeField] Vector3 offsetAngle = Vector3.zero;
 
     void OnDisable()
     {
@@ -27,14 +27,19 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         radius = Mathf.Max(radius, (totalWidth + margin) / (2 * Mathf.PI));
         var totalAngle = totalWidth / radius;
 
-        float angle = -totalAngle / 2 + offsetAngle * Mathf.Deg2Rad;
+        float angle = -totalAngle / 2;
+        var offsetRot = Quaternion.Euler(offsetAngle);
         foreach (var info in monitors) {
             var uddTex = info.uddTexture;
             var width = info.gameObject.transform.localScale.x * (info.mesh.bounds.extents.x * 2f);
 
             angle += (width / radius) * 0.5f;
-            uddTex.transform.localPosition = radius * new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle) - 1f);
-            uddTex.transform.localRotation = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, Vector3.up) * info.originalRotation;
+            var pos = radius * new Vector3(Mathf.Sin(angle), 0f, Mathf.Cos(angle) - 1f);
+            pos += radius * Vector3.forward;
+            pos = offsetRot * pos;
+            pos -= radius * Vector3.forward;
+            uddTex.transform.localPosition = pos;
+            uddTex.transform.localRotation = offsetRot * Quaternion.AngleAxis(angle * Mathf.Rad2Deg, Vector3.up) * info.originalRotation;
             angle += (width * 0.5f + margin) / radius;
 
             uddTex.bend = true;
