@@ -4,9 +4,26 @@ using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
-    [SerializeField] GameObject monitorPrefab;
-    [SerializeField] bool removeIfUnsupported = true;
-    [SerializeField] float removeWaitDuration = 5f;
+    [Tooltip("Create monitors using this prefab.")]
+    [SerializeField] 
+    GameObject monitorPrefab;
+
+    [Tooltip("Use same scale as real using DPI.")]
+    [SerializeField] 
+    bool useRealScale = true;
+
+    [Tooltip("Use this sacle as width if useRealScale is false.")]
+    [SerializeField] 
+    float scale = 0.5f;
+
+    [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
+    [SerializeField] 
+    bool removeIfUnsupported = true;
+
+    [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
+    [SerializeField] 
+    float removeWaitDuration = 5f;
+
     bool hasMonitorUnsupportStateChecked = false;
     float removeWaitTimer_ = 0f;
 
@@ -96,10 +113,18 @@ public class MultipleMonitorCreator : MonoBehaviour
             var monitor = texture.monitor;
 
             // Set width / height
-            if (meshForwardDirection == MeshForwardDirection.Y) {
-                go.transform.localScale = new Vector3(monitor.widthMeter, go.transform.localScale.y, monitor.heightMeter);
+            float width, height;
+            if (useRealScale) {
+                width = monitor.widthMeter;
+                height = monitor.heightMeter;
             } else {
-                go.transform.localScale = new Vector3(monitor.widthMeter, monitor.heightMeter, go.transform.localScale.z);
+                width = scale * (monitor.isHorizontal ? 1f : monitor.aspect);
+                height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f);
+            }
+            if (meshForwardDirection == MeshForwardDirection.Y) {
+                go.transform.localScale = new Vector3(width, go.transform.localScale.y, height);
+            } else {
+                go.transform.localScale = new Vector3(width, height, go.transform.localScale.z);
             }
 
             // Set parent as this object
@@ -126,7 +151,8 @@ public class MultipleMonitorCreator : MonoBehaviour
         monitors_.Clear();
     }
 
-    void Recreate()
+    [ContextMenu("Recreate")]
+    public void Recreate()
     {
         Clear();
         Create();
