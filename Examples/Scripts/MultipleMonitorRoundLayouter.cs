@@ -3,6 +3,7 @@
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
     [SerializeField] float radius = 10f;
+    [SerializeField] float offsetAngle = 0f;
 
     void OnDisable()
     {
@@ -26,7 +27,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         radius = Mathf.Max(radius, (totalWidth + margin) / (2 * Mathf.PI));
         var totalAngle = totalWidth / radius;
 
-        float angle = -totalAngle / 2;
+        float angle = -totalAngle / 2 + offsetAngle * Mathf.Deg2Rad;
         foreach (var info in monitors) {
             var uddTex = info.uddTexture;
             var width = uddTex.monitor.widthMeter * (info.mesh.bounds.extents.x * 2f);
