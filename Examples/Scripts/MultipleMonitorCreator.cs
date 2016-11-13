@@ -8,13 +8,23 @@ public class MultipleMonitorCreator : MonoBehaviour
     [SerializeField] 
     GameObject monitorPrefab;
 
-    [Tooltip("Use same scale as real using DPI.")]
-    [SerializeField] 
-    bool useRealScale = true;
+    public enum ScaleMode
+    {
+        Real,
+        Fixed,
+        Pixel,
+    }
 
-    [Tooltip("Use this sacle as width if useRealScale is false.")]
+    [Tooltip("Real: DPI-based real scale \nFixed: Same width \nPixel: bigger if screen resolution is high.")]
+    [SerializeField] 
+    ScaleMode scaleMode = ScaleMode.Fixed;
+
+    [Tooltip("Use this sacle as width if scaleMode is Fixed.")]
     [SerializeField] 
     float scale = 0.5f;
+
+    [Tooltip("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
+    public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
 
     [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
     [SerializeField] 
@@ -24,11 +34,12 @@ public class MultipleMonitorCreator : MonoBehaviour
     [SerializeField] 
     float removeWaitDuration = 5f;
 
+    [Tooltip("Remove all childrens (for debug).")]
+    [SerializeField] 
+    bool removeChildrenWhenClear = true;
+
     bool hasMonitorUnsupportStateChecked = false;
     float removeWaitTimer_ = 0f;
-
-    [Tooltip("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
-    public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
 
     public class MonitorInfo
     {
@@ -113,13 +124,20 @@ public class MultipleMonitorCreator : MonoBehaviour
             var monitor = texture.monitor;
 
             // Set width / height
-            float width, height;
-            if (useRealScale) {
-                width = monitor.widthMeter;
-                height = monitor.heightMeter;
-            } else {
-                width = scale * (monitor.isHorizontal ? 1f : monitor.aspect);
-                height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f);
+            float width = 1f, height = 1f;
+            switch (scaleMode) {
+                case ScaleMode.Real:
+                    width = monitor.widthMeter;
+                    height = monitor.heightMeter;
+                    break;
+                case ScaleMode.Fixed:
+                    width = scale * (monitor.isHorizontal ? 1f : monitor.aspect);
+                    height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f);
+                    break;
+                case ScaleMode.Pixel:
+                    width = scale * (monitor.isHorizontal ? 1f : monitor.aspect) * ((float)monitor.width / 1920);
+                    height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f) * ((float)monitor.width / 1920);
+                    break;
             }
             if (meshForwardDirection == MeshForwardDirection.Y) {
                 go.transform.localScale = new Vector3(width, go.transform.localScale.y, height);
@@ -147,6 +165,11 @@ public class MultipleMonitorCreator : MonoBehaviour
     {
         foreach (var info in monitors_) {
             Destroy(info.gameObject);
+        }
+        if (removeChildrenWhenClear) {
+            for (int i = 0; i < transform.childCount; ++i) {
+                Destroy(transform.GetChild(i).gameObject);
+            }
         }
         monitors_.Clear();
     }
