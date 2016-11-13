@@ -13,22 +13,26 @@ public class Monitor
         switch (state)
         {
             case MonitorState.InvalidArg:
-                Debug.LogErrorFormat("[{0}:{1}] Invalid.", id, name);
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Invalid.", id, name);
                 break;
             case MonitorState.AccessDenied:
-                Debug.LogErrorFormat("[{0}:{1}] Access Denied.", id, name);
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Access Denied.", id, name);
                 break;
             case MonitorState.Unsupported:
-                Debug.LogErrorFormat("[{0}:{1}] Unsupported.", id, name);
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Unsupported.", id, name);
                 break;
             case MonitorState.SessionDisconnected:
-                Debug.LogErrorFormat("[{0}:{1}] Disconnected.", id, name);
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Disconnected.", id, name);
                 break;
             case MonitorState.NotSet:
-                Debug.LogErrorFormat("[{0}:{1}] Something wrong.", id, name);
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Something wrong.", id, name);
                 break;
             default:
                 break;
+        }
+
+        if (dpiX == 0 || dpiY == 0) {
+            Debug.LogWarningFormat("[uDD] {0}:{1} => Could not get DPI", id, name);
         }
     }
 
