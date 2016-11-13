@@ -35,6 +35,10 @@ public class MultipleMonitorCreator : MonoBehaviour
         if (removeIfUnsupported) {
             RemoveUnsupportedDisplayAfterRemoveTimer();
         }
+
+        if (uDesktopDuplication.Manager.monitorCount != monitors.Count) {
+            Recreate();
+        }
     }
 
     void OnEnable()

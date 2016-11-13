@@ -68,7 +68,7 @@ void MonitorManager::RequireReinitilization()
 
 void MonitorManager::Reinitialize()
 {
-    Debug::Log("Reinitialize()");
+    Debug::Log("MonitorManager::Reinitialize()");
     Initialize();
     SendMessageToUnity(Message::Reinitialized);
 }
