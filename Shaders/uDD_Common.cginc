@@ -92,18 +92,26 @@ inline fixed4 uddGetScreenTextureWithCursor(float2 uv)
     return color;
 }
 
-inline void uddBendVertex(inout float4 v, half radius, half width)
+inline void uddBendVertex(inout float4 v, half radius, half width, half thickness)
 {
-#if !defined(_BEND_OFF)
+#ifdef BEND_ON
     half angle = width * v.x / radius;
-    #ifdef _BEND_Y
+    #ifdef _FORWARD_Z
+    v.y *= thickness;
     radius -= v.y;
     v.y += radius * (1 - cos(angle));
-    #elif _BEND_Z
+    #elif _FORWARD_Y
+    v.z *= thickness;
     radius -= v.z;
     v.z += radius * (1 - cos(angle));
     #endif
     v.x = radius * sin(angle) / width;
+#else
+    #ifdef _FORWARD_Z
+    v.y *= thickness;
+    #elif _FORWARD_Y
+    v.z *= thickness;
+    #endif
 #endif
 }
 

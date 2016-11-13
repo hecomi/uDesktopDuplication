@@ -3,12 +3,12 @@
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
     [SerializeField] float radius = 10f;
-    [SerializeField] float offsetAngle = 0f;
+    [SerializeField][Range(-180f, 180f)] float offsetAngle = 0f;
 
     void OnDisable()
     {
         foreach (var info in creator_.monitors) {
-            info.uddTexture.bend = uDesktopDuplication.Texture.Bend.Off;
+            info.uddTexture.bend = false;
         }
     }
 
@@ -37,12 +37,10 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
             uddTex.transform.localRotation = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, Vector3.up) * info.originalRotation;
             angle += (width * 0.5f + margin) / radius;
 
-            if (creator_.meshForwardDirection == MultipleMonitorCreator.MeshForwardDirection.Y) {
-                uddTex.bend = uDesktopDuplication.Texture.Bend.Y;
-            } else {
-                uddTex.bend = uDesktopDuplication.Texture.Bend.Z;
-            }
+            uddTex.bend = true;
+            uddTex.meshForwardDirection = creator_.meshForwardDirection;
             uddTex.radius = radius;
+            uddTex.thickness = thickness;
             uddTex.width = uddTex.transform.localScale.x;
         }
     }

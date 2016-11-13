@@ -6,8 +6,10 @@ Properties
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
     _CursorTex ("Cursor Texture", 2D) = "white" {}
-    [KeywordEnum(Off, Y, Z)] _Bend("Bending", Int) = 0
-    [PowerSlider(10.0)] _Radius("Radius", Range(1, 100)) = 30
+    [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
+    [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
+    [PowerSlider(10.0)] _Radius("Bend Radius", Range(1, 100)) = 30
+    [PowerSlider(10.0)] _Thickness("Thickness", Range(0.01, 10)) = 1
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
@@ -26,11 +28,12 @@ CGINCLUDE
 
 half _Radius;
 half _Width;
+half _Thickness;
 
 v2f vert(appdata v)
 {
     v2f o;
-    uddBendVertex(v.vertex, _Radius, _Width);
+    uddBendVertex(v.vertex, _Radius, _Width, _Thickness);
     o.vertex = UnityObjectToClipPos(v.vertex);
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     return o;
