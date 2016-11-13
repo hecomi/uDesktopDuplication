@@ -12,22 +12,25 @@ public class Monitor
 
         switch (state)
         {
+            case MonitorState.Available:
+                break;
             case MonitorState.InvalidArg:
                 Debug.LogErrorFormat("[uDD] {0}:{1} => Invalid.", id, name);
                 break;
             case MonitorState.AccessDenied:
-                Debug.LogErrorFormat("[uDD] {0}:{1} => Access Denied.", id, name);
+                Debug.LogWarningFormat("[uDD] {0}:{1} => Access Denied.", id, name);
                 break;
             case MonitorState.Unsupported:
-                Debug.LogErrorFormat("[uDD] {0}:{1} => Unsupported.", id, name);
+                Debug.LogWarningFormat("[uDD] {0}:{1} => Unsupported.", id, name);
                 break;
             case MonitorState.SessionDisconnected:
-                Debug.LogErrorFormat("[uDD] {0}:{1} => Disconnected.", id, name);
+                Debug.LogWarningFormat("[uDD] {0}:{1} => Disconnected.", id, name);
                 break;
             case MonitorState.NotSet:
                 Debug.LogErrorFormat("[uDD] {0}:{1} => Something wrong.", id, name);
                 break;
             default:
+                Debug.LogErrorFormat("[uDD] {0}:{1} => Unknown error.", id, name);
                 break;
         }
 

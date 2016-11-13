@@ -37,6 +37,7 @@ public enum MonitorState
 	CurrentlyNotAvailable = 4,
 	SessionDisconnected = 5,
 	AccessLost = 6,
+    Unknown = 999,
 }
 
 public enum DebugMode
