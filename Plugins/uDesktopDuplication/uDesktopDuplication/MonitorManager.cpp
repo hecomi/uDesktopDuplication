@@ -9,6 +9,7 @@
 #include "IUnityGraphicsD3D11.h"
 
 #include "Common.h"
+#include "Debug.h"
 #include "Monitor.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
@@ -67,8 +68,33 @@ void MonitorManager::RequireReinitilization()
 
 void MonitorManager::Reinitialize()
 {
+    Debug::Log("Reinitialize()");
     Initialize();
     SendMessageToUnity(Message::Reinitialized);
+}
+
+
+void MonitorManager::CheckMonitorNumbers()
+{
+    ComPtr<IDXGIFactory1> factory;
+    CreateDXGIFactory1(IID_PPV_ARGS(&factory));
+
+    int id = 0;
+    ComPtr<IDXGIAdapter1> adapter;
+    for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
+    {
+        ComPtr<IDXGIOutput> output;
+        for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
+        {
+            id++;
+        }
+    }
+
+    if (GetMonitorCount() != id)
+    {
+        Debug::Log("Monitor number changed: ", GetMonitorCount(), " => ", id);
+        RequireReinitilization();
+    }
 }
 
 
@@ -84,6 +110,8 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 
 void MonitorManager::Update()
 {
+    CheckMonitorNumbers();
+
     if (isReinitializationRequired_)
     {
         Reinitialize();

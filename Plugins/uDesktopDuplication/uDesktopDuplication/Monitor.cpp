@@ -38,6 +38,9 @@ void Monitor::Initialize(IDXGIOutput* output)
         case S_OK:
             state_ = State::Available;
             Debug::Log("Monitor::Initialize() => OK.");
+            Debug::Log("    ID    : ", GetId());
+            Debug::Log("    Size  : (", GetWidth(), ", ", GetHeight(), ")");
+            Debug::Log("    DPI   : (", GetDpiX(), ", ", GetDpiY(), ")");
             break;
         case E_INVALIDARG:
             state_ = State::InvalidArg;
@@ -186,25 +189,25 @@ bool Monitor::IsPrimary() const
 
 int Monitor::GetLeft() const
 {
-    return outputDesc_.DesktopCoordinates.left;
+    return static_cast<int>(outputDesc_.DesktopCoordinates.left);
 }
 
 
 int Monitor::GetRight() const
 {
-    return outputDesc_.DesktopCoordinates.right;
+    return static_cast<int>(outputDesc_.DesktopCoordinates.right);
 }
 
 
 int Monitor::GetTop() const
 {
-    return outputDesc_.DesktopCoordinates.top;
+    return static_cast<int>(outputDesc_.DesktopCoordinates.top);
 }
 
 
 int Monitor::GetBottom() const
 {
-    return outputDesc_.DesktopCoordinates.bottom;
+    return static_cast<int>(outputDesc_.DesktopCoordinates.bottom);
 }
 
 

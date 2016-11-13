@@ -29,21 +29,24 @@ extern "C"
     {
         if (g_unity && !g_manager)
         {
-            g_manager = std::make_unique<MonitorManager>();
             Debug::Initialize();
+            g_manager = std::make_unique<MonitorManager>();
         }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
-        g_manager.reset();
+        if (g_manager)
+        {
+            g_manager.reset();
 
-        std::queue<Message> empty;
-        g_messages.swap(empty);
+            std::queue<Message> empty;
+            g_messages.swap(empty);
 
-        Debug::SetLogFunc(nullptr);
-        Debug::SetErrorFunc(nullptr);
-        Debug::Finalize();
+            Debug::SetLogFunc(nullptr);
+            Debug::SetErrorFunc(nullptr);
+            Debug::Finalize();
+        }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
