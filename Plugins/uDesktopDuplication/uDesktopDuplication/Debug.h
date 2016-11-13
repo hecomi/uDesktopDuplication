@@ -97,7 +97,7 @@ public:
     template <class Arg, class... RestArgs>
     static void Error(Arg&& arg, RestArgs&&... restArgs)
     {
-        Output("[uDD::Error] ");
+        Output("[uDD::Err] ");
         _Log(Level::Error, std::forward<Arg>(arg), std::forward<RestArgs>(restArgs)...);
     }
 

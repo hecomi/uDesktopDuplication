@@ -117,9 +117,22 @@ void Monitor::Render(UINT timeout)
         ComPtr<ID3D11Texture2D> texture;
         resource.As<ID3D11Texture2D>(&texture);
 
-        ComPtr<ID3D11DeviceContext> context;
-        GetDevice()->GetImmediateContext(&context);
-        context->CopyResource(unityTexture_, texture.Get());
+        D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
+        texture->GetDesc(&srcDesc);
+        texture->GetDesc(&dstDesc);
+        if (srcDesc.Width != dstDesc.Width ||
+            srcDesc.Height != dstDesc.Height)
+        {
+            Debug::Error("Monitor::Render() => Texture sizes are defferent.");
+            Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
+            Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
+        }
+        else
+        {
+            ComPtr<ID3D11DeviceContext> context;
+            GetDevice()->GetImmediateContext(&context);
+            context->CopyResource(unityTexture_, texture.Get());
+        }
     }
 
     cursor_->UpdateBuffer(frameInfo);
