@@ -25,16 +25,6 @@ Usage
 Attach `uDesktopDuplication/Texture` component to the target object, then its main texture will be replaced with the captured screen. Please see example scenes for more details.
 
 
-Version
--------
-| Data       | Version | Description                       |
-| ---------- | ------- | --------------------------------- |
-| 2016/10/28 |  1.0.0  | Support multiple screens.         |
-| 2016/10/27 |  0.0.3  | Support lienar color.             |
-| 2016/10/27 |  0.0.2  | Add mouse cursor / shaders.       |
-| 2016/10/27 |  0.0.1  | Initial commit.                   |
-
-
 Lisence
 -------
 The MIT License (MIT)
