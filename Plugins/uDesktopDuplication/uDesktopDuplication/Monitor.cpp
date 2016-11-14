@@ -18,6 +18,7 @@ Monitor::Monitor(int id)
 
 Monitor::~Monitor()
 {
+	deskDupl_->Release();
 }
 
 
@@ -118,25 +119,35 @@ void Monitor::Render(UINT timeout)
         switch (hr)
         {
             case DXGI_ERROR_ACCESS_LOST:
-                // If any monitor setting has changed (e.g. monitor size has changed),
-                // it is necessary to re-initialize monitors.
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
-                state_ = State::AccessLost;
-                break;
+			{
+				// If any monitor setting has changed (e.g. monitor size has changed),
+				// it is necessary to re-initialize monitors.
+				Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
+				state_ = State::AccessLost;
+				break;
+			}
             case DXGI_ERROR_WAIT_TIMEOUT:
-                // This often occurs when timeout value is small and it is not problem. 
-                // Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
-                break;
+			{
+				// This often occurs when timeout value is small and it is not problem. 
+				// Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
+				break;
+			}
             case DXGI_ERROR_INVALID_CALL:
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
-                break;
+			{
+				Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
+				break;
+			}
             case E_INVALIDARG:
-                Debug::Error("Monitor::Render() => E_INVALIDARG.");
-                break;
+			{
+				Debug::Error("Monitor::Render() => E_INVALIDARG.");
+				break;
+			}
             default:
-                state_ = State::Unknown;
-                Debug::Error("Monitor::Render() => Unknown Error.");
-                break;
+			{
+				state_ = State::Unknown;
+				Debug::Error("Monitor::Render() => Unknown Error.");
+				break;
+			}
         }
         return;
     }
@@ -159,11 +170,11 @@ void Monitor::Render(UINT timeout)
             Debug::Error("Monitor::Render() => Texture sizes are defferent.");
             Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
             Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
-            Debug::Log("    => Try modifying width/height using reported value from DDA.");
-			width_ = srcDesc.Width;
-			height_ = srcDesc.Height;
+            //Debug::Log("    => Try modifying width/height using reported value from DDA.");
+			//width_ = srcDesc.Width;
+			//height_ = srcDesc.Height;
 			state_ = MonitorState::TextureSizeInconsistent;
-			SendMessageToUnity(Message::TextureSizeChanged);
+			//SendMessageToUnity(Message::TextureSizeChanged);
         }
         else
         {

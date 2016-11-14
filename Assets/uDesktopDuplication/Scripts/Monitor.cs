@@ -203,7 +203,7 @@ public class Monitor
         set;
     }
 
-    private Texture2D errorTexture_;
+    private static Texture2D errorTexture;
     private static readonly string errorTexturePath = "uDesktopDuplication/Textures/NotAvailable";
 
     private Texture2D texture_;
@@ -212,8 +212,8 @@ public class Monitor
         get 
         { 
             if (!available) {
-                return errorTexture_ ?? 
-                    (errorTexture_ = Resources.Load<Texture2D>(errorTexturePath));   
+                return errorTexture ?? 
+                    (errorTexture = Resources.Load<Texture2D>(errorTexturePath));   
             }
             if (texture_ == null) {
                 CreateTexture();
@@ -245,11 +245,8 @@ public class Monitor
 
         if (texture_) {
             if (texture_.width != w || texture_.height != h) {
-                if (texture_) {
-                    Object.Destroy(texture_);
-                    texture_ = null;
-                }
-                shouldCreate = true;
+                Object.DestroyImmediate(texture_);
+                texture_ = null;
             } else { 
                 shouldCreate = false;
             }
