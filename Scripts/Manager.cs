@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace uDesktopDuplication
 {
@@ -113,7 +112,7 @@ public class Manager : MonoBehaviour
     }
 
     [ContextMenu("Reinitialize")]
-    void Reinitialize()
+    public void Reinitialize()
     {
         Debug.Log("[uDD] Reinitialize");
         Lib.Reinitialize();
@@ -152,9 +151,13 @@ public class Manager : MonoBehaviour
     {
         var message = Lib.PopMessage();
         while (message != Message.None) {
+            Debug.Log("[uDD] " + message);
             switch (message) {
                 case Message.Reinitialized:
                     ReinitializeMonitors();
+                    break;
+                case Message.TextureSizeChanged:
+                    RecreateTextures();
                     break;
                 default:
                     break;
@@ -195,15 +198,11 @@ public class Manager : MonoBehaviour
         }
     }
 
-    void WaitThenDo(System.Action func, float sec)
+    void RecreateTextures()
     {
-        StartCoroutine(_WaitThenDo(func, sec));
-    }
-
-    IEnumerator _WaitThenDo(System.Action func, float sec)
-    {
-        yield return new WaitForSeconds(sec);
-        func();
+        for (int i = 0; i < monitorCount; ++i) {
+            monitors[i].CreateTexture();
+        }
     }
 }
 

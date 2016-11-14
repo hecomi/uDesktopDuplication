@@ -29,6 +29,14 @@ public class UddSceneManager : MonoBehaviour
         } else if (Input.GetKeyDown(KeyCode.LeftArrow)) {
             Prev();
         }
+
+        if (Input.GetKeyDown(KeyCode.R) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))) {
+            uDesktopDuplication.Manager.instance.Reinitialize();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Application.Quit();
+        }
     }
 
     void Next()
@@ -45,6 +53,6 @@ public class UddSceneManager : MonoBehaviour
 
     void Load()
     {
-        SceneManager.LoadScene(scenes[sceneNo]);
+        SceneManager.LoadScene(scenes[Mathf.Clamp(sceneNo, 0, scenes.Length - 1)]);
     }
 }

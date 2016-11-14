@@ -9,6 +9,7 @@ public enum Message
 {
     None = -1,
     Reinitialized = 0,
+    TextureSizeChanged = 1,
 }
 
 public enum CursorShapeType
@@ -36,7 +37,8 @@ public enum MonitorState
 	Unsupported = 3,
 	CurrentlyNotAvailable = 4,
 	SessionDisconnected = 5,
-	AccessLost = 6,
+    AccessLost = 6,
+    TextureSizeInconsistent = 7,
     Unknown = 999,
 }
 
