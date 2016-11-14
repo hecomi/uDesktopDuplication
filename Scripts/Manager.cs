@@ -193,8 +193,9 @@ public class Manager : MonoBehaviour
         for (int i = 0; i < monitorCount; ++i) {
             if (i == monitors.Count) {
                 monitors.Add(new Monitor(i));
+            } else {
+                monitors[i].Reinitialize();
             }
-            monitors[i].Reinitialize();
         }
     }
 
