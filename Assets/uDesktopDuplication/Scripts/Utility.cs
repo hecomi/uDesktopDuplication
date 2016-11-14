@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Runtime.InteropServices;
 
 namespace uDesktopDuplication
@@ -24,6 +25,17 @@ public static class Utility
             p.y = -1;
         }
         return p;
+    }
+
+    public static void WaitThenDo(System.Action func, float sec)
+    {
+        Manager.instance.StartCoroutine(_WaitThenDo(func, sec));
+    }
+
+    public static IEnumerator _WaitThenDo(System.Action func, float sec)
+    {
+        yield return new WaitForSeconds(sec);
+        func();
     }
 }
 

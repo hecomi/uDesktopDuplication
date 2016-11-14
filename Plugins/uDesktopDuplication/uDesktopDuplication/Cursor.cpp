@@ -58,13 +58,12 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     // Get mouse pointer information
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
-    const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
-        apiBufferSize_,
-        reinterpret_cast<void*>(apiBuffer_.get()),
-        &bufferSize,
-        &shapeInfo);
-
-    if (FAILED(hr))
+    if (FAILED(
+		monitor_->GetDeskDupl()->GetFramePointerShape(
+			apiBufferSize_,
+			reinterpret_cast<void*>(apiBuffer_.get()),
+			&bufferSize,
+			&shapeInfo)))
     {
         Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
         apiBuffer_.reset();
@@ -105,8 +104,6 @@ void Cursor::UpdateTexture()
     // If masked, copy the desktop image and merge it with masked image.
     if (isMono || isColorMask)
     {
-        HRESULT hr;
-
         const auto mw = monitor_->GetWidth();
         const auto mh = monitor_->GetHeight();
         auto x = x_;
@@ -153,8 +150,7 @@ void Cursor::UpdateTexture()
         desc.MiscFlags = 0;
 
         ComPtr<ID3D11Texture2D> texture;
-        hr = GetDevice()->CreateTexture2D(&desc, nullptr, &texture);
-        if (FAILED(hr)) 
+        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture))) 
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
@@ -174,23 +170,19 @@ void Cursor::UpdateTexture()
             return;
         }
 
-        {
-            ComPtr<ID3D11DeviceContext> context;
-            GetDevice()->GetImmediateContext(&context);
-            context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
-        }
+		ComPtr<ID3D11DeviceContext> context;
+		GetDevice()->GetImmediateContext(&context);
+		context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
 
         ComPtr<IDXGISurface> surface;
-        hr = texture.As<IDXGISurface>(&surface);
-        if (FAILED(hr))
+        if (FAILED(texture.As<IDXGISurface>(&surface)))
         {
             Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
             return;
         }
 
         DXGI_MAPPED_RECT mappedSurface;
-        hr = surface->Map(&mappedSurface, DXGI_MAP_READ);
-        if (FAILED(hr))
+        if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
         {
             Debug::Error("Cursor::UpdateTexture() => surface->Map() failed.");
             return;
@@ -243,8 +235,7 @@ void Cursor::UpdateTexture()
             }
         }
 
-        hr = surface->Unmap();
-        if (FAILED(hr))
+        if (FAILED(surface->Unmap()))
         {
             return;
         }

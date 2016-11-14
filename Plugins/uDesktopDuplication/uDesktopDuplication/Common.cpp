@@ -1,13 +1,13 @@
 #pragma once
 
 #include <queue>
-#include <unordered_map>
-#include <iostream>
 #include <d3d11.h>
 
 #include "IUnityInterface.h"
 #include "IUnityGraphicsD3D11.h"
 #include "Common.h"
+
+using namespace Microsoft::WRL;
 
 
 extern IUnityInterfaces* g_unity;
@@ -21,7 +21,7 @@ IUnityInterfaces* GetUnity()
 }
 
 
-ID3D11Device* GetDevice()
+ComPtr<ID3D11Device> GetDevice()
 {
     return GetUnity()->Get<IUnityGraphicsD3D11>()->GetDevice();
 }

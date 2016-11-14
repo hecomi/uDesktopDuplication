@@ -28,4 +28,6 @@ void Debug::Finalize()
         Debug::Log("Stop");
         fs_.close();
     }
+	Debug::SetLogFunc(nullptr);
+	Debug::SetErrorFunc(nullptr);
 }

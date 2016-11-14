@@ -1,8 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <functional>
+#include <wrl/client.h>
 
 
 // Unity interface and ID3D11Device getters
@@ -10,7 +9,7 @@ struct IUnityInterfaces;
 IUnityInterfaces* GetUnity();
 
 struct ID3D11Device;
-ID3D11Device* GetDevice();
+Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
 
 
 // Manager getter
@@ -23,6 +22,7 @@ enum class Message
 {
     None = -1,
     Reinitialized = 0,
+	TextureSizeChanged = 1,
 };
 
 void SendMessageToUnity(Message message);

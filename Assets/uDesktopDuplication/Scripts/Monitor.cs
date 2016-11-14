@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Runtime.InteropServices;
 
 namespace uDesktopDuplication
 {
@@ -204,13 +203,17 @@ public class Monitor
         set;
     }
 
+    private Texture2D errorTexture_;
+    private static readonly string errorTexturePath = "uDesktopDuplication/Textures/NotAvailable";
+
     private Texture2D texture_;
     public Texture2D texture 
     {
         get 
         { 
             if (!available) {
-                return Resources.Load<Texture2D>("uDesktopDuplication/Textures/NotAvailable");   
+                return errorTexture_ ?? 
+                    (errorTexture_ = Resources.Load<Texture2D>(errorTexturePath));   
             }
             if (texture_ == null) {
                 CreateTexture();
@@ -242,7 +245,10 @@ public class Monitor
 
         if (texture_) {
             if (texture_.width != w || texture_.height != h) {
-                if (texture_) Object.DestroyImmediate(texture_);
+                if (texture_) {
+                    Object.Destroy(texture_);
+                    texture_ = null;
+                }
                 shouldCreate = true;
             } else { 
                 shouldCreate = false;

@@ -43,8 +43,6 @@ extern "C"
             std::queue<Message> empty;
             g_messages.swap(empty);
 
-            Debug::SetLogFunc(nullptr);
-            Debug::SetErrorFunc(nullptr);
             Debug::Finalize();
         }
     }
