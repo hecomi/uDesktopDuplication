@@ -18,7 +18,10 @@ Monitor::Monitor(int id)
 
 Monitor::~Monitor()
 {
-	deskDupl_->Release();
+	if (deskDupl_) 
+	{
+		deskDupl_->Release();
+	}
 }
 
 
@@ -110,7 +113,7 @@ void Monitor::Render(UINT timeout)
 {
     if (!deskDupl_) return;
 
-    ComPtr<IDXGIResource> resource;
+    IDXGIResource* resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
     const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
@@ -154,8 +157,8 @@ void Monitor::Render(UINT timeout)
 
     if (unityTexture_)
     {
-        ComPtr<ID3D11Texture2D> texture;
-		if (FAILED(resource.As<ID3D11Texture2D>(&texture)))
+        ID3D11Texture2D* texture;
+		if (FAILED(resource->QueryInterface<ID3D11Texture2D>(&texture)))
 		{
 			Debug::Error("Monitor::Render() => resource.As() failed.");
 			return;
@@ -178,9 +181,10 @@ void Monitor::Render(UINT timeout)
         }
         else
         {
-            ComPtr<ID3D11DeviceContext> context;
+            ID3D11DeviceContext* context;
             GetDevice()->GetImmediateContext(&context);
-            context->CopyResource(unityTexture_, texture.Get());
+            context->CopyResource(unityTexture_, texture);
+			context->Release();
         }
     }
 
@@ -218,7 +222,7 @@ ID3D11Texture2D* Monitor::GetUnityTexture() const
 }
 
 
-const ComPtr<IDXGIOutputDuplication>& Monitor::GetDeskDupl() 
+IDXGIOutputDuplication* Monitor::GetDeskDupl() 
 { 
     return deskDupl_; 
 }

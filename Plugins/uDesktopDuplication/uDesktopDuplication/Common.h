@@ -17,6 +17,17 @@ class MonitorManager;
 const std::unique_ptr<MonitorManager>& GetMonitorManager();
 
 
+template <class T>
+auto MakeUniqueWithReleaser(T* ptr)
+{
+    const auto deleter = [](T* ptr) 
+    { 
+        if (ptr != nullptr) ptr->Release();
+    };
+    return std::unique_ptr<T, decltype(deleter)>(ptr, deleter);
+}
+
+
 // Message is pooled and fetch from Unity.
 enum class Message
 {

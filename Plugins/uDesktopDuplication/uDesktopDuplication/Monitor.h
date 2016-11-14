@@ -48,7 +48,7 @@ public:
     int GetRotation() const;
     int GetDpiX() const;
     int GetDpiY() const;
-    const Microsoft::WRL::ComPtr<IDXGIOutputDuplication>& GetDeskDupl();
+    IDXGIOutputDuplication* GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
 
 private:
@@ -57,7 +57,7 @@ private:
 	int width_ = -1, height_ = -1;
     State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
-    Microsoft::WRL::ComPtr<IDXGIOutputDuplication> deskDupl_;
+    IDXGIOutputDuplication* deskDupl_ = nullptr;
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;
