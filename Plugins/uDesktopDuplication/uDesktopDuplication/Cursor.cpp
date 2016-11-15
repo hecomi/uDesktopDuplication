@@ -73,6 +73,7 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
         apiBuffer_.reset();
         apiBufferSize_ = 0;
+		return;
     }
 
     shapeInfo_ = shapeInfo;
@@ -104,7 +105,16 @@ void Cursor::UpdateTexture()
         bgra32BufferSize_ = bgraBufferSize;
         bgra32Buffer_ = std::make_unique<BYTE[]>(bgra32BufferSize_);
     }
-    if (!bgra32Buffer_) return;
+	
+	if (!bgra32Buffer_) 
+	{
+		return;
+	}
+
+	if (!apiBuffer_) 
+	{
+		return;
+	}
 
     // If masked, copy the desktop image and merge it with masked image.
     if (isMono || isColorMask)
