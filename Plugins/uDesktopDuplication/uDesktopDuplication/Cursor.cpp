@@ -54,19 +54,19 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         apiBuffer_ = std::make_unique<BYTE[]>(apiBufferSize_);
     }
 
-	if (!apiBuffer_) 
-	{
-		return;
-	}
+    if (!apiBuffer_) 
+    {
+        return;
+    }
 
     // Get mouse pointer information
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
-	const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
-		apiBufferSize_,
-		apiBuffer_.get(),
-		&bufferSize,
-		&shapeInfo);
+    const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
+        apiBufferSize_,
+        apiBuffer_.get(),
+        &bufferSize,
+        &shapeInfo);
 
     if (FAILED(hr))
     {
@@ -175,11 +175,11 @@ void Cursor::UpdateTexture()
             return;
         }
 
-		{
-			ComPtr<ID3D11DeviceContext> context;
-			GetDevice()->GetImmediateContext(&context);
-			context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
-		}
+        {
+            ComPtr<ID3D11DeviceContext> context;
+            GetDevice()->GetImmediateContext(&context);
+            context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+        }
 
         ComPtr<IDXGISurface> surface;
         if (FAILED(texture.As(&surface)))

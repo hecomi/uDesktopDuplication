@@ -33,7 +33,7 @@ enum class Message
 {
     None = -1,
     Reinitialized = 0,
-	TextureSizeChanged = 1,
+    TextureSizeChanged = 1,
 };
 
 void SendMessageToUnity(Message message);

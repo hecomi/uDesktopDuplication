@@ -87,34 +87,34 @@ private:
         Flush(level);
     }
 
-	static void OutputTime()
-	{
-		auto t = time(nullptr);
-		tm tm;
-		localtime_s(&tm, &t);
-		char buf[64];
-		strftime(buf, 64, "%F %T", &tm);
+    static void OutputTime()
+    {
+        auto t = time(nullptr);
+        tm tm;
+        localtime_s(&tm, &t);
+        char buf[64];
+        strftime(buf, 64, "%F %T", &tm);
         Output("[");;
         Output(buf);
         Output("]");
-	}
+    }
 
 public:
     template <class Arg, class... RestArgs>
     static void Log(Arg&& arg, RestArgs&&... restArgs)
     {
-		Output("[uDD::Log]");
-		OutputTime();
-		Output(" ");
+        Output("[uDD::Log]");
+        OutputTime();
+        Output(" ");
         _Log(Level::Log, std::forward<Arg>(arg), std::forward<RestArgs>(restArgs)...);
     }
 
     template <class Arg, class... RestArgs>
     static void Error(Arg&& arg, RestArgs&&... restArgs)
     {
-		Output("[uDD::Err]");
-		OutputTime();
-		Output(" ");
+        Output("[uDD::Err]");
+        OutputTime();
+        Output(" ");
         _Log(Level::Error, std::forward<Arg>(arg), std::forward<RestArgs>(restArgs)...);
     }
 

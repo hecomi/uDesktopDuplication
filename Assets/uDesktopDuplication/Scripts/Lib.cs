@@ -30,13 +30,13 @@ public enum MonitorRotation
 
 public enum MonitorState
 {
-	NotSet = -1,
-	Available = 0,
-	InvalidArg = 1,
-	AccessDenied = 2,
-	Unsupported = 3,
-	CurrentlyNotAvailable = 4,
-	SessionDisconnected = 5,
+    NotSet = -1,
+    Available = 0,
+    InvalidArg = 1,
+    AccessDenied = 2,
+    Unsupported = 3,
+    CurrentlyNotAvailable = 4,
+    SessionDisconnected = 5,
     AccessLost = 6,
     TextureSizeInconsistent = 7,
     Unknown = 999,

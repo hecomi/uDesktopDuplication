@@ -18,94 +18,94 @@ Monitor::Monitor(int id)
 
 Monitor::~Monitor()
 {
-	if (deskDupl_) 
-	{
-		deskDupl_->Release();
-		deskDupl_ = nullptr;
-	}
+    if (deskDupl_) 
+    {
+        deskDupl_->Release();
+        deskDupl_ = nullptr;
+    }
 }
 
 
 void Monitor::Initialize(IDXGIOutput* output)
 {
-	if (FAILED(output->GetDesc(&outputDesc_)))
-	{
-		Debug::Error("Monitor::Initialize() => IDXGIOutput::GetDesc() failed.");
-		return;
-	}
+    if (FAILED(output->GetDesc(&outputDesc_)))
+    {
+        Debug::Error("Monitor::Initialize() => IDXGIOutput::GetDesc() failed.");
+        return;
+    }
 
     monitorInfo_.cbSize = sizeof(MONITORINFOEX);
-	if (!GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_))
-	{
-		Debug::Error("Monitor::Initialize() => GetMonitorInfo() failed.");
-		return;
-	}
-	else
-	{
-		const auto rect = monitorInfo_.rcMonitor;
-		width_ = rect.right - rect.left;
-		height_ = rect.bottom - rect.top;
-	}
+    if (!GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_))
+    {
+        Debug::Error("Monitor::Initialize() => GetMonitorInfo() failed.");
+        return;
+    }
+    else
+    {
+        const auto rect = monitorInfo_.rcMonitor;
+        width_ = rect.right - rect.left;
+        height_ = rect.bottom - rect.top;
+    }
 
-	if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
-	{
-		Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
-		return;
-	}
+    if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
+    {
+        Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
+        return;
+    }
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
     switch (output1->DuplicateOutput(GetDevice().Get(), &deskDupl_))
     {
         case S_OK:
-		{
-			state_ = State::Available;
-			Debug::Log("Monitor::Initialize() => OK.");
-			Debug::Log("    ID    : ", GetId());
-			Debug::Log("    Size  : (", GetWidth(), ", ", GetHeight(), ")");
-			Debug::Log("    DPI   : (", GetDpiX(), ", ", GetDpiY(), ")");
-			break;
-		}
+        {
+            state_ = State::Available;
+            Debug::Log("Monitor::Initialize() => OK.");
+            Debug::Log("    ID    : ", GetId());
+            Debug::Log("    Size  : (", GetWidth(), ", ", GetHeight(), ")");
+            Debug::Log("    DPI   : (", GetDpiX(), ", ", GetDpiY(), ")");
+            break;
+        }
         case E_INVALIDARG:
-		{
-			state_ = State::InvalidArg;
-			Debug::Error("Monitor::Initialize() => Invalid arguments.");
-			break;
-		}
+        {
+            state_ = State::InvalidArg;
+            Debug::Error("Monitor::Initialize() => Invalid arguments.");
+            break;
+        }
         case E_ACCESSDENIED:
-		{
-			// For example, when the user presses Ctrl + Alt + Delete and the screen
-			// switches to admin screen, this error occurs. 
-			state_ = State::AccessDenied;
-			Debug::Error("Monitor::Initialize() => Access denied.");
-			break;
-		}
+        {
+            // For example, when the user presses Ctrl + Alt + Delete and the screen
+            // switches to admin screen, this error occurs. 
+            state_ = State::AccessDenied;
+            Debug::Error("Monitor::Initialize() => Access denied.");
+            break;
+        }
         case DXGI_ERROR_UNSUPPORTED:
-		{
-			// If the display adapter on the computer is running under the Microsoft Hybrid system,
-			// this error occurs.
-			state_ = State::Unsupported;
-			Debug::Error("Monitor::Initialize() => Unsupported display.");
-			break;
-		}
+        {
+            // If the display adapter on the computer is running under the Microsoft Hybrid system,
+            // this error occurs.
+            state_ = State::Unsupported;
+            Debug::Error("Monitor::Initialize() => Unsupported display.");
+            break;
+        }
         case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
-		{
-			// When other application use Desktop Duplication API, this error occurs.
-			state_ = State::CurrentlyNotAvailable;
-			Debug::Error("Monitor::Initialize() => Currently not available.");
-			break;
-		}
+        {
+            // When other application use Desktop Duplication API, this error occurs.
+            state_ = State::CurrentlyNotAvailable;
+            Debug::Error("Monitor::Initialize() => Currently not available.");
+            break;
+        }
         case DXGI_ERROR_SESSION_DISCONNECTED:
-		{
+        {
             state_ = State::SessionDisconnected;
             Debug::Error("Monitor::Initialize() => Session disconnected.");
-			break;
-		}
+            break;
+        }
         default:
-		{
-			state_ = State::Unknown;
-			Debug::Error("Monitor::Render() => Unknown Error.");
-			break;
-		}
+        {
+            state_ = State::Unknown;
+            Debug::Error("Monitor::Render() => Unknown Error.");
+            break;
+        }
     }
 }
 
@@ -123,35 +123,35 @@ void Monitor::Render(UINT timeout)
         switch (hr)
         {
             case DXGI_ERROR_ACCESS_LOST:
-			{
-				// If any monitor setting has changed (e.g. monitor size has changed),
-				// it is necessary to re-initialize monitors.
-				Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
-				state_ = State::AccessLost;
-				break;
-			}
+            {
+                // If any monitor setting has changed (e.g. monitor size has changed),
+                // it is necessary to re-initialize monitors.
+                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
+                state_ = State::AccessLost;
+                break;
+            }
             case DXGI_ERROR_WAIT_TIMEOUT:
-			{
-				// This often occurs when timeout value is small and it is not problem. 
-				// Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
-				break;
-			}
+            {
+                // This often occurs when timeout value is small and it is not problem. 
+                // Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
+                break;
+            }
             case DXGI_ERROR_INVALID_CALL:
-			{
-				Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
-				break;
-			}
+            {
+                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
+                break;
+            }
             case E_INVALIDARG:
-			{
-				Debug::Error("Monitor::Render() => E_INVALIDARG.");
-				break;
-			}
+            {
+                Debug::Error("Monitor::Render() => E_INVALIDARG.");
+                break;
+            }
             default:
-			{
-				state_ = State::Unknown;
-				Debug::Error("Monitor::Render() => Unknown Error.");
-				break;
-			}
+            {
+                state_ = State::Unknown;
+                Debug::Error("Monitor::Render() => Unknown Error.");
+                break;
+            }
         }
         return;
     }
@@ -159,11 +159,11 @@ void Monitor::Render(UINT timeout)
     if (unityTexture_)
     {
         ID3D11Texture2D* texture;
-		if (FAILED(resource.CopyTo(&texture)))
-		{
-			Debug::Error("Monitor::Render() => resource.As() failed.");
-			return;
-		}
+        if (FAILED(resource.CopyTo(&texture)))
+        {
+            Debug::Error("Monitor::Render() => resource.As() failed.");
+            return;
+        }
 
         D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
         texture->GetDesc(&srcDesc);
@@ -175,10 +175,10 @@ void Monitor::Render(UINT timeout)
             Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
             Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
             //Debug::Log("    => Try modifying width/height using reported value from DDA.");
-			//width_ = srcDesc.Width;
-			//height_ = srcDesc.Height;
-			state_ = MonitorState::TextureSizeInconsistent;
-			//SendMessageToUnity(Message::TextureSizeChanged);
+            //width_ = srcDesc.Width;
+            //height_ = srcDesc.Height;
+            state_ = MonitorState::TextureSizeInconsistent;
+            //SendMessageToUnity(Message::TextureSizeChanged);
         }
         else
         {
@@ -296,11 +296,11 @@ int Monitor::GetDpiY() const
 
 int Monitor::GetWidth() const
 {
-	return width_;
+    return width_;
 }
 
 
 int Monitor::GetHeight() const
 {
-	return height_;
+    return height_;
 }

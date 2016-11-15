@@ -35,11 +35,11 @@ void MonitorManager::Initialize()
 
     // Get factory
     ComPtr<IDXGIFactory1> factory;
-	if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
-	{
-		Debug::Error("MonitorManager::Initialize() => CreateDXGIFactory1() failed.");
-		return;
-	}
+    if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
+    {
+        Debug::Error("MonitorManager::Initialize() => CreateDXGIFactory1() failed.");
+        return;
+    }
 
     // Check all display adapters
     int id = 0;
@@ -47,7 +47,7 @@ void MonitorManager::Initialize()
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
         // Search the main monitor from all outputs
-		ComPtr<IDXGIOutput> output;
+        ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
@@ -81,24 +81,24 @@ void MonitorManager::Reinitialize()
 bool MonitorManager::HasMonitorCountChanged() const
 {
     ComPtr<IDXGIFactory1> factory;
-	if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
-	{
-		Debug::Error("MonitorManager::CheckMonitorConnection() => CreateDXGIFactory1() failed.");
-		return false;
-	}
+    if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
+    {
+        Debug::Error("MonitorManager::CheckMonitorConnection() => CreateDXGIFactory1() failed.");
+        return false;
+    }
 
     int id = 0;
     ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
-		ComPtr<IDXGIOutput> output;
+        ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             id++;
         }
     }
 
-	return monitors_.size() != id;
+    return monitors_.size() != id;
 }
 
 

@@ -17,7 +17,7 @@ enum class MonitorState
     CurrentlyNotAvailable = 4,
     SessionDisconnected = 5,
     AccessLost = 6,
-	TextureSizeInconsistent = 7,
+    TextureSizeInconsistent = 7,
     Unknown = 999,
 };
 
@@ -54,7 +54,7 @@ public:
 private:
     int id_ = -1;
     UINT dpiX_ = -1, dpiY_ = -1;
-	int width_ = -1, height_ = -1;
+    int width_ = -1, height_ = -1;
     State state_ = State::NotSet;
     std::unique_ptr<Cursor> cursor_;
     IDXGIOutputDuplication* deskDupl_ = nullptr;
