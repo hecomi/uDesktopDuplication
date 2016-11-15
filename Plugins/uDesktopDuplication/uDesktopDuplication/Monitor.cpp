@@ -159,7 +159,7 @@ void Monitor::Render(UINT timeout)
     if (unityTexture_)
     {
         ID3D11Texture2D* texture;
-		if (FAILED(resource->QueryInterface<ID3D11Texture2D>(&texture)))
+		if (FAILED(resource.CopyTo(&texture)))
 		{
 			Debug::Error("Monitor::Render() => resource.As() failed.");
 			return;
