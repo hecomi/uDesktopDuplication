@@ -3,7 +3,7 @@
 namespace uDesktopDuplication
 {
 
-[AddComponentMenu("uDesktopDuplication/Texture")] 
+[AddComponentMenu("uDesktopDuplication/Texture"), RequireComponent(typeof(Cursor))] 
 public class Texture : MonoBehaviour
 {
     private Monitor monitor_;
@@ -105,10 +105,7 @@ public class Texture : MonoBehaviour
 
     void Awake()
     {
-        if (!GetComponent<Cursor>())
-        {
-            gameObject.AddComponent<Cursor>();
-        }
+        AddCursorIfNotAttached();
     }
 
     void OnEnable()
@@ -128,6 +125,14 @@ public class Texture : MonoBehaviour
     {
         monitor.shouldBeUpdated = true;
         UpdateMaterial();
+    }
+
+    void AddCursorIfNotAttached()
+    {
+        if (!GetComponent<Cursor>())
+        {
+            gameObject.AddComponent<Cursor>();
+        }
     }
 
     void Reinitialize()

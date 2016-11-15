@@ -5,8 +5,7 @@ using System.Collections.Generic;
 namespace uDesktopDuplication
 {
 
-[AddComponentMenu("uDesktopDuplication/Cursor"), 
- RequireComponent(typeof(Texture))]
+[AddComponentMenu("uDesktopDuplication/Cursor"), RequireComponent(typeof(Texture))]
 public class Cursor : MonoBehaviour
 {
     [SerializeField] Vector2 modelScale = Vector2.one;
