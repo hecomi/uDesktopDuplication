@@ -38,6 +38,11 @@ public class Monitor
         }
     }
 
+    ~Monitor()
+    {
+        DestroyTexture();
+    }
+
     public int id 
     { 
         get; 
@@ -203,21 +208,24 @@ public class Monitor
         set;
     }
 
-    private static Texture2D errorTexture;
+    private static Texture2D errorTexture_;
     private static readonly string errorTexturePath = "uDesktopDuplication/Textures/NotAvailable";
+    private Texture2D errorTexture
+    {
+        get 
+        {
+            return errorTexture_ ?? 
+                (errorTexture_ = Resources.Load<Texture2D>(errorTexturePath));   
+        }
+    }
 
     private Texture2D texture_;
     public Texture2D texture 
     {
         get 
         { 
-            if (!available) {
-                return errorTexture ?? 
-                    (errorTexture = Resources.Load<Texture2D>(errorTexturePath));   
-            }
-            if (texture_ == null) {
-                CreateTexture();
-            }
+            if (!available) return errorTexture;
+            if (texture_ == null) CreateTextureIfNeeded();
             return texture_;
         }
     }
@@ -235,7 +243,7 @@ public class Monitor
         Lib.GetCursorTexture(id, ptr);
     }
 
-    public void CreateTexture()
+    public void CreateTextureIfNeeded()
     {
         if (!available) return;
 
@@ -243,13 +251,8 @@ public class Monitor
         var h = isHorizontal ? height : width;
         bool shouldCreate = true;
 
-        if (texture_) {
-            if (texture_.width != w || texture_.height != h) {
-                Object.DestroyImmediate(texture_);
-                texture_ = null;
-            } else { 
-                shouldCreate = false;
-            }
+        if (texture_ && texture_.width == w && texture_.height == h) {
+            shouldCreate = false;
         }
 
         if (w <= 0 || h <= 0) {
@@ -257,13 +260,29 @@ public class Monitor
         }
 
         if (shouldCreate) {
-            texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
+            CreateTexture();
+        }
+    }
+
+    void CreateTexture()
+    {
+        DestroyTexture();
+        var w = isHorizontal ? width : height;
+        var h = isHorizontal ? height : width;
+        texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
+    }
+
+    public void DestroyTexture()
+    {
+        if (texture_) {
+            Object.Destroy(texture_);
+            texture_ = null;
         }
     }
 
     public void Reinitialize()
     {
-        CreateTexture();
+        CreateTextureIfNeeded();
     }
 }
 

@@ -115,6 +115,12 @@ extern "C"
         return g_manager->GetMonitorCount();
     }
 
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API HasMonitorCountChanged()
+    {
+        if (!g_manager) return false;
+        return g_manager->HasMonitorCountChanged();
+    }
+
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorMonitorId()
     {
         if (!g_manager) return -1;

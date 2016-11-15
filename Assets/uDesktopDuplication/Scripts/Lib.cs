@@ -78,6 +78,8 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]
+    public static extern bool HasMonitorCountChanged();
+    [DllImport("uDesktopDuplication")]
     public static extern int GetCursorMonitorId();
     [DllImport("uDesktopDuplication")]
     public static extern int GetTotalWidth();

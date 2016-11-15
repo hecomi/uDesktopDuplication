@@ -16,7 +16,7 @@ public:
     explicit MonitorManager();
     ~MonitorManager();
     void Reinitialize();
-    void CheckMonitorNumbers();
+    bool HasMonitorCountChanged() const;
     void RequireReinitilization();
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
     int GetCursorMonitorId() const { return cursorMonitorId_; }

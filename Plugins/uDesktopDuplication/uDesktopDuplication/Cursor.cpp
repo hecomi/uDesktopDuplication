@@ -53,16 +53,21 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         apiBufferSize_ = frameInfo.PointerShapeBufferSize;
         apiBuffer_ = std::make_unique<BYTE[]>(apiBufferSize_);
     }
-    if (!apiBuffer_) return;
+
+	if (!apiBuffer_) 
+	{
+		return;
+	}
 
     // Get mouse pointer information
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
 	const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
 		apiBufferSize_,
-		reinterpret_cast<void*>(apiBuffer_.get()),
+		apiBuffer_.get(),
 		&bufferSize,
 		&shapeInfo);
+
     if (FAILED(hr))
     {
         Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
@@ -149,13 +154,12 @@ void Cursor::UpdateTexture()
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags = 0;
 
-        ID3D11Texture2D* texture;
+        ComPtr<ID3D11Texture2D> texture;
         if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture))) 
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
         }
-		const auto textureReleaser = MakeUniqueWithReleaser(texture);
 
         D3D11_BOX box;
         box.front = 0;
@@ -171,18 +175,18 @@ void Cursor::UpdateTexture()
             return;
         }
 
-		ID3D11DeviceContext* context;
-		GetDevice()->GetImmediateContext(&context);
-		context->CopySubresourceRegion(texture, 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
-		context->Release();
+		{
+			ComPtr<ID3D11DeviceContext> context;
+			GetDevice()->GetImmediateContext(&context);
+			context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+		}
 
-        IDXGISurface* surface;
-        if (FAILED(texture->QueryInterface<IDXGISurface>(&surface)))
+        ComPtr<IDXGISurface> surface;
+        if (FAILED(texture.As(&surface)))
         {
             Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
             return;
         }
-		const auto surfaceReleaser = MakeUniqueWithReleaser(surface);
 
         DXGI_MAPPED_RECT mappedSurface;
         if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
@@ -282,10 +286,9 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
         return;
     }
 
-    ID3D11DeviceContext* context;
+    ComPtr<ID3D11DeviceContext> context;
     GetDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), GetWidth() * 4, 0);
-	context->Release();
 }
 
 

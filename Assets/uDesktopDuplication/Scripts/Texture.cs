@@ -118,6 +118,11 @@ public class Texture : MonoBehaviour
         }
     }
 
+    void OnDisable()
+    {
+        Destroy(material);
+    }
+
     void Update()
     {
         monitor.shouldBeUpdated = true;

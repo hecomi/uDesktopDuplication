@@ -21,6 +21,7 @@ Monitor::~Monitor()
 	if (deskDupl_) 
 	{
 		deskDupl_->Release();
+		deskDupl_ = nullptr;
 	}
 }
 
@@ -113,7 +114,7 @@ void Monitor::Render(UINT timeout)
 {
     if (!deskDupl_) return;
 
-    IDXGIResource* resource;
+    ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
 
     const auto hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
@@ -181,10 +182,9 @@ void Monitor::Render(UINT timeout)
         }
         else
         {
-            ID3D11DeviceContext* context;
+            ComPtr<ID3D11DeviceContext> context;
             GetDevice()->GetImmediateContext(&context);
             context->CopyResource(unityTexture_, texture);
-			context->Release();
         }
     }
 

@@ -21,7 +21,7 @@ public class Loupe : MonoBehaviour
 
         // To get other monitor textures, set dirty flag.
         foreach (var target in uDesktopDuplication.Manager.monitors) {
-            target.CreateTexture();
+            target.CreateTextureIfNeeded();
             target.shouldBeUpdated = true;
         }
 

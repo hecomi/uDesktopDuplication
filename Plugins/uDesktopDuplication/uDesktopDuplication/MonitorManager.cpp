@@ -33,11 +33,8 @@ void MonitorManager::Initialize()
 {
     Finalize();
 
-    ComPtr<IDXGIFactory1> factory;
-    ComPtr<IDXGIAdapter1> adapter;
-	ComPtr<IDXGIOutput> output;
-
     // Get factory
+    ComPtr<IDXGIFactory1> factory;
 	if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
 	{
 		Debug::Error("MonitorManager::Initialize() => CreateDXGIFactory1() failed.");
@@ -46,9 +43,11 @@ void MonitorManager::Initialize()
 
     // Check all display adapters
     int id = 0;
+    ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
         // Search the main monitor from all outputs
+		ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
@@ -79,31 +78,27 @@ void MonitorManager::Reinitialize()
 }
 
 
-void MonitorManager::CheckMonitorNumbers()
+bool MonitorManager::HasMonitorCountChanged() const
 {
     ComPtr<IDXGIFactory1> factory;
-    ComPtr<IDXGIAdapter1> adapter;
-	ComPtr<IDXGIOutput> output;
-
 	if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
 	{
-		Debug::Error("MonitorManager::CheckMonitorNumbers() => CreateDXGIFactory1() failed.");
-		return;
+		Debug::Error("MonitorManager::CheckMonitorConnection() => CreateDXGIFactory1() failed.");
+		return false;
 	}
 
     int id = 0;
+    ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
+		ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             id++;
         }
     }
 
-    if (GetMonitorCount() != id)
-    {
-        RequireReinitilization();
-    }
+	return monitors_.size() != id;
 }
 
 
@@ -119,8 +114,6 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 
 void MonitorManager::Update()
 {
-    CheckMonitorNumbers();
-
     if (isReinitializationRequired_)
     {
         Reinitialize();
@@ -146,6 +139,7 @@ int MonitorManager::GetMonitorCount() const
     return static_cast<int>(monitors_.size());
 }
 
+
 int MonitorManager::GetTotalWidth() const
 {
     std::vector<int> lefts, rights;
@@ -158,6 +152,7 @@ int MonitorManager::GetTotalWidth() const
     const auto maxRight = *std::max_element(rights.begin(), rights.end());
     return maxRight - minLeft;
 }
+
 
 int MonitorManager::GetTotalHeight() const
 {
