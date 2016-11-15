@@ -116,17 +116,24 @@ public class Texture : MonoBehaviour
         if (monitor == null) {
             monitor = Manager.primary;
         }
+        Manager.onReinitialized += Reinitialize;
     }
 
     void OnDisable()
     {
-        Destroy(material);
+        Manager.onReinitialized -= Reinitialize;
     }
 
     void Update()
     {
         monitor.shouldBeUpdated = true;
         UpdateMaterial();
+    }
+
+    void Reinitialize()
+    {
+        // Monitor instance is released here when initialized.
+        monitor = Manager.GetMonitor(monitor.id);
     }
 
     void UpdateMaterial()
