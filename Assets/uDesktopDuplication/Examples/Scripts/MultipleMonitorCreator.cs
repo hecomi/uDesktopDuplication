@@ -19,7 +19,7 @@ public class MultipleMonitorCreator : MonoBehaviour
     [SerializeField] 
     ScaleMode scaleMode = ScaleMode.Fixed;
 
-    [Tooltip("Use this sacle as width if scaleMode is Fixed.")]
+    [Tooltip("Use this scale as width if scaleMode is Fixed.")]
     [SerializeField] 
     float scale = 0.5f;
 
