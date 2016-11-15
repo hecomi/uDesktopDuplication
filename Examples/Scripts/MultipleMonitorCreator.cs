@@ -112,7 +112,7 @@ public class MultipleMonitorCreator : MonoBehaviour
             go.name = "Monitor " + i;
 
             // Expand AABB
-            var mesh = go.GetComponent<MeshFilter>().mesh; // clone
+            var mesh = go.GetComponent<MeshFilter>().sharedMesh;
             var aabbScale = mesh.bounds.size;
             aabbScale.y = Mathf.Max(aabbScale.y, aabbScale.x);
             aabbScale.z = Mathf.Max(aabbScale.z, aabbScale.x);

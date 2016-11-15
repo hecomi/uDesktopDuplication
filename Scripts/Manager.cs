@@ -13,6 +13,19 @@ public class Manager : MonoBehaviour
         get { return CreateInstance(); }
     }
 
+    public static Manager CreateInstance()
+    {
+        if (instance_) {
+            return instance_;
+        }
+
+        var manager = FindObjectOfType<Manager>();
+        if (manager) return manager;
+
+        var go = new GameObject("uDesktopDuplicationManager");
+        return go.AddComponent<Manager>();
+    }
+
     private List<Monitor> monitors_ = new List<Monitor>();
     static public List<Monitor> monitors
     {
@@ -48,22 +61,6 @@ public class Manager : MonoBehaviour
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
 
-    public static Manager CreateInstance()
-    {
-        if (instance_) {
-            return instance_;
-        }
-
-        var manager = FindObjectOfType<Manager>();
-        if (manager) {
-            manager.Awake();
-            return manager;
-        }
-
-        var go = new GameObject("uDesktopDuplicationManager");
-        return go.AddComponent<Manager>();
-    }
-
     public static Monitor GetMonitor(int id)
     {
         if (id < 0 || id >= Manager.monitors.Count) {
@@ -77,18 +74,21 @@ public class Manager : MonoBehaviour
     {
         Lib.SetDebugMode(debugMode);
         Lib.InitializeUDD();
+        Lib.SetTimeout(desktopDuplicationApiTimeout);
 
-        if (instance_ != null) return;
+        if (instance_ != null) {
+            Destroy(gameObject);
+            return;
+        }
         instance_ = this;
 
         CreateMonitors();
-
-        Lib.SetTimeout(desktopDuplicationApiTimeout);
     }
 
     void OnApplicationQuit()
     {
         Lib.FinalizeUDD();
+        DestroyMonitors();
     }
 
     void OnEnable()
@@ -124,18 +124,28 @@ public class Manager : MonoBehaviour
 
     void ReinitializeIfNeeded()
     {
+        bool reinitializeNeeded = false;
+
         for (int i = 0; i < monitors.Count; ++i) {
             var monitor = monitors[i];
-            if (monitor.state == MonitorState.NotSet ||
+            if (
+                monitor.state == MonitorState.NotSet ||
                 monitor.state == MonitorState.AccessLost || 
                 monitor.state == MonitorState.AccessDenied ||
-                monitor.state == MonitorState.SessionDisconnected) {
-                if (!shouldReinitialize_) {
-                    shouldReinitialize_ = true;
-                    reinitializationTimer_ = 0f;
-                    break;
-                }
+                monitor.state == MonitorState.SessionDisconnected
+            ) {
+                reinitializeNeeded = true;
+                break;
             }
+        }
+
+        if (Lib.HasMonitorCountChanged()) {
+            reinitializeNeeded = true;
+        }
+
+        if (!shouldReinitialize_ && reinitializeNeeded) {
+            shouldReinitialize_ = true;
+            reinitializationTimer_ = 0f;
         }
 
         if (shouldReinitialize_) {
@@ -182,10 +192,18 @@ public class Manager : MonoBehaviour
 
     void CreateMonitors()
     {
-        monitors.Clear();
+        DestroyMonitors();
         for (int i = 0; i < monitorCount; ++i) {
             monitors.Add(new Monitor(i));
         }
+    }
+
+    void DestroyMonitors()
+    {
+        for (int i = 0; i < monitors.Count; ++i) {
+            monitors[i].DestroyTexture();
+        }
+        monitors.Clear();
     }
 
     void ReinitializeMonitors()
@@ -202,7 +220,7 @@ public class Manager : MonoBehaviour
     void RecreateTextures()
     {
         for (int i = 0; i < monitorCount; ++i) {
-            monitors[i].CreateTexture();
+            monitors[i].CreateTextureIfNeeded();
         }
     }
 }
