@@ -73,7 +73,7 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
         apiBuffer_.reset();
         apiBufferSize_ = 0;
-		return;
+        return;
     }
 
     shapeInfo_ = shapeInfo;
@@ -94,7 +94,7 @@ void Cursor::UpdateTexture()
     const auto cursorImageHeight = GetHeight();
     const auto cursorImagePitch = GetPitch();
 
-	// Captured area
+    // Captured area
     auto capturedImageWidth = cursorImageWidth;
     auto capturedImageHeight = cursorImageHeight;
 
@@ -105,24 +105,24 @@ void Cursor::UpdateTexture()
         bgra32BufferSize_ = bgraBufferSize;
         bgra32Buffer_ = std::make_unique<BYTE[]>(bgra32BufferSize_);
     }
-	
-	// Check buffers
-	if (!bgra32Buffer_ || !apiBuffer_) 
-	{
-		return;
-	}
+    
+    // Check buffers
+    if (!bgra32Buffer_ || !apiBuffer_) 
+    {
+        return;
+    }
 
     // If masked, copy the desktop image and merge it with masked image.
     if (isMono || isColorMask)
     {
         const auto monitorWidth = monitor_->GetWidth();
         const auto monitorHeight = monitor_->GetHeight();
-		const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
-		const auto isVertical = 
-			monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
-			monitorRot == DXGI_MODE_ROTATION_ROTATE270;
-		const auto desktopImageWidth  = !isVertical ? monitorWidth  : monitorHeight;
-		const auto desktopImageHeight = !isVertical ? monitorHeight : monitorWidth;
+        const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
+        const auto isVertical = 
+            monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
+            monitorRot == DXGI_MODE_ROTATION_ROTATE270;
+        const auto desktopImageWidth  = !isVertical ? monitorWidth  : monitorHeight;
+        const auto desktopImageHeight = !isVertical ? monitorHeight : monitorWidth;
 
         auto x = x_;
         auto y = y_;
@@ -158,56 +158,56 @@ void Cursor::UpdateTexture()
         box.front = 0;
         box.back = 1;
 
-		switch (monitorRot)
-		{
-			case DXGI_MODE_ROTATION_ROTATE90:
-			{
-				box.left   = y;
-				box.top    = monitorWidth - x - capturedImageWidth;
-				box.right  = y + capturedImageWidth;
-				box.bottom = monitorWidth - x;
-				break;
-			}
-			case DXGI_MODE_ROTATION_ROTATE180:
-			{
-				box.left   = monitorWidth - x - capturedImageWidth;
-				box.top    = monitorHeight - y - capturedImageHeight;
-				box.right  = monitorWidth - x;
-				box.bottom = monitorHeight - y;
-				break;
-			}
-			case DXGI_MODE_ROTATION_ROTATE270:
-			{
-				box.left   = monitorHeight - y - capturedImageHeight;
-				box.top    = x;
-				box.right  = monitorHeight - y;
-				box.bottom = x + capturedImageWidth;
-				break;
-			}
-			case DXGI_MODE_ROTATION_IDENTITY:
-			case DXGI_MODE_ROTATION_UNSPECIFIED:
-			{
-				box.left   = x;
-				box.top    = y;
-				box.right  = x + capturedImageWidth;
-				box.bottom = y + capturedImageHeight;
-				break;
-			}
-		}
+        switch (monitorRot)
+        {
+            case DXGI_MODE_ROTATION_ROTATE90:
+            {
+                box.left   = y;
+                box.top    = monitorWidth - x - capturedImageWidth;
+                box.right  = y + capturedImageWidth;
+                box.bottom = monitorWidth - x;
+                break;
+            }
+            case DXGI_MODE_ROTATION_ROTATE180:
+            {
+                box.left   = monitorWidth - x - capturedImageWidth;
+                box.top    = monitorHeight - y - capturedImageHeight;
+                box.right  = monitorWidth - x;
+                box.bottom = monitorHeight - y;
+                break;
+            }
+            case DXGI_MODE_ROTATION_ROTATE270:
+            {
+                box.left   = monitorHeight - y - capturedImageHeight;
+                box.top    = x;
+                box.right  = monitorHeight - y;
+                box.bottom = x + capturedImageWidth;
+                break;
+            }
+            case DXGI_MODE_ROTATION_IDENTITY:
+            case DXGI_MODE_ROTATION_UNSPECIFIED:
+            {
+                box.left   = x;
+                box.top    = y;
+                box.right  = x + capturedImageWidth;
+                box.bottom = y + capturedImageHeight;
+                break;
+            }
+        }
 
-		if (box.left   <  0 || 
-			box.top    <  0 || 
-			box.right  >= static_cast<UINT>(desktopImageWidth) || 
-			box.bottom >= static_cast<UINT>(desktopImageHeight))
-		{
-			Debug::Error("Cursor::UpdateTexture() => box is out of area.");
-			Debug::Error(
-				"    ",
-				"(", box.left, ", ", box.top, ")", 
-				" ~ (", box.right, ", ", box.bottom, ") > ",
-				"(", desktopImageWidth, ", ", desktopImageHeight, ")");
-			return;
-		}
+        if (box.left   <  0 || 
+            box.top    <  0 || 
+            box.right  >= static_cast<UINT>(desktopImageWidth) || 
+            box.bottom >= static_cast<UINT>(desktopImageHeight))
+        {
+            Debug::Error("Cursor::UpdateTexture() => box is out of area.");
+            Debug::Error(
+                "    ",
+                "(", box.left, ", ", box.top, ")", 
+                " ~ (", box.right, ", ", box.bottom, ") > ",
+                "(", desktopImageWidth, ", ", desktopImageHeight, ")");
+            return;
+        }
 
         if (monitor_->GetUnityTexture() == nullptr) 
         {
@@ -259,26 +259,26 @@ void Cursor::UpdateTexture()
         const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
         const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
 
-		// Take the monitor orientation into consideration.
-		const auto getDesktop32 = [&](int col, int row)
-		{
-			switch (monitorRot)
-			{
-				case DXGI_MODE_ROTATION_ROTATE90:
-					return desktop32[(capturedImageWidth - 1 - col) * desktopPitch + row];
-					break;
-				case DXGI_MODE_ROTATION_ROTATE180:
-					return desktop32[(capturedImageHeight - 1 - row) * desktopPitch + (capturedImageWidth - 1 - col)];
-					break;
-				case DXGI_MODE_ROTATION_ROTATE270:
-					return desktop32[col * desktopPitch + (capturedImageHeight - 1 - row)];
-					break;
-				case DXGI_MODE_ROTATION_IDENTITY:
-				case DXGI_MODE_ROTATION_UNSPECIFIED:
-					return desktop32[row * desktopPitch + col];
-					break;
-			}
-		};
+        // Take the monitor orientation into consideration.
+        const auto getDesktop32 = [&](int col, int row)
+        {
+            switch (monitorRot)
+            {
+                case DXGI_MODE_ROTATION_ROTATE90:
+                    return desktop32[(capturedImageWidth - 1 - col) * desktopPitch + row];
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE180:
+                    return desktop32[(capturedImageHeight - 1 - row) * desktopPitch + (capturedImageWidth - 1 - col)];
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE270:
+                    return desktop32[col * desktopPitch + (capturedImageHeight - 1 - row)];
+                    break;
+                case DXGI_MODE_ROTATION_IDENTITY:
+                case DXGI_MODE_ROTATION_UNSPECIFIED:
+                    return desktop32[row * desktopPitch + col];
+                    break;
+            }
+        };
 
         // Access RGBA values at the same time
         auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.get());
