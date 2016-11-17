@@ -36,25 +36,47 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
     {
-        if (g_manager)
-        {
-            g_manager.reset();
+		if (!g_manager) return;
 
-            std::queue<Message> empty;
-            g_messages.swap(empty);
+		g_manager.reset();
 
-            Debug::Finalize();
-        }
+		std::queue<Message> empty;
+		g_messages.swap(empty);
+
+		Debug::Finalize();
     }
+
+	void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType event)
+	{
+		switch (event)
+		{
+			case kUnityGfxDeviceEventInitialize:
+			{
+				InitializeUDD();
+				break;
+			}
+			case kUnityGfxDeviceEventShutdown:
+			{
+				FinalizeUDD();
+				break;
+			}
+		}
+	}
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
     {
         g_unity = unityInterfaces;
         InitializeUDD();
+
+		auto unityGraphics = g_unity->Get<IUnityGraphics>();
+		unityGraphics->RegisterDeviceEventCallback(OnGraphicsDeviceEvent);
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
+		auto unityGraphics = g_unity->Get<IUnityGraphics>();
+		unityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
+
         FinalizeUDD();
         g_unity = nullptr;
     }
