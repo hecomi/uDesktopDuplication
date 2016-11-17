@@ -4,9 +4,9 @@
 public class MultipleMonitorLayouter : MonoBehaviour
 {
     protected MultipleMonitorCreator creator_;
-    [SerializeField] bool updateEveryFrame = true;
-    [SerializeField] protected float margin = 0.1f;
-    [SerializeField][Range(0f, 10f)] protected float thickness = 1f;
+    public bool updateEveryFrame = true;
+    public float margin = 0.1f;
+    [Range(0f, 10f)] public float thickness = 1f;
 
     void Start()
     {
