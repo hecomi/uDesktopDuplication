@@ -13,9 +13,11 @@ public class Texture : MonoBehaviour
         set 
         { 
             monitor_ = value;
-            material = GetComponent<Renderer>().material; // clone
-            material.mainTexture = monitor_.texture;
-            material.SetFloat("_Width", transform.localScale.x);
+            if (monitor_ != null) {
+                material = GetComponent<Renderer>().material; // clone
+                material.mainTexture = monitor_.texture;
+                material.SetFloat("_Width", transform.localScale.x);
+            }
         }
     }
 
