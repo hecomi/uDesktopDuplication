@@ -17,6 +17,17 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         var monitors = creator_.monitors;
         var n = monitors.Count;
 
+        // keep the local scale z of monitors as 1 to bend them correctly.
+        foreach (var info in monitors) {
+            var scale = info.gameObject.transform.localScale;
+            scale.z = 1f;
+            info.gameObject.transform.localScale = scale;
+        }
+
+        // keep thicness plus value.
+        thickness = Mathf.Max(thickness, 0f);
+
+        // calculate total width
         var totalWidth = 0f;
         foreach (var info in monitors) {
             var width = info.gameObject.transform.localScale.x * (info.mesh.bounds.extents.x * 2f);
@@ -24,9 +35,13 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         }
         totalWidth += margin * (n - 1);
 
+        // expand radius if total width is larger than the circumference.
         radius = Mathf.Max(radius, (totalWidth + margin) / (2 * Mathf.PI));
+
+        // total angle of monitors
         var totalAngle = totalWidth / radius;
 
+        // layout
         float angle = -totalAngle / 2;
         var offsetRot = Quaternion.Euler(offsetAngle);
         foreach (var info in monitors) {
@@ -53,7 +68,12 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
     protected override void Update()
     {
         base.Update();
+        DebugDraw();
+    }
 
+    void DebugDraw()
+    {
+        // draw the circumference in the scene view.
         var scale = transform.localScale.x;
         var center = transform.position - Vector3.forward * radius * scale;
         for (int i = 0; i < 100; ++i) {
