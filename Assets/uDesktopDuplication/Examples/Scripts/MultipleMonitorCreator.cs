@@ -5,8 +5,7 @@ using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 public class MultipleMonitorCreator : MonoBehaviour
 {
     [Tooltip("Create monitors using this prefab.")]
-    [SerializeField] 
-    GameObject monitorPrefab;
+    public GameObject monitorPrefab;
 
     public enum ScaleMode
     {
@@ -16,29 +15,24 @@ public class MultipleMonitorCreator : MonoBehaviour
     }
 
     [Tooltip("Real: DPI-based real scale \nFixed: Same width \nPixel: bigger if screen resolution is high.")]
-    [SerializeField] 
-    ScaleMode scaleMode = ScaleMode.Fixed;
+    public ScaleMode scaleMode = ScaleMode.Fixed;
 
     [Tooltip("Use this scale as width if scaleMode is Fixed.")]
-    [SerializeField] 
-    float scale = 0.5f;
+    public float scale = 0.5f;
 
     [Tooltip("Please specify the surface direction of the mesh (e.g. Plane => Y.)")]
     public MeshForwardDirection meshForwardDirection = MeshForwardDirection.Z;
 
     [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
-    [SerializeField] 
-    bool removeIfUnsupported = true;
+    public bool removeIfUnsupported = true;
 
     [Tooltip("Remove unsupported monitors automatically after removeWaitDuration.")]
-    [SerializeField] 
-    float removeWaitDuration = 5f;
+    public float removeWaitDuration = 5f;
 
     [Tooltip("Remove all childrens (for debug).")]
-    [SerializeField] 
-    bool removeChildrenWhenClear = true;
+    public bool removeChildrenWhenClear = true;
 
-    bool hasMonitorUnsupportStateChecked = false;
+    bool hasMonitorUnsupportStateChecked_ = false;
     float removeWaitTimer_ = 0f;
 
     public class MonitorInfo
@@ -81,10 +75,10 @@ public class MultipleMonitorCreator : MonoBehaviour
 
     void RemoveUnsupportedDisplayAfterRemoveTimer()
     {
-        if (!hasMonitorUnsupportStateChecked) {
+        if (!hasMonitorUnsupportStateChecked_) {
             removeWaitTimer_ += Time.deltaTime;
             if (removeWaitTimer_ > removeWaitDuration) {
-                hasMonitorUnsupportStateChecked = true;
+                hasMonitorUnsupportStateChecked_ = true;
                 foreach (var info in monitors_) {
                     if (info.uddTexture.monitor.state == uDesktopDuplication.MonitorState.Unsupported) {
                         Destroy(info.gameObject);
@@ -97,7 +91,7 @@ public class MultipleMonitorCreator : MonoBehaviour
 
     void ResetRemoveTimer()
     {
-        hasMonitorUnsupportStateChecked = false;
+        hasMonitorUnsupportStateChecked_ = false;
         removeWaitTimer_ = 0f;
     }
 

@@ -2,8 +2,8 @@
 
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
-    [SerializeField] float radius = 10f;
-    [SerializeField] Vector3 offsetAngle = Vector3.zero;
+    public float radius = 10f;
+    public Vector3 offsetAngle = Vector3.zero;
 
     void OnDisable()
     {
