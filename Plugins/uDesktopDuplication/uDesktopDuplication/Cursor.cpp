@@ -185,8 +185,8 @@ void Cursor::UpdateTexture()
 
         if (box.left   <  0 || 
             box.top    <  0 || 
-            box.right  >= static_cast<UINT>(desktopImageWidth) || 
-            box.bottom >= static_cast<UINT>(desktopImageHeight))
+            box.right  > static_cast<UINT>(desktopImageWidth) || 
+            box.bottom > static_cast<UINT>(desktopImageHeight))
         {
             Debug::Error("Cursor::UpdateTexture() => box is out of area.");
             Debug::Error(
