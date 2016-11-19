@@ -109,7 +109,6 @@ public class GazePointAnalyzer : MonoBehaviour
                 coord += center * weight;
                 totalWeights += weight;
             }
-            var n = monitor.dirtyRectCount;
             coord /= totalWeights;
             filter = dirtyRectFilter;
         } 
