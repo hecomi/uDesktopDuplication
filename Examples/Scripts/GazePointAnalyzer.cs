@@ -86,7 +86,6 @@ public class GazePointAnalyzer : MonoBehaviour
             }
             coord /= monitor.moveRectCount;
             filter = moveRectFilter;
-            Debug.Log("Move Rect");
         } 
         // mouse
         else if (
