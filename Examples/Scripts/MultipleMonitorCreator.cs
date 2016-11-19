@@ -35,16 +35,26 @@ public class MultipleMonitorCreator : MonoBehaviour
     bool hasMonitorUnsupportStateChecked_ = false;
     float removeWaitTimer_ = 0f;
 
+    public class SavedMonitorInfo
+    {
+        public float widthScale = 1f;
+        public float heightScale = 1f;
+    }
+
     public class MonitorInfo
     {
         public GameObject gameObject { get; set; }
         public Quaternion originalRotation { get; set; }
+        public Vector3 originalLocalScale { get; set; }
         public uDesktopDuplication.Texture uddTexture { get; set; }
         public Mesh mesh { get; set; }
     }
 
     private List<MonitorInfo> monitors_ = new List<MonitorInfo>();
     public List<MonitorInfo> monitors { get { return monitors_; } }
+
+    private List<SavedMonitorInfo> savedInfoList_ = new List<SavedMonitorInfo>();
+    public List<SavedMonitorInfo> savedInfoList { get { return savedInfoList_; } }
 
     void Start()
     {
@@ -105,6 +115,12 @@ public class MultipleMonitorCreator : MonoBehaviour
             var go = Instantiate(monitorPrefab);
             go.name = "Monitor " + i;
 
+            // Saved infomation
+            if (savedInfoList.Count == i) {
+               savedInfoList.Add(new SavedMonitorInfo());
+            }
+            var savedInfo = savedInfoList[i];
+
             // Expand AABB
             var mesh = go.GetComponent<MeshFilter>().mesh; // clone
             var aabbScale = mesh.bounds.size;
@@ -133,6 +149,10 @@ public class MultipleMonitorCreator : MonoBehaviour
                     height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f) * ((float)monitor.width / 1920);
                     break;
             }
+
+            width *= savedInfo.widthScale;
+            height *= savedInfo.heightScale;
+
             if (meshForwardDirection == MeshForwardDirection.Y) {
                 go.transform.localScale = new Vector3(width, go.transform.localScale.y, height);
             } else {
@@ -143,12 +163,15 @@ public class MultipleMonitorCreator : MonoBehaviour
             go.transform.SetParent(transform);
 
             // Save
-            var info = new MonitorInfo();
-            info.gameObject = go;
-            info.originalRotation = go.transform.rotation;
-            info.uddTexture = texture;
-            info.mesh = mesh;
-            monitors_.Add(info);
+            {
+                var info = new MonitorInfo();
+                info.gameObject = go;
+                info.originalRotation = go.transform.rotation;
+                info.originalLocalScale = go.transform.localScale;
+                info.uddTexture = texture;
+                info.mesh = mesh;
+                monitors.Add(info);
+            }
         }
 
         // Sort monitors in coordinate order
