@@ -125,8 +125,8 @@ public class MultipleMonitorCreator : MonoBehaviour
                     height = monitor.heightMeter;
                     break;
                 case ScaleMode.Fixed:
-                    width = scale * (monitor.isHorizontal ? 1f : monitor.aspect);
-                    height = scale * (monitor.isHorizontal ? 1f / monitor.aspect : 1f);
+                    width = scale * (monitor.isHorizontal ? monitor.aspect : 1f);
+                    height = scale * (monitor.isHorizontal ? 1f : 1f / monitor.aspect);
                     break;
                 case ScaleMode.Pixel:
                     width = scale * (monitor.isHorizontal ? 1f : monitor.aspect) * ((float)monitor.width / 1920);
