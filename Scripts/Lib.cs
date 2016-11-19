@@ -50,6 +50,26 @@ public enum DebugMode
     UnityLog = 2, /* currently has bug when app exits. */
 }
 
+[StructLayout(LayoutKind.Sequential)]
+public struct RECT
+{
+    [MarshalAs(UnmanagedType.I4)]
+    public int left;
+    [MarshalAs(UnmanagedType.I4)]
+    public int top;
+    [MarshalAs(UnmanagedType.I4)]
+    public int right;
+    [MarshalAs(UnmanagedType.I4)]
+    public int bottom;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct DXGI_OUTDUPL_MOVE_RECT
+{
+    public RECT source;
+    public RECT destination;
+}
+
 public static class Lib
 {
     public delegate void MessageHandler(Message message);
@@ -134,12 +154,46 @@ public static class Lib
     public static extern void GetCursorTexture(int id, System.IntPtr ptr);
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetMoveRectCount(int id);
+    [DllImport("uDesktopDuplication", EntryPoint = "GetMoveRects")]
+    private static extern IntPtr GetMoveRects_Internal(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetDirtyRectCount(int id);
+    [DllImport("uDesktopDuplication", EntryPoint = "GetDirtyRects")]
+    private static extern IntPtr GetDirtyRects_Internal(int id);
 
     public static string GetName(int id)
     {
         var buf = new StringBuilder(32);
         GetName(id, buf, buf.Capacity);
         return buf.ToString();
+    }
+
+    public static DXGI_OUTDUPL_MOVE_RECT[] GetMoveRects(int id)
+    {
+        var count = GetMoveRectCount(id);
+        var rects = new DXGI_OUTDUPL_MOVE_RECT[count];
+        var ptr = GetMoveRects_Internal(id);
+        var size = Marshal.SizeOf(typeof(DXGI_OUTDUPL_MOVE_RECT));
+        for (int i = 0; i < count; ++i) {
+            var data = new IntPtr(ptr.ToInt64() + size * i);
+            rects[i] = (DXGI_OUTDUPL_MOVE_RECT)Marshal.PtrToStructure(data, typeof(DXGI_OUTDUPL_MOVE_RECT));
+        }
+        return rects;
+    }
+
+    public static RECT[] GetDirtyRects(int id)
+    {
+        var count = GetDirtyRectCount(id);
+        var rects = new RECT[count];
+        var ptr = GetDirtyRects_Internal(id);
+        var size = Marshal.SizeOf(typeof(RECT));
+        for (int i = 0; i < count; ++i) {
+            var data = new IntPtr(ptr.ToInt64() + size * i);
+            rects[i] = (RECT)Marshal.PtrToStructure(data, typeof(RECT));
+        }
+        return rects;
     }
 }
 

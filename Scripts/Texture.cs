@@ -69,13 +69,13 @@ public class Texture : MonoBehaviour
             switch (value) {
                 case MeshForwardDirection.Y:
                     material.SetInt("_Forward", 0);
-                    material.EnableKeyword("_BEND_Y");
-                    material.DisableKeyword("_BEND_Z");
+                    material.EnableKeyword("_FORWARD_Y");
+                    material.DisableKeyword("_FORWARD_Z");
                     break;
                 case MeshForwardDirection.Z:
                     material.SetInt("_Forward", 1);
-                    material.DisableKeyword("_BEND_Y");
-                    material.EnableKeyword("_BEND_Z");
+                    material.DisableKeyword("_FORWARD_Y");
+                    material.EnableKeyword("_FORWARD_Z");
                     break;
             }
         }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
@@ -20,7 +21,11 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
         // keep the local scale z of monitors as 1 to bend them correctly.
         foreach (var info in monitors) {
             var scale = info.gameObject.transform.localScale;
-            scale.z = 1f;
+            if (creator_.meshForwardDirection == MeshForwardDirection.Y) {
+                scale.y = 1f;
+            } else {
+                scale.z = 1f;
+            }
             info.gameObject.transform.localScale = scale;
         }
 
