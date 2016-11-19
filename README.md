@@ -1,6 +1,9 @@
 uDesktopDuplication
 ===================
 
+![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)
+![Build Status](http://unitybuildbadge.azurewebsites.net/api/status/7566d616-2916-4c99-bb14-e7ab9501cf7e)
+
 **uDesktopDuplication** is an Unity asset to use the realtime screen capture as `Texture2D` using Desktop Duplication API.
 
 
