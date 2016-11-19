@@ -1,6 +1,5 @@
 #include <d3d11.h>
 #include <wrl/client.h>
-#include "Common.h"
 #include "Debug.h"
 #include "MonitorManager.h"
 #include "Monitor.h"
@@ -47,13 +46,7 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
         return;
     }
 
-    // Increase the buffer size if needed
-    if (frameInfo.PointerShapeBufferSize > apiBufferSize_)
-    {
-        apiBufferSize_ = frameInfo.PointerShapeBufferSize;
-        apiBuffer_ = std::make_unique<BYTE[]>(apiBufferSize_);
-    }
-
+	apiBuffer_.ExpandIfNeeded(frameInfo.PointerShapeBufferSize);
     if (!apiBuffer_) 
     {
         return;
@@ -63,16 +56,15 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
     const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
-        apiBufferSize_,
-        apiBuffer_.get(),
+        apiBuffer_.Size(),
+        apiBuffer_.Get(),
         &bufferSize,
         &shapeInfo);
 
     if (FAILED(hr))
     {
         Debug::Error("Cursor::UpdateBuffer() => GetFramePointerShape() failed.");
-        apiBuffer_.reset();
-        apiBufferSize_ = 0;
+        apiBuffer_.Reset();
         return;
     }
 
@@ -100,11 +92,7 @@ void Cursor::UpdateTexture()
 
     // Convert the buffer given by API into BGRA32
     const UINT bgraBufferSize = cursorImageWidth * cursorImageHeight * 4;
-    if (bgraBufferSize > bgra32BufferSize_)
-    {
-        bgra32BufferSize_ = bgraBufferSize;
-        bgra32Buffer_ = std::make_unique<BYTE[]>(bgra32BufferSize_);
-    }
+	bgra32Buffer_.ExpandIfNeeded(bgraBufferSize);
     
     // Check buffers
     if (!bgra32Buffer_ || !apiBuffer_) 
@@ -281,7 +269,7 @@ void Cursor::UpdateTexture()
         };
 
         // Access RGBA values at the same time
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.get());
+        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.Get());
 
         if (isMono)
         {
@@ -300,7 +288,7 @@ void Cursor::UpdateTexture()
         }
         else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR
         {
-            const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.get());
+            const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.Get());
 
             for (int row = rowMin, y = 0; row < rowMax; ++row, ++y) 
             {
@@ -329,8 +317,8 @@ void Cursor::UpdateTexture()
     }
     else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR
     {
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.get());
-        const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.get());
+        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.Get());
+        const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.Get());
         for (int i = 0; i < cursorImageWidth * cursorImageHeight; ++i) 
         {
             output32[i] = buffer32[i];
@@ -341,7 +329,7 @@ void Cursor::UpdateTexture()
 
 void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
-    if (bgra32Buffer_ == nullptr)
+    if (!bgra32Buffer_)
     {
         Debug::Error("Cursor::GetTexture() => bgra32Buffer is null.");
         return;
@@ -368,7 +356,7 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
 
     ComPtr<ID3D11DeviceContext> context;
     GetDevice()->GetImmediateContext(&context);
-    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.get(), GetWidth() * 4, 0);
+    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.Get(), GetWidth() * 4, 0);
 }
 
 

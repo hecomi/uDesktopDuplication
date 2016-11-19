@@ -156,6 +156,7 @@ void Monitor::Render(UINT timeout)
         return;
     }
 
+	// Get texture
     if (unityTexture_)
     {
         ID3D11Texture2D* texture;

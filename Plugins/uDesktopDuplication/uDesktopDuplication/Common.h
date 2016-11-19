@@ -17,17 +17,6 @@ class MonitorManager;
 const std::unique_ptr<MonitorManager>& GetMonitorManager();
 
 
-template <class T>
-auto MakeUniqueWithReleaser(T* ptr)
-{
-    const auto deleter = [](T* ptr) 
-    { 
-        if (ptr != nullptr) ptr->Release();
-    };
-    return std::unique_ptr<T, decltype(deleter)>(ptr, deleter);
-}
-
-
 // Message is pooled and fetch from Unity.
 enum class Message
 {
@@ -37,3 +26,57 @@ enum class Message
 };
 
 void SendMessageToUnity(Message message);
+
+
+// Buffer
+template <class T>
+class Buffer
+{
+public:
+	Buffer() {}
+	~Buffer() {}
+
+	void ExpandIfNeeded(UINT size)
+	{
+		if (size > size_)
+		{
+			size_ = size;
+			value_ = std::make_unique<T[]>(size);
+		}
+	}
+
+	void Reset()
+	{
+		value_.reset();
+		size_ = 0;
+	}
+
+	UINT Size() const
+	{
+		return size_;
+	}
+
+	T* Get() const
+	{
+		return value_.get();
+	}
+
+	operator bool() const
+	{
+		return value_ != nullptr;
+	}
+
+	T operator [](UINT index) const
+	{
+		if (index >= size_)
+		{
+			Debug::Error("Array index out of range: ", index, size_);
+			return T(0);
+		}
+		return value_[index];
+	}
+
+private:
+	std::unique_ptr<T[]> value_;
+	UINT size_ = 0;
+};
