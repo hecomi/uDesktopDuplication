@@ -73,8 +73,8 @@ public class Manager : MonoBehaviour
     void Awake()
     {
         Lib.SetDebugMode(debugMode);
-        Lib.InitializeUDD();
         Lib.SetTimeout(desktopDuplicationApiTimeout);
+        Lib.InitializeUDD();
 
         if (instance_ != null) {
             Destroy(gameObject);

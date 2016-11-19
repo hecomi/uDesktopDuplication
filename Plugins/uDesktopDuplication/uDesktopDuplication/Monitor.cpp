@@ -50,7 +50,7 @@ void Monitor::Initialize(IDXGIOutput* output)
     if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
     {
         Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
-        return;
+		// DPI is set as -1, so the application has to use the appropriate value.
     }
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
