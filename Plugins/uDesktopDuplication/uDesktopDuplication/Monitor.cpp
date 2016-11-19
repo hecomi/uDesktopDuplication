@@ -1,6 +1,5 @@
 #include <d3d11.h>
 #include <ShellScalingAPI.h>
-#include "Common.h"
 #include "Debug.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
@@ -50,7 +49,7 @@ void Monitor::Initialize(IDXGIOutput* output)
     if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
     {
         Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
-		// DPI is set as -1, so the application has to use the appropriate value.
+        // DPI is set as -1, so the application has to use the appropriate value.
     }
 
     auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
@@ -156,7 +155,7 @@ void Monitor::Render(UINT timeout)
         return;
     }
 
-	// Get texture
+    // Get texture
     if (unityTexture_)
     {
         ID3D11Texture2D* texture;
@@ -189,12 +188,115 @@ void Monitor::Render(UINT timeout)
         }
     }
 
-    cursor_->UpdateBuffer(frameInfo);
-    cursor_->UpdateTexture();
+    UpdateMetadata(frameInfo);
+    UpdateCursor(frameInfo);
 
     if (FAILED(deskDupl_->ReleaseFrame()))
     {
         Debug::Error("Monitor::Render() => ReleaseFrame() failed.");
+    }
+}
+
+
+void Monitor::UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+{
+    cursor_->UpdateBuffer(frameInfo);
+    cursor_->UpdateTexture();
+}
+
+
+void Monitor::UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+{
+    metaData_.ExpandIfNeeded(frameInfo.TotalMetadataBufferSize);
+    UpdateMoveRects(frameInfo);
+    UpdateDirtyRects(frameInfo);
+}
+
+
+void Monitor::UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+{
+    moveRectSize_ = metaData_.Size();
+
+    const auto hr = deskDupl_->GetFrameMoveRects(
+        moveRectSize_,
+        metaData_.As<DXGI_OUTDUPL_MOVE_RECT>(), 
+        &moveRectSize_);
+
+    if (FAILED(hr))
+    {
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+            {
+                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameMoveRects()).");
+                break;
+            }
+            case DXGI_ERROR_MORE_DATA:
+            {
+                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameMoveRects()).");
+                break;
+            }
+            case DXGI_ERROR_INVALID_CALL:
+            {
+                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameMoveRects()).");
+                break;
+            }
+            case E_INVALIDARG:
+            {
+                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameMoveRects()).");
+                break;
+            }
+            default:
+            {
+                Debug::Error("Monitor::Render() => Unknown Error (GetFrameMoveRects()).");
+                break;
+            }
+        }
+        return;
+    }
+}
+
+
+void Monitor::UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+{
+    dirtyRectSize_ = metaData_.Size() - moveRectSize_;
+
+    const auto hr = deskDupl_->GetFrameDirtyRects(
+        dirtyRectSize_,
+        metaData_.As<RECT>(moveRectSize_ /* offset */), 
+        &dirtyRectSize_);
+
+    if (FAILED(hr))
+    {
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+            {
+                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameDirtyRects()).");
+                break;
+            }
+            case DXGI_ERROR_MORE_DATA:
+            {
+                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameDirtyRects()).");
+                break;
+            }
+            case DXGI_ERROR_INVALID_CALL:
+            {
+                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameDirtyRects()).");
+                break;
+            }
+            case E_INVALIDARG:
+            {
+                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameDirtyRects()).");
+                break;
+            }
+            default:
+            {
+                Debug::Error("Monitor::Render() => Unknown Error (GetFrameDirtyRects()).");
+                break;
+            }
+        }
+        return;
     }
 }
 
@@ -304,4 +406,28 @@ int Monitor::GetWidth() const
 int Monitor::GetHeight() const
 {
     return height_;
+}
+
+
+int Monitor::GetMoveRectCount() const
+{
+    return moveRectSize_ / sizeof(DXGI_OUTDUPL_MOVE_RECT);
+}
+
+
+DXGI_OUTDUPL_MOVE_RECT* Monitor::GetMoveRects() const
+{
+    return metaData_.As<DXGI_OUTDUPL_MOVE_RECT>();
+}
+
+
+int Monitor::GetDirtyRectCount() const
+{
+    return dirtyRectSize_ / sizeof(RECT);
+}
+
+
+RECT* Monitor::GetDirtyRects() const
+{
+    return metaData_.As<RECT>(moveRectSize_);
 }

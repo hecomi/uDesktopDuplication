@@ -97,13 +97,13 @@ inline void uddBendVertex(inout float4 v, half radius, half width, half thicknes
 #ifdef BEND_ON
     half angle = width * v.x / radius;
     #ifdef _FORWARD_Z
+    v.z *= thickness;
+    radius -= v.z;
+    v.z -= radius * (1 - cos(angle));
+    #elif _FORWARD_Y
     v.y *= thickness;
     radius -= v.y;
     v.y += radius * (1 - cos(angle));
-    #elif _FORWARD_Y
-    v.z *= thickness;
-    radius -= v.z;
-    v.z += radius * (1 - cos(angle));
     #endif
     v.x = radius * sin(angle) / width;
 #else

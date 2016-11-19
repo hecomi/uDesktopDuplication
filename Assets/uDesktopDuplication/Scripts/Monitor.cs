@@ -202,6 +202,26 @@ public class Monitor
         get { return Lib.GetCursorShapeType(id); }
     }
 
+    public int moveRectCount
+    { 
+        get { return Lib.GetMoveRectCount(id); }
+    }
+
+    public DXGI_OUTDUPL_MOVE_RECT[] moveRects
+    {
+        get { return Lib.GetMoveRects(id); }
+    }
+
+    public int dirtyRectCount
+    { 
+        get { return Lib.GetDirtyRectCount(id); }
+    }
+
+    public RECT[] dirtyRects
+    {
+        get { return Lib.GetDirtyRects(id); }
+    }
+
     public bool shouldBeUpdated
     {
         get; 

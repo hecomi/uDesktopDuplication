@@ -4,6 +4,7 @@
 #include <dxgi1_2.h>
 #include <wrl/client.h>
 #include <memory>
+#include "Common.h"
 
 class Cursor;
 
@@ -50,8 +51,17 @@ public:
     int GetDpiY() const;
     IDXGIOutputDuplication* GetDeskDupl();
     const std::unique_ptr<Cursor>& GetCursor();
+	int GetMoveRectCount() const;
+	DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
+	int GetDirtyRectCount() const;
+	RECT* GetDirtyRects() const;
 
 private:
+	void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+	void UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+	void UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+	void UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+
     int id_ = -1;
     UINT dpiX_ = -1, dpiY_ = -1;
     int width_ = -1, height_ = -1;
@@ -61,4 +71,7 @@ private:
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;
+	Buffer<BYTE> metaData_;
+	UINT moveRectSize_ = 0;
+	UINT dirtyRectSize_ = 0;;
 };

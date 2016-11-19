@@ -383,4 +383,40 @@ extern "C"
             monitor->SetUnityTexture(d3d11Texture);
         }
     }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetMoveRectCount(int id)
+    {
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetMoveRectCount();
+        }
+    }
+
+    UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetMoveRects(int id)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetMoveRects();
+        }
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetDirtyRectCount(int id)
+    {
+        if (!g_manager) return -1;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetDirtyRectCount();
+        }
+    }
+
+    UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetDirtyRects(int id)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetDirtyRects();
+        }
+    }
 }
