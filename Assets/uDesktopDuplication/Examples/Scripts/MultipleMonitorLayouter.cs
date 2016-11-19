@@ -30,7 +30,7 @@ public class MultipleMonitorLayouter : MonoBehaviour
 
         var totalWidth = 0f;
         foreach (var info in monitors) {
-            var width = info.gameObject.transform.localEulerAngles.x * (info.mesh.bounds.extents.x * 2f);
+            var width = info.gameObject.transform.localScale.x * (info.mesh.bounds.extents.x * 2f);
             totalWidth += width;
         }
         totalWidth += margin * (n - 1);
@@ -38,7 +38,7 @@ public class MultipleMonitorLayouter : MonoBehaviour
         var x = -totalWidth / 2;
 
         foreach (var info in monitors) {
-            var width = info.gameObject.transform.localEulerAngles.x;
+            var width = info.gameObject.transform.localScale.x;
             x += (width * info.mesh.bounds.extents.x);
             info.gameObject.transform.localPosition = new Vector3(x, 0f, 0f);
             info.gameObject.transform.localRotation = info.originalRotation;

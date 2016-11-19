@@ -14,6 +14,7 @@ public enum Message
 
 public enum CursorShapeType
 {
+    Unspecified = 0,
     MonoChrome = 1,
     Color = 2,
     MaskedColor = 4,
