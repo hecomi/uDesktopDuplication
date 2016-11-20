@@ -21,6 +21,7 @@ public class Texture : MonoBehaviour
         }
     }
 
+    private int lastMonitorId_ = 0;
     public int monitorId
     { 
         get { return monitor.id; }
@@ -125,8 +126,18 @@ public class Texture : MonoBehaviour
 
     void Update()
     {
+        KeepMonitor();
         monitor.shouldBeUpdated = true;
         UpdateMaterial();
+    }
+
+    void KeepMonitor()
+    {
+        if (monitor == null) {
+            Reinitialize();
+        } else {
+            lastMonitorId_ = monitorId;
+        }
     }
 
     void AddCursorIfNotAttached()
@@ -140,7 +151,7 @@ public class Texture : MonoBehaviour
     void Reinitialize()
     {
         // Monitor instance is released here when initialized.
-        monitor = Manager.GetMonitor(monitor.id);
+        monitor = Manager.GetMonitor(lastMonitorId_);
     }
 
     void UpdateMaterial()

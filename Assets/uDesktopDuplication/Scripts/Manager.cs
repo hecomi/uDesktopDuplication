@@ -57,6 +57,7 @@ public class Manager : MonoBehaviour
     private Coroutine renderCoroutine_ = null;
     private bool shouldReinitialize_ = false;
     private float reinitializationTimer_ = 0f;
+    private bool isFirstFrame_ = true;
 
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
@@ -72,15 +73,16 @@ public class Manager : MonoBehaviour
 
     void Awake()
     {
-        Lib.SetDebugMode(debugMode);
-        Lib.SetTimeout(desktopDuplicationApiTimeout);
-        Lib.InitializeUDD();
-
+        // for simple singleton
         if (instance_ != null) {
             Destroy(gameObject);
             return;
         }
         instance_ = this;
+
+        Lib.SetDebugMode(debugMode);
+        Lib.SetTimeout(desktopDuplicationApiTimeout);
+        Lib.InitializeUDD();
 
         CreateMonitors();
     }
@@ -94,6 +96,9 @@ public class Manager : MonoBehaviour
     void OnEnable()
     {
         renderCoroutine_ = StartCoroutine(OnRender());
+        if (!isFirstFrame_) {
+            Reinitialize();
+        }
     }
 
     void OnDisable()
@@ -109,6 +114,7 @@ public class Manager : MonoBehaviour
         Lib.Update();
         ReinitializeIfNeeded();
         UpdateMessage();
+        isFirstFrame_ = false;
     }
 
     [ContextMenu("Reinitialize")]
