@@ -1,18 +1,22 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(uDesktopDuplication.Texture)),
+ RequireComponent(typeof(uDesktopDuplication.Cursor))]
 public class Loupe : MonoBehaviour
 {
     private uDesktopDuplication.Texture uddTexture_;
+    private uDesktopDuplication.Cursor uddCursor_;
     public float zoom = 3f;
     public float aspect = 1f;
 
     void Start()
     {
         uddTexture_ = GetComponent<uDesktopDuplication.Texture>();
+        uddCursor_  = GetComponent<uDesktopDuplication.Cursor>();
         uddTexture_.useClip = true;
     }
 
-    void Update()
+    void LateUpdate()
     {
         CheckVariables();
 
@@ -26,11 +30,12 @@ public class Loupe : MonoBehaviour
         }
 
         var monitor = uddTexture_.monitor;
-        var cursorX = monitor.isCursorVisible ? monitor.cursorX : monitor.systemCursorX;
-        var cursorY = monitor.isCursorVisible ? monitor.cursorY : monitor.systemCursorY;
-
-        var x = (float)cursorX / monitor.width;
-        var y = (float)cursorY / monitor.height;
+        var x = monitor.isCursorVisible ? 
+            uddCursor_.coord.x : 
+            (float)monitor.systemCursorX / monitor.width;
+        var y = monitor.isCursorVisible ? 
+            uddCursor_.coord.y : 
+            (float)monitor.systemCursorY / monitor.height;
         var w = 1f / zoom;
         var h = w / aspect * monitor.aspect;
         x = Mathf.Clamp(x - w / 2, 0f, 1f - w);

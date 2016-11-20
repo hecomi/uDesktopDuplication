@@ -20,7 +20,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 
         // Keep the local scale z of monitors as 1 to bend them correctly.
         // And save width / height to use same values after reinitialization.
-        for (int i = 0; i < monitors.Count; ++i) {
+        for (int i = 0; i < n; ++i) {
             var info = monitors[i];
             var savedInfo = creator_.savedInfoList[i];
             var scale = info.gameObject.transform.localScale;

@@ -10,7 +10,8 @@ public class Cursor : MonoBehaviour
 {
     [SerializeField] Vector2 modelScale = Vector2.one;
 
-    Vector3 worldPosition { get; set; }
+    public Vector3 worldPosition { get; set; }
+    public Vector2 coord { get; set; }
 
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
@@ -65,6 +66,8 @@ public class Cursor : MonoBehaviour
         var w = (float)monitor.cursorShapeWidth  / monitor.width;
         var h = (float)monitor.cursorShapeHeight / monitor.height;
         uddTexture_.material.SetVector("_CursorPositionScale", new Vector4(x, y, w, h));
+
+        coord = new Vector2(x, y);
     }
 }
 

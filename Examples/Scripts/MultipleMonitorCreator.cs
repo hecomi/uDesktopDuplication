@@ -2,6 +2,7 @@
 using UnityEngine.Assertions;
 using System.Collections.Generic;
 using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
+using MonitorState = uDesktopDuplication.MonitorState;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
@@ -36,12 +37,6 @@ public class MultipleMonitorCreator : MonoBehaviour
     bool hasMonitorUnsupportStateChecked_ = false;
     float removeWaitTimer_ = 0f;
 
-    public class SavedMonitorInfo
-    {
-        public float widthScale = 1f;
-        public float heightScale = 1f;
-    }
-
     public class MonitorInfo
     {
         public GameObject gameObject { get; set; }
@@ -53,6 +48,12 @@ public class MultipleMonitorCreator : MonoBehaviour
 
     private List<MonitorInfo> monitors_ = new List<MonitorInfo>();
     public List<MonitorInfo> monitors { get { return monitors_; } }
+
+    public class SavedMonitorInfo
+    {
+        public float widthScale = 1f;
+        public float heightScale = 1f;
+    }
 
     private List<SavedMonitorInfo> savedInfoList_ = new List<SavedMonitorInfo>();
     public List<SavedMonitorInfo> savedInfoList { get { return savedInfoList_; } }
@@ -90,12 +91,12 @@ public class MultipleMonitorCreator : MonoBehaviour
             removeWaitTimer_ += Time.deltaTime;
             if (removeWaitTimer_ > removeWaitDuration) {
                 hasMonitorUnsupportStateChecked_ = true;
-                foreach (var info in monitors_) {
-                    if (info.uddTexture.monitor.state == uDesktopDuplication.MonitorState.Unsupported) {
+                foreach (var info in monitors) {
+                    if (info.uddTexture.monitor.state == MonitorState.Unsupported) {
                         Destroy(info.gameObject);
                     }
                 }
-                monitors_.RemoveAll(info => info.uddTexture.monitor.state == uDesktopDuplication.MonitorState.Unsupported);
+                monitors.RemoveAll(info => info.uddTexture.monitor.state == MonitorState.Unsupported);
             }
         }
     }
@@ -111,14 +112,16 @@ public class MultipleMonitorCreator : MonoBehaviour
         ResetRemoveTimer();
 
         // Create monitors
-        for (int i = 0; i < uDesktopDuplication.Manager.monitors.Count; ++i) {
+        var n = uDesktopDuplication.Manager.monitors.Count;
+        for (int i = 0; i < n; ++i) {
             // Create monitor obeject
             var go = Instantiate(monitorPrefab);
             go.name = "Monitor " + i;
 
             // Saved infomation
             if (savedInfoList.Count == i) {
-               savedInfoList.Add(new SavedMonitorInfo());
+                savedInfoList.Add(new SavedMonitorInfo());
+                Assert.AreEqual(i, savedInfoList.Count - 1);
             }
             var savedInfo = savedInfoList[i];
 
@@ -164,24 +167,22 @@ public class MultipleMonitorCreator : MonoBehaviour
             go.transform.SetParent(transform);
 
             // Save
-            {
-                var info = new MonitorInfo();
-                info.gameObject = go;
-                info.originalRotation = go.transform.rotation;
-                info.originalLocalScale = go.transform.localScale;
-                info.uddTexture = texture;
-                info.mesh = mesh;
-                monitors.Add(info);
-            }
+            var info = new MonitorInfo();
+            info.gameObject = go;
+            info.originalRotation = go.transform.rotation;
+            info.originalLocalScale = go.transform.localScale;
+            info.uddTexture = texture;
+            info.mesh = mesh;
+            monitors.Add(info);
         }
 
         // Sort monitors in coordinate order
-        monitors_.Sort((a, b) => a.uddTexture.monitor.left - b.uddTexture.monitor.left);
+        monitors.Sort((a, b) => a.uddTexture.monitor.left - b.uddTexture.monitor.left);
     }
 
     void Clear()
     {
-        foreach (var info in monitors_) {
+        foreach (var info in monitors) {
             Destroy(info.gameObject);
         }
         if (removeChildrenWhenClear) {
@@ -189,7 +190,7 @@ public class MultipleMonitorCreator : MonoBehaviour
                 Destroy(transform.GetChild(i).gameObject);
             }
         }
-        monitors_.Clear();
+        monitors.Clear();
     }
 
     [ContextMenu("Recreate")]
