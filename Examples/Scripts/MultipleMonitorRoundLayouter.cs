@@ -3,6 +3,8 @@ using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
 public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
 {
+    [SerializeField] bool debugDraw = true;
+
     public float radius = 10f;
     public Vector3 offsetAngle = Vector3.zero;
 
@@ -80,7 +82,7 @@ public class MultipleMonitorRoundLayouter : MultipleMonitorLayouter
     protected override void Update()
     {
         base.Update();
-        DebugDraw();
+        if (debugDraw) DebugDraw();
     }
 
     void DebugDraw()

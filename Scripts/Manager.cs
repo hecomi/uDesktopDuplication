@@ -15,15 +15,17 @@ public class Manager : MonoBehaviour
 
     public static Manager CreateInstance()
     {
-        if (instance_) {
-            return instance_;
-        }
+        if (instance_ != null) return instance_;
 
         var manager = FindObjectOfType<Manager>();
-        if (manager) return manager;
+        if (manager) {
+            instance_ = manager;
+            return manager;
+        }
 
         var go = new GameObject("uDesktopDuplicationManager");
-        return go.AddComponent<Manager>();
+        instance_ = go.AddComponent<Manager>();
+        return instance_;
     }
 
     private List<Monitor> monitors_ = new List<Monitor>();
@@ -74,10 +76,16 @@ public class Manager : MonoBehaviour
     void Awake()
     {
         // for simple singleton
-        if (instance_ != null) {
+
+        if (instance_ == this) {
+            return;
+        }
+
+        if (instance_ != null && instance_ != this) {
             Destroy(gameObject);
             return;
         }
+
         instance_ = this;
 
         Lib.SetDebugMode(debugMode);
@@ -134,11 +142,12 @@ public class Manager : MonoBehaviour
 
         for (int i = 0; i < monitors.Count; ++i) {
             var monitor = monitors[i];
+            var state = monitor.state;
             if (
-                monitor.state == MonitorState.NotSet ||
-                monitor.state == MonitorState.AccessLost || 
-                monitor.state == MonitorState.AccessDenied ||
-                monitor.state == MonitorState.SessionDisconnected
+                state == MonitorState.NotSet ||
+                state == MonitorState.AccessLost || 
+                state == MonitorState.AccessDenied ||
+                state == MonitorState.SessionDisconnected
             ) {
                 reinitializeNeeded = true;
                 break;

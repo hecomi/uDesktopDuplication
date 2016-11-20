@@ -240,6 +240,7 @@ public class Monitor
     }
 
     private Texture2D texture_;
+    private System.IntPtr texturePtr_;
     public Texture2D texture 
     {
         get 
@@ -253,7 +254,7 @@ public class Monitor
     public void Render()
     {
         if (texture_ && available) {
-            Lib.SetTexturePtr(id, texture_.GetNativeTexturePtr());
+            Lib.SetTexturePtr(id, texturePtr_);
             GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
         }
     }
@@ -290,6 +291,7 @@ public class Monitor
         var w = isHorizontal ? width : height;
         var h = isHorizontal ? height : width;
         texture_ = new Texture2D(w, h, TextureFormat.BGRA32, false);
+        texturePtr_ = texture_.GetNativeTexturePtr();
     }
 
     public void DestroyTexture()
@@ -297,6 +299,7 @@ public class Monitor
         if (texture_) {
             Object.Destroy(texture_);
             texture_ = null;
+            texturePtr_ = System.IntPtr.Zero;
         }
     }
 
