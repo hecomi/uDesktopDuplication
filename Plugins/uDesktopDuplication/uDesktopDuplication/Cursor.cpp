@@ -79,33 +79,43 @@ void Cursor::UpdateTexture()
         return;
     }
 
+    // Check desktop texure
+    if (monitor_->GetUnityTexture() == nullptr) 
+    {
+        Debug::Error("Cursor::UpdateTexture() => Monitor::GetUnityTexture() is null.");
+        return;
+    }
+
     // Cursor information
-    const bool isMono = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME;
-    const bool isColorMask = GetType() == DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR;
     const auto cursorImageWidth = GetWidth();
     const auto cursorImageHeight = GetHeight();
     const auto cursorImagePitch = GetPitch();
 
-    // Captured area
+    // Captured size
     auto capturedImageWidth = cursorImageWidth;
     auto capturedImageHeight = cursorImageHeight;
 
     // Convert the buffer given by API into BGRA32
     const UINT bgraBufferSize = cursorImageWidth * cursorImageHeight * 4;
-	bgra32Buffer_.ExpandIfNeeded(bgraBufferSize);
+	bgraBuffer_.ExpandIfNeeded(bgraBufferSize);
     
     // Check buffers
-    if (!bgra32Buffer_ || !apiBuffer_) 
+    if (!bgraBuffer_ || !apiBuffer_) 
     {
         return;
     }
 
-    // If masked, copy the desktop image and merge it with masked image.
-    if (isMono || isColorMask)
+    // Calculate information to capture desktop image under cursor.
+    D3D11_BOX box;
+    const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
+    auto colMin = 0;
+    auto colMax = cursorImageWidth;
+    auto rowMin = 0;
+    auto rowMax = cursorImageHeight;
+
     {
         const auto monitorWidth = monitor_->GetWidth();
         const auto monitorHeight = monitor_->GetHeight();
-        const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
         const auto isVertical = 
             monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
             monitorRot == DXGI_MODE_ROTATION_ROTATE270;
@@ -114,10 +124,6 @@ void Cursor::UpdateTexture()
 
         auto x = x_;
         auto y = y_;
-        auto colMin = 0;
-        auto colMax = cursorImageWidth;
-        auto rowMin = 0;
-        auto rowMax = cursorImageHeight;
 
         if (x < 0)
         {
@@ -142,7 +148,6 @@ void Cursor::UpdateTexture()
             rowMax = capturedImageHeight;
         }
 
-        D3D11_BOX box;
         box.front = 0;
         box.back = 1;
 
@@ -196,13 +201,11 @@ void Cursor::UpdateTexture()
                 "(", desktopImageWidth, ", ", desktopImageHeight, ")");
             return;
         }
+    }
 
-        if (monitor_->GetUnityTexture() == nullptr) 
-        {
-            Debug::Error("Cursor::UpdateTexture() => Monitor::GetUnityTexture() is null.");
-            return;
-        }
-
+    // Create texture
+    ComPtr<ID3D11Texture2D> texture;
+    {
         D3D11_TEXTURE2D_DESC desc;
         desc.Width = capturedImageWidth;
         desc.Height = capturedImageHeight;
@@ -216,83 +219,89 @@ void Cursor::UpdateTexture()
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags = 0;
 
-        ComPtr<ID3D11Texture2D> texture;
-        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture))) 
+        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
         }
+    }
 
+    // Copy desktop image to the texture
+    {
+        ComPtr<ID3D11DeviceContext> context;
+        GetDevice()->GetImmediateContext(&context);
+        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+    }
+
+    // Get mapped surface
+    ComPtr<IDXGISurface> surface;
+    if (FAILED(texture.As(&surface)))
+    {
+        Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
+        return;
+    }
+
+    DXGI_MAPPED_RECT mappedSurface;
+    if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
+    {
+        Debug::Error("Cursor::UpdateTexture() => surface->Map() failed.");
+        return;
+    }
+
+    // Finally, get the desktop texture under the mouse cursor.
+    const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
+    const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
+
+    // Take the monitor orientation into consideration.
+    const auto getDesktop32 = [&](int col, int row)
+    {
+        switch (monitorRot)
         {
-            ComPtr<ID3D11DeviceContext> context;
-            GetDevice()->GetImmediateContext(&context);
-            context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+            case DXGI_MODE_ROTATION_ROTATE90:
+                return desktop32[(capturedImageWidth - 1 - col) * desktopPitch + row];
+            case DXGI_MODE_ROTATION_ROTATE180:
+                return desktop32[(capturedImageHeight - 1 - row) * desktopPitch + (capturedImageWidth - 1 - col)];
+            case DXGI_MODE_ROTATION_ROTATE270:
+                return desktop32[col * desktopPitch + (capturedImageHeight - 1 - row)];
+            case DXGI_MODE_ROTATION_IDENTITY:
+            case DXGI_MODE_ROTATION_UNSPECIFIED:
+                return desktop32[row * desktopPitch + col];
         }
+    };
 
-        ComPtr<IDXGISurface> surface;
-        if (FAILED(texture.As(&surface)))
+    // Access RGBA values at the same time
+    Buffer<BYTE> output;
+    output.ExpandIfNeeded(bgraBuffer_.Size());
+    auto output32 = output.As<UINT>();
+
+    switch (GetType())
+    {
+        case DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MONOCHROME:
         {
-            Debug::Error("Cursor::UpdateTexture() => texture->QueryInterface() failed.");
-            return;
-        }
-
-        DXGI_MAPPED_RECT mappedSurface;
-        if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
-        {
-            Debug::Error("Cursor::UpdateTexture() => surface->Map() failed.");
-            return;
-        }
-
-        // Finally, get the texture behind the mouse cursor.
-        const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
-        const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
-
-        // Take the monitor orientation into consideration.
-        const auto getDesktop32 = [&](int col, int row)
-        {
-            switch (monitorRot)
+            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y)
             {
-                case DXGI_MODE_ROTATION_ROTATE90:
-                    return desktop32[(capturedImageWidth - 1 - col) * desktopPitch + row];
-                    break;
-                case DXGI_MODE_ROTATION_ROTATE180:
-                    return desktop32[(capturedImageHeight - 1 - row) * desktopPitch + (capturedImageWidth - 1 - col)];
-                    break;
-                case DXGI_MODE_ROTATION_ROTATE270:
-                    return desktop32[col * desktopPitch + (capturedImageHeight - 1 - row)];
-                    break;
-                case DXGI_MODE_ROTATION_IDENTITY:
-                case DXGI_MODE_ROTATION_UNSPECIFIED:
-                    return desktop32[row * desktopPitch + col];
-                    break;
-            }
-        };
-
-        // Access RGBA values at the same time
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.Get());
-
-        if (isMono)
-        {
-            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y) 
-            {
-                for (int col = colMin, x = 0; col < colMax; ++col, ++x) 
+                for (int col = colMin, x = 0; col < colMax; ++col, ++x)
                 {
+                    const int i = col + row * cursorImageWidth;
+
                     BYTE mask = 0b10000000 >> (col % 8);
                     const BYTE andMask = apiBuffer_[col / 8 + row * cursorImagePitch] & mask;
                     const BYTE xorMask = apiBuffer_[col / 8 + (row + capturedImageHeight) * cursorImagePitch] & mask;
                     const UINT andMask32 = andMask ? 0xFFFFFFFF : 0x00000000;
                     const UINT xorMask32 = xorMask ? 0xFFFFFFFF : 0x00000000;
-                    output32[row * cursorImageWidth + col] = (getDesktop32(x, y) & andMask32) ^ xorMask32;
+
+                    output32[i] = (getDesktop32(x, y) & andMask32) ^ xorMask32;
                 }
             }
+            break;
         }
-        else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR
+        case DXGI_OUTDUPL_POINTER_SHAPE_TYPE_MASKED_COLOR:
         {
-            const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.Get());
+            const auto buffer32 = apiBuffer_.As<UINT>();
 
-            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y) 
+            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y)
             {
-                for (int col = colMin, x = 0; col < colMax; ++col, ++x) 
+                for (int col = colMin, x = 0; col < colMax; ++col, ++x)
                 {
                     const int i = col + row * cursorImageWidth;
                     const int j = col + row * cursorImagePitch / sizeof(UINT);
@@ -308,28 +317,92 @@ void Cursor::UpdateTexture()
                     }
                 }
             }
+            break;
         }
-
-        if (FAILED(surface->Unmap()))
+        case DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR:
         {
-            return;
+            const auto buffer32 = apiBuffer_.As<UINT>();
+            auto output32 = bgraBuffer_.As<UINT>();
+
+            for (int row = rowMin, y = 0; row < rowMax; ++row, ++y)
+            {
+                for (int col = colMin, x = 0; col < colMax; ++col, ++x)
+                {
+                    const int i = 4 * (col + row * cursorImageWidth);
+
+                    const auto desktop32 = getDesktop32(x, y);
+                    const auto desktop = (BYTE*)(&desktop32);
+                    const auto desktopB = desktop[0];
+                    const auto desktopG = desktop[1];
+                    const auto desktopR = desktop[2];
+                    const auto desktopA = desktop[3];
+
+                    const auto cursorB = apiBuffer_[i + 0];
+                    const auto cursorG = apiBuffer_[i + 1];
+                    const auto cursorR = apiBuffer_[i + 2];
+                    const auto cursorA = apiBuffer_[i + 3];
+
+                    const auto a0 = cursorA / 255.f;
+                    const auto a1 = 1.f - a0;
+
+                    output[i + 0] = static_cast<BYTE>(cursorB * a0 + desktopB * a1);
+                    output[i + 1] = static_cast<BYTE>(cursorG * a0 + desktopG * a1);
+                    output[i + 2] = static_cast<BYTE>(cursorR * a0 + desktopR * a1);
+                    output[i + 3] = desktopA;
+                }
+            }
+            break;
+        }
+        default:
+        {
+            Debug::Error("Cursor::UpdateTexture() => Unknown cursor type");
+            break;
         }
     }
-    else // DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR
+
+    // Rotation
+    auto bgraBuffer32 = bgraBuffer_.As<UINT>();
+    for (int row = rowMin, y = 0; row < rowMax; ++row, ++y)
     {
-        auto output32 = reinterpret_cast<UINT*>(bgra32Buffer_.Get());
-        const auto buffer32 = reinterpret_cast<UINT*>(apiBuffer_.Get());
-        for (int i = 0; i < cursorImageWidth * cursorImageHeight; ++i) 
+        for (int col = colMin, x = 0; col < colMax; ++col, ++x)
         {
-            output32[i] = buffer32[i];
+            const auto i = col + row * cursorImageWidth;
+            switch (monitorRot)
+            {
+                case DXGI_MODE_ROTATION_ROTATE90:
+                    bgraBuffer32[i] = output32[col * cursorImageHeight + (cursorImageHeight - 1 - row)];
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE180:
+                    bgraBuffer32[i] = output32[(cursorImageHeight - 1 - row) * cursorImageWidth + (cursorImageWidth - 1 - col)];
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE270:
+                    bgraBuffer32[i] = output32[(cursorImageWidth - 1 - col) * cursorImageHeight + row];
+                    break;
+                case DXGI_MODE_ROTATION_IDENTITY:
+                case DXGI_MODE_ROTATION_UNSPECIFIED:
+                    bgraBuffer32[i] = output32[i];
+                    break;
+            }
         }
+    }
+
+    {
+        ComPtr<ID3D11DeviceContext> context;
+        GetDevice()->GetImmediateContext(&context);
+        context->UpdateSubresource(monitor_->GetUnityTexture(), 0, &box, bgraBuffer_.Get(), GetWidth() * 4, 0);
+    }
+
+    if (FAILED(surface->Unmap()))
+    {
+        Debug::Error("Cursor::UpdateTexture() => surface->Unmap() failed.");
+        return;
     }
 }
 
 
 void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
-    if (!bgra32Buffer_)
+    if (!bgraBuffer_)
     {
         Debug::Error("Cursor::GetTexture() => bgra32Buffer is null.");
         return;
@@ -356,7 +429,7 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
 
     ComPtr<ID3D11DeviceContext> context;
     GetDevice()->GetImmediateContext(&context);
-    context->UpdateSubresource(texture, 0, nullptr, bgra32Buffer_.Get(), GetWidth() * 4, 0);
+    context->UpdateSubresource(texture, 0, nullptr, bgraBuffer_.Get(), GetWidth() * 4, 0);
 }
 
 

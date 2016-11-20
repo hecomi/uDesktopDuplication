@@ -32,7 +32,7 @@ private:
     int x_ = -1;
     int y_ = -1;
     Buffer<BYTE> apiBuffer_;
-	Buffer<BYTE> bgra32Buffer_;
+	Buffer<BYTE> bgraBuffer_;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_;
     LARGE_INTEGER timestamp_;
 };
