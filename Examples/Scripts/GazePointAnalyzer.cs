@@ -15,7 +15,6 @@ public class GazePointAnalyzer : MonoBehaviour
     {
         get { return GetWorldPositionFromCoord((int)averageCoord_.x, (int)averageCoord_.y); }
     }
-
     private Vector2 preCursorCoord_ = Vector2.zero;
 
     [Header("Filters")]
@@ -118,8 +117,6 @@ public class GazePointAnalyzer : MonoBehaviour
             filter = noEventFilter;
         }
 
-        preCursorCoord_ = cursorCoord;
-
         var cf = (filter / ((1f / 60) / Time.deltaTime));
         var vf = (velocityFilter / ((1f / 60) / Time.deltaTime));
         var targetCoord = averageCoord_ + (coord - averageCoord_) * cf;
@@ -127,11 +124,13 @@ public class GazePointAnalyzer : MonoBehaviour
 
         if (float.IsNaN(targetCoord.x) || float.IsNaN(targetCoord.y)) return;
         if (float.IsNaN(targetVelocity.x) || float.IsNaN(targetVelocity.y)) return;
-        
+
         averageCoordVelocity_ += (targetVelocity - averageCoordVelocity_) * vf;
         averageCoord_ += averageCoordVelocity_;
         averageCoord_.x = Mathf.Clamp(averageCoord_.x, 0, monitor.width);
         averageCoord_.y = Mathf.Clamp(averageCoord_.y, 0, monitor.height);
+
+        preCursorCoord_ = cursorCoord;
     }
 
     void Update()
