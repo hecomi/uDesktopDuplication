@@ -39,7 +39,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    return uddGetScreenTextureWithCursor(i.uv);
+    return uddGetScreenTexture(i.uv);
 }
 
 ENDCG

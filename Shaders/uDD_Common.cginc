@@ -65,31 +65,13 @@ inline void uddConvertToLinearIfNeeded(inout fixed3 rgb)
 
 inline fixed4 uddGetScreenTexture(float2 uv)
 {
-    fixed4 c = tex2D(_MainTex, uv);
-    return c;
-}
-
-inline fixed4 uddGetCursorTexture(float2 uv)
-{
-    uv.x = (uv.x - _CursorX) / _CursorWidth;
-    uv.y = (uv.y - _CursorY) / _CursorHeight;
-    fixed4 c = tex2D(_CursorTex, uv);
-    fixed a = step(0, uv.x) * step(0, uv.y) * step(uv.x, 1) * step(uv.y, 1);
-    c.a *= step(0.01, a);
-    return c;
-}
-
-inline fixed4 uddGetScreenTextureWithCursor(float2 uv)
-{
     uv = uddInvertUV(uv);
 #ifdef USE_CLIP
     uv = uddClipUV(uv);
 #endif
-    fixed4 screen = uddGetScreenTexture(uddRotateUV(uv));
-    fixed4 cursor = uddGetCursorTexture(uv);
-    fixed4 color = lerp(screen, cursor, cursor.a);
-    uddConvertToLinearIfNeeded(color.rgb);
-    return color;
+    fixed4 c = tex2D(_MainTex, uddRotateUV(uv));
+    uddConvertToLinearIfNeeded(c.rgb);
+    return c;
 }
 
 inline void uddBendVertex(inout float4 v, half radius, half width, half thickness)

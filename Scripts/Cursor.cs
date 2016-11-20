@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Assertions;
-using System.Collections.Generic;
 
 namespace uDesktopDuplication
 {
@@ -16,18 +14,6 @@ public class Cursor : MonoBehaviour
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
 
-    struct TextureInfo
-    {
-        public Texture2D texture;
-        public System.IntPtr ptr;
-        public TextureInfo(Texture2D texture)
-        {
-            this.texture = texture;
-            this.ptr = texture.GetNativeTexturePtr();
-        }
-    }
-    private Dictionary<int, TextureInfo> textures_ = new Dictionary<int, TextureInfo>();
-
     void Start()
     {
         uddTexture_ = GetComponent<Texture>();
@@ -37,9 +23,8 @@ public class Cursor : MonoBehaviour
     {
         if (monitor.isCursorVisible) {
             UpdatePosition();
-            UpdateTexture();
         }
-        UpdateMaterial();
+        UpdateCoords();
     }
 
     void UpdatePosition()
@@ -51,33 +36,10 @@ public class Cursor : MonoBehaviour
         worldPosition = transform.TransformPoint(localPos);
     }
 
-    void UpdateTexture()
-    {
-        var w = monitor.cursorShapeWidth;
-        var h = monitor.cursorShapeHeight;
-        if (w == 0 || h == 0) return;
-
-        var key = w + h * 100;
-        if (!textures_.ContainsKey(key)) {
-            var texture = new Texture2D(w, h, TextureFormat.BGRA32, false);
-            texture.wrapMode = TextureWrapMode.Clamp;
-            textures_.Add(key, new TextureInfo(texture));
-        }
-
-        var cursorTexture = textures_[key];
-        Assert.IsNotNull(cursorTexture.texture);
-        monitor.GetCursorTexture(cursorTexture.ptr);
-        uddTexture_.material.SetTexture("_CursorTex", cursorTexture.texture);
-    }
-
-    void UpdateMaterial()
+    void UpdateCoords()
     {
         var x = monitor.isCursorVisible ? (float)monitor.cursorX / monitor.width : -9999f;
         var y = monitor.isCursorVisible ? (float)monitor.cursorY / monitor.height : -9999f;
-        var w = (float)monitor.cursorShapeWidth  / monitor.width;
-        var h = (float)monitor.cursorShapeHeight / monitor.height;
-        uddTexture_.material.SetVector("_CursorPositionScale", new Vector4(x, y, w, h));
-
         coord = new Vector2(x, y);
     }
 }

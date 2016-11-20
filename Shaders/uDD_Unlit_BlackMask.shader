@@ -43,7 +43,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    fixed4 tex = uddGetScreenTextureWithCursor(i.uv);
+    fixed4 tex = uddGetScreenTexture(i.uv);
     fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
     return fixed4(tex.rgb * _Color.rgb, alpha * _Color.a);
 }

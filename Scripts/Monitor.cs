@@ -253,7 +253,7 @@ public class Monitor
 
     public void Render()
     {
-        if (texture_ && available) {
+        if (texture_ && available && texturePtr_ != System.IntPtr.Zero) {
             Lib.SetTexturePtr(id, texturePtr_);
             GL.IssuePluginEvent(Lib.GetRenderEventFunc(), id);
         }

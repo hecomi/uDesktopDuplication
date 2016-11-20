@@ -41,7 +41,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    return fixed4(uddGetScreenTextureWithCursor(i.uv).rgb, 1.0) * _Color;
+    return fixed4(uddGetScreenTexture(i.uv).rgb, 1.0) * _Color;
 }
 
 ENDCG

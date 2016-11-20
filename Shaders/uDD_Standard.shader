@@ -34,7 +34,7 @@ SubShader
 
     void surf(Input IN, inout SurfaceOutputStandard o) 
     {
-        fixed4 c = uddGetScreenTextureWithCursor(IN.uv_MainTex) * _Color;
+        fixed4 c = uddGetScreenTexture(IN.uv_MainTex) * _Color;
         o.Albedo = c.rgb;
         o.Metallic = _Metallic;
         o.Smoothness = _Glossiness;
