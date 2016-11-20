@@ -25,9 +25,9 @@ public class GazePointAnalyzer : MonoBehaviour
     [Range(0f, 1f)] public float velocityFilter = 0.1f;
 
     [Header("Debug")]
-    [SerializeField] bool drawAveragePos;
-    [SerializeField] bool drawMoveRects;
-    [SerializeField] bool drawDirtyRects;
+    public bool drawAveragePos;
+    public bool drawMoveRects;
+    public bool drawDirtyRects;
 
     void Start()
     {
