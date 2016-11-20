@@ -15,7 +15,18 @@ public class Cursor : MonoBehaviour
 
     private Texture uddTexture_;
     private Monitor monitor { get { return uddTexture_.monitor; } }
-    private Dictionary<int, Texture2D> textures_ = new Dictionary<int, Texture2D>();
+
+    struct TextureInfo
+    {
+        public Texture2D texture;
+        public System.IntPtr ptr;
+        public TextureInfo(Texture2D texture)
+        {
+            this.texture = texture;
+            this.ptr = texture.GetNativeTexturePtr();
+        }
+    }
+    private Dictionary<int, TextureInfo> textures_ = new Dictionary<int, TextureInfo>();
 
     void Start()
     {
@@ -50,13 +61,13 @@ public class Cursor : MonoBehaviour
         if (!textures_.ContainsKey(key)) {
             var texture = new Texture2D(w, h, TextureFormat.BGRA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
-            textures_.Add(key, texture);
+            textures_.Add(key, new TextureInfo(texture));
         }
 
         var cursorTexture = textures_[key];
-        Assert.IsNotNull(cursorTexture);
-        monitor.GetCursorTexture(cursorTexture.GetNativeTexturePtr());
-        uddTexture_.material.SetTexture("_CursorTex", cursorTexture);
+        Assert.IsNotNull(cursorTexture.texture);
+        monitor.GetCursorTexture(cursorTexture.ptr);
+        uddTexture_.material.SetTexture("_CursorTex", cursorTexture.texture);
     }
 
     void UpdateMaterial()
