@@ -53,8 +53,10 @@ public class Texture : MonoBehaviour
         {
             if (value) {
                 material.EnableKeyword("BEND_ON");
+                material.SetInt("_Bend", 1);
             } else {
                 material.DisableKeyword("BEND_ON");
+                material.SetInt("_Bend", 0);
             }
         }
     }
