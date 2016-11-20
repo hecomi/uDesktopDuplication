@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Assertions;
 using System.Collections.Generic;
 using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
@@ -110,7 +111,7 @@ public class MultipleMonitorCreator : MonoBehaviour
         ResetRemoveTimer();
 
         // Create monitors
-        for (int i = 0; i < uDesktopDuplication.Manager.monitorCount; ++i) {
+        for (int i = 0; i < uDesktopDuplication.Manager.monitors.Count; ++i) {
             // Create monitor obeject
             var go = Instantiate(monitorPrefab);
             go.name = "Monitor " + i;
