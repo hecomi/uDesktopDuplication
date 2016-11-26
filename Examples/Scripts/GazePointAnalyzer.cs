@@ -43,32 +43,7 @@ public class GazePointAnalyzer : MonoBehaviour
 
     public Vector3 GetWorldPositionFromCoord(int u, int v)
     {
-        var monitor = uddTexture_.monitor;
-
-        // Mesh & Scale information
-        var mesh = GetComponent<MeshFilter>().sharedMesh;
-        var width  = transform.localScale.x * (mesh.bounds.extents.x * 2f);
-        var height = transform.localScale.y * (mesh.bounds.extents.y * 2f);
-
-        // Local position (scale included).
-        var x =  (float)(u - monitor.width  / 2) / monitor.width;
-        var y = -(float)(v - monitor.height / 2) / monitor.height;
-        var localPos = new Vector3(width * x, height * y, 0f);
-
-        // Bending
-        if (uddTexture_.bend) {
-            var radius = uddTexture_.radius;
-            var angle = localPos.x / radius;
-            if (uddTexture_.meshForwardDirection == MeshForwardDirection.Y) {
-                localPos.y -= radius * (1f - Mathf.Cos(angle));
-            } else {
-                localPos.z -= radius * (1f - Mathf.Cos(angle));
-            }
-            localPos.x  = radius * Mathf.Sin(angle);
-        }
-
-        // To world position
-        return transform.position + (transform.rotation * localPos);
+        return uddTexture_.GetWorldPositionFromCoord(u, v);
     }
 
     void CalcAveragePos()

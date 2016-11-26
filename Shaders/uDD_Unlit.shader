@@ -31,7 +31,7 @@ half _Thickness;
 v2f vert(appdata v)
 {
     v2f o;
-    uddBendVertex(v.vertex, _Radius, _Width, _Thickness);
+    uddBendVertex(v.vertex.xyz, _Radius, _Width, _Thickness);
     o.vertex = UnityObjectToClipPos(v.vertex);
     o.uv = TRANSFORM_TEX(v.uv, _MainTex);
     return o;

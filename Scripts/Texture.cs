@@ -16,7 +16,6 @@ public class Texture : MonoBehaviour
             if (monitor_ != null) {
                 material = GetComponent<Renderer>().material; // clone
                 material.mainTexture = monitor_.texture;
-                material.SetTexture("_DispTex", monitor_.texture);
                 material.SetFloat("_Width", transform.localScale.x);
             }
         }
@@ -203,6 +202,33 @@ public class Texture : MonoBehaviour
         } else {
             material.DisableKeyword("USE_CLIP");
         }
+    }
+
+    public Vector3 GetWorldPositionFromCoord(int u, int v)
+    {
+        // Mesh & Scale information
+        var mesh = GetComponent<MeshFilter>().sharedMesh;
+        var width  = transform.localScale.x * (mesh.bounds.extents.x * 2f);
+        var height = transform.localScale.y * (mesh.bounds.extents.y * 2f);
+
+        // Local position (scale included).
+        var x =  (float)(u - monitor.width  / 2) / monitor.width;
+        var y = -(float)(v - monitor.height / 2) / monitor.height;
+        var localPos = new Vector3(width * x, height * y, 0f);
+
+        // Bending
+        if (bend) {
+            var angle = localPos.x / radius;
+            if (meshForwardDirection == MeshForwardDirection.Y) {
+                localPos.y -= radius * (1f - Mathf.Cos(angle));
+            } else {
+                localPos.z -= radius * (1f - Mathf.Cos(angle));
+            }
+            localPos.x  = radius * Mathf.Sin(angle);
+        }
+
+        // To world position
+        return transform.position + (transform.rotation * localPos);
     }
 }
 

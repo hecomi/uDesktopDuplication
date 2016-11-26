@@ -79,7 +79,7 @@ inline fixed4 uddGetScreenTexture(float2 uv)
     return uddGetTexture(_MainTex, uv);
 }
 
-inline void uddBendVertex(inout float4 v, half radius, half width, half thickness)
+inline void uddBendVertex(inout float3 v, half radius, half width, half thickness)
 {
 #ifdef BEND_ON
     half angle = width * v.x / radius;
