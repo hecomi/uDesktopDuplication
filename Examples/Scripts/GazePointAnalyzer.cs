@@ -15,6 +15,11 @@ public class GazePointAnalyzer : MonoBehaviour
     {
         get { return GetWorldPositionFromCoord((int)averageCoord_.x, (int)averageCoord_.y); }
     }
+
+    public Vector3 cursorPos
+    {
+        get { return GetWorldPositionFromCoord(uddTexture_.monitor.cursorX, uddTexture_.monitor.cursorY); }
+    }
     private Vector2 preCursorCoord_ = Vector2.zero;
 
     [Header("Filters")]
@@ -26,6 +31,7 @@ public class GazePointAnalyzer : MonoBehaviour
 
     [Header("Debug")]
     public bool drawAveragePos;
+    public bool drawCursorPos;
     public bool drawMoveRects;
     public bool drawDirtyRects;
 
@@ -142,6 +148,7 @@ public class GazePointAnalyzer : MonoBehaviour
     void DebugDraw()
     {
         if (drawAveragePos) DrawAveragePos();
+        if (drawCursorPos)  DrawCursorPos();
         if (drawDirtyRects) DrawDirtyRects();
         if (drawMoveRects)  DrawMoveRects();
     }
@@ -162,6 +169,11 @@ public class GazePointAnalyzer : MonoBehaviour
     void DrawAveragePos()
     {
         Debug.DrawLine(transform.position, averagePos, Color.yellow);
+    }
+
+    void DrawCursorPos()
+    {
+        Debug.DrawLine(transform.position, cursorPos, Color.grey);
     }
 
     void DrawMoveRects()
