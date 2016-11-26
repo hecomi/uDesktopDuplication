@@ -146,12 +146,22 @@ public class Monitor
 
     public bool isHorizontal
     { 
-        get { return width > height; }
+        get 
+        {
+            return 
+                (rotation == MonitorRotation.Identity) || 
+                (rotation == MonitorRotation.Rotate180);
+        }
     }
 
     public bool isVertical 
     { 
-        get { return height > width; }
+        get 
+        {
+            return 
+                (rotation == MonitorRotation.Rotate90) || 
+                (rotation == MonitorRotation.Rotate270);
+        }
     }
 
     public bool isCursorVisible
