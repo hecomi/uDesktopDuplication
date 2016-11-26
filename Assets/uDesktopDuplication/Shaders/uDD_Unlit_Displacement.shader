@@ -12,7 +12,7 @@ Properties
     [PowerSlider(10.0)] _Thickness("Thickness", Range(0.01, 10)) = 1
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
     _DispTex ("Displacement Map", 2D) = "black" {}
-    _Displacement("Displacement Factor", Range(0, 5.0)) = 1
+    _DispFactor("Displacement Factor", Range(0, 5.0)) = 1
     _TessMinDist("Tessellation Min Distance", Range(0.1, 100.0)) = 1.0
     _TessMaxDist("Tessellation Max Distance", Range(0.1, 100.0)) = 5.0
     _TessFactor("Tessellation Factor", Range(0.1, 50.0)) = 10.0
@@ -35,7 +35,7 @@ half _Width;
 half _Thickness;
 Texture2D _DispTex;
 SamplerState sampler_DispTex;
-half _Displacement;
+half _DispFactor;
 half _TessMinDist;
 half _TessMaxDist;
 half _TessFactor;
@@ -76,10 +76,7 @@ struct DsOutput
 HsInput vert(VsInput i)
 {
     HsInput o;
-    float4 v = float4(i.vertex, 1.0);
-    uddBendNormal(v.x, i.normal, _Radius, _Width);
-    uddBendVertex(v, _Radius, _Width, _Thickness);
-    o.f4Position = v;
+    o.f4Position = float4(i.vertex, 1.0);
     o.f3Normal   = i.normal;
     o.f2TexCoord = i.texcoord;
     return o;
@@ -139,7 +136,10 @@ DsOutput domain(
         bary.y * i[1].f2TexCoord + 
         bary.z * i[2].f2TexCoord;
 
-    float disp = length(_DispTex.SampleLevel(sampler_DispTex, o.f2TexCoord, 0)) * _Displacement;
+    uddBendNormal(f3Position.x, f3Normal, _Radius, _Width);
+    uddBendVertex(f3Position, _Radius, _Width, _Thickness);
+
+    float disp = length(_DispTex.SampleLevel(sampler_DispTex, o.f2TexCoord, 0)) * _DispFactor;
     f3Position.xyz += f3Normal * disp;
 
     o.f4Position = mul(UNITY_MATRIX_MVP, float4(f3Position.xyz, 1.0));
