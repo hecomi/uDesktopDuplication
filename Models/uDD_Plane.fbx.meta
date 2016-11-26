@@ -1,16 +1,25 @@
 fileFormatVersion: 2
-guid: d6b30b913257fee4d8246bf7a2620fcd
-timeCreated: 1478887431
+guid: f30f6cfd6aa37554ca886424cada7cbb
+timeCreated: 1480072865
 licenseType: Pro
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
     100000: //RootNode
+    100002: uDD_Plane_MeshPart0
+    100004: uDD_Plane_MeshPart1
     400000: //RootNode
+    400002: uDD_Plane_MeshPart0
+    400004: uDD_Plane_MeshPart1
     2300000: //RootNode
+    2300002: uDD_Plane_MeshPart0
+    2300004: uDD_Plane_MeshPart1
     3300000: //RootNode
-    4300000: pCube1
-    4300002: uDD_Board
+    3300002: uDD_Plane_MeshPart0
+    3300004: uDD_Plane_MeshPart1
+    4300000: uDD_Plane
+    4300002: uDD_Plane_MeshPart0
+    4300004: uDD_Plane_MeshPart1
     9500000: //RootNode
   materials:
     importMaterials: 0
@@ -43,7 +52,7 @@ ModelImporter:
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 0
+    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     secondaryUVAngleDistortion: 8

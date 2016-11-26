@@ -16,6 +16,7 @@ public class Texture : MonoBehaviour
             if (monitor_ != null) {
                 material = GetComponent<Renderer>().material; // clone
                 material.mainTexture = monitor_.texture;
+                material.SetTexture("_DispTex", monitor_.texture);
                 material.SetFloat("_Width", transform.localScale.x);
             }
         }
