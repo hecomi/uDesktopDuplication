@@ -10,6 +10,7 @@ Properties
     [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
     [PowerSlider(10.0)] _Radius("Bend Radius", Range(1, 100)) = 30
     [PowerSlider(10.0)] _Thickness("Thickness", Range(0.01, 10)) = 1
+    _Width("Width", Range(0.0, 10.0)) = 1.0
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
