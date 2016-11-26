@@ -6,7 +6,6 @@ Properties
     _Color ("Color", Color) = (1, 1, 1, 1)
     _MainTex ("Texture", 2D) = "white" {}
     _Mask ("Mask", Range(0, 1)) = 0.1
-    _CursorTex ("Cursor Texture", 2D) = "white" {}
     [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
     [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
     [PowerSlider(10.0)] _Radius("Bend Radius", Range(1, 100)) = 30
