@@ -40,7 +40,7 @@ void Cursor::UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frame
         return;
     }
 
-	buffer_.ExpandIfNeeded(frameInfo.PointerShapeBufferSize);
+    buffer_.ExpandIfNeeded(frameInfo.PointerShapeBufferSize);
     if (!buffer_) 
     {
         return;
@@ -92,7 +92,7 @@ void Cursor::Draw(Monitor* monitor)
 
     // Convert the buffer given by API into BGRA32
     const UINT bgraBufferSize = cursorImageWidth * cursorImageHeight * 4;
-	bgraBuffer_.ExpandIfNeeded(bgraBufferSize);
+    bgraBuffer_.ExpandIfNeeded(bgraBufferSize);
     
     // Check buffers
     if (!bgraBuffer_ || !buffer_) 
