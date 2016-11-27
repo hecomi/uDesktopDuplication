@@ -171,12 +171,12 @@ public class Monitor
 
     public int cursorX
     { 
-        get { return Lib.GetCursorX(id); }
+        get { return Lib.GetCursorMonitorId() == id ? Lib.GetCursorX() : -1; }
     }
 
     public int cursorY
     { 
-        get { return Lib.GetCursorY(id); }
+        get { return Lib.GetCursorMonitorId() == id ? Lib.GetCursorY() : -1; }
     }
 
     public int systemCursorX
@@ -199,17 +199,17 @@ public class Monitor
 
     public int cursorShapeWidth
     { 
-        get { return Lib.GetCursorShapeWidth(id); }
+        get { return Lib.GetCursorShapeWidth(); }
     }
 
     public int cursorShapeHeight
     { 
-        get { return Lib.GetCursorShapeHeight(id); }
+        get { return Lib.GetCursorShapeHeight(); }
     }
 
     public CursorShapeType cursorShapeType
     { 
-        get { return Lib.GetCursorShapeType(id); }
+        get { return Lib.GetCursorShapeType(); }
     }
 
     public int moveRectCount
