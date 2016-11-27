@@ -58,10 +58,17 @@ void Monitor::Initialize(IDXGIOutput* output)
         case S_OK:
         {
             state_ = State::Available;
+            const auto rot = static_cast<DXGI_MODE_ROTATION>(GetRotation());
             Debug::Log("Monitor::Initialize() => OK.");
             Debug::Log("    ID    : ", GetId());
             Debug::Log("    Size  : (", GetWidth(), ", ", GetHeight(), ")");
             Debug::Log("    DPI   : (", GetDpiX(), ", ", GetDpiY(), ")");
+            Debug::Log("    Rot   : ", 
+                rot == DXGI_MODE_ROTATION_IDENTITY  ? "Landscape" :
+                rot == DXGI_MODE_ROTATION_ROTATE90  ? "Portrait" :
+                rot == DXGI_MODE_ROTATION_ROTATE180 ? "Landscape (flipped)" :
+                rot == DXGI_MODE_ROTATION_ROTATE270 ? "Portrait (flipped)" : 
+                "Unspecified");
             break;
         }
         case E_INVALIDARG:
