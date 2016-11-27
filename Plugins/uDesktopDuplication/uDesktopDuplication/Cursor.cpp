@@ -259,9 +259,10 @@ void Cursor::Draw(Monitor* monitor)
         }
     };
 
-    // Access RGBA values at the same time
     Buffer<BYTE> output;
     output.ExpandIfNeeded(bgraBuffer_.Size());
+
+    // Access RGBA values at the same time
     auto output32 = output.As<UINT>();
 
     switch (GetType())
@@ -276,7 +277,7 @@ void Cursor::Draw(Monitor* monitor)
 
                     BYTE mask = 0b10000000 >> (col % 8);
                     const BYTE andMask = apiBuffer_[col / 8 + row * cursorImagePitch] & mask;
-                    const BYTE xorMask = apiBuffer_[col / 8 + (row + capturedImageHeight) * cursorImagePitch] & mask;
+                    const BYTE xorMask = apiBuffer_[col / 8 + (row + cursorImageHeight) * cursorImagePitch] & mask;
                     const UINT andMask32 = andMask ? 0xFFFFFFFF : 0x00000000;
                     const UINT xorMask32 = xorMask ? 0xFFFFFFFF : 0x00000000;
 
@@ -311,9 +312,6 @@ void Cursor::Draw(Monitor* monitor)
         }
         case DXGI_OUTDUPL_POINTER_SHAPE_TYPE_COLOR:
         {
-            const auto buffer32 = apiBuffer_.As<UINT>();
-            auto output32 = bgraBuffer_.As<UINT>();
-
             for (int row = rowMin, y = 0; row < rowMax; ++row, ++y)
             {
                 for (int col = colMin, x = 0; col < colMax; ++col, ++x)
