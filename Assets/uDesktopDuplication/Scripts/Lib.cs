@@ -2,6 +2,8 @@
 using System.Text;
 using System.Runtime.InteropServices;
 
+#pragma warning disable 114, 465
+
 namespace uDesktopDuplication
 {
 
@@ -77,9 +79,9 @@ public static class Lib
     public delegate void DebugLogDelegate(string str);
 
     [DllImport("uDesktopDuplication")]
-    public static extern void InitializeUDD();
+    public static extern void Initialize();
     [DllImport("uDesktopDuplication")]
-    public static extern void FinalizeUDD();
+    public static extern void Finalize();
     [DllImport("uDesktopDuplication")]
     public static extern void Reinitialize();
     [DllImport("uDesktopDuplication")]
@@ -93,9 +95,9 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern void SetDebugMode(DebugMode mode);
     [DllImport("uDesktopDuplication")]
-    public static extern void SetLogFunc(IntPtr func);
+    public static extern void SetLogFunc(DebugLogDelegate func);
     [DllImport("uDesktopDuplication")]
-    public static extern void SetErrorFunc(IntPtr func);
+    public static extern void SetErrorFunc(DebugLogDelegate func);
     [DllImport("uDesktopDuplication")]
     public static extern int GetMonitorCount();
     [DllImport("uDesktopDuplication")]

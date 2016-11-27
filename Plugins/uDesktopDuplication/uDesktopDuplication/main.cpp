@@ -25,7 +25,7 @@ std::queue<Message> g_messages;
 
 extern "C"
 {
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API InitializeUDD()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Initialize()
     {
         if (g_unity && !g_manager)
         {
@@ -34,7 +34,7 @@ extern "C"
         }
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API FinalizeUDD()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
     {
         if (!g_manager) return;
 
@@ -52,12 +52,12 @@ extern "C"
         {
             case kUnityGfxDeviceEventInitialize:
             {
-                InitializeUDD();
+                Initialize();
                 break;
             }
             case kUnityGfxDeviceEventShutdown:
             {
-                FinalizeUDD();
+                Finalize();
                 break;
             }
         }
@@ -66,8 +66,6 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
     {
         g_unity = unityInterfaces;
-        InitializeUDD();
-
         auto unityGraphics = g_unity->Get<IUnityGraphics>();
         unityGraphics->RegisterDeviceEventCallback(OnGraphicsDeviceEvent);
     }
@@ -76,8 +74,6 @@ extern "C"
     {
         auto unityGraphics = g_unity->Get<IUnityGraphics>();
         unityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
-
-        FinalizeUDD();
         g_unity = nullptr;
     }
 

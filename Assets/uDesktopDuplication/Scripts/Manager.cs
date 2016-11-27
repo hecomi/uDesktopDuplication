@@ -52,7 +52,9 @@ public class Manager : MonoBehaviour
         }
     }
 
+    [Tooltip("Debug mode is not applied while running.")]
     [SerializeField] DebugMode debugMode = DebugMode.File;
+
     [SerializeField] int desktopDuplicationApiTimeout = 0;
     [SerializeField] float retryReinitializationDuration = 1f;
 
@@ -60,6 +62,9 @@ public class Manager : MonoBehaviour
     private bool shouldReinitialize_ = false;
     private float reinitializationTimer_ = 0f;
     private bool isFirstFrame_ = true;
+
+    public static event Lib.DebugLogDelegate onDebugLog = msg => Debug.Log(msg);
+    public static event Lib.DebugLogDelegate onDebugErr = msg => Debug.LogError(msg);
 
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
@@ -89,15 +94,18 @@ public class Manager : MonoBehaviour
         instance_ = this;
 
         Lib.SetDebugMode(debugMode);
+        Lib.SetLogFunc(onDebugLog);
+        Lib.SetErrorFunc(onDebugErr);
+
         Lib.SetTimeout(desktopDuplicationApiTimeout);
-        Lib.InitializeUDD();
+        Lib.Initialize();
 
         CreateMonitors();
     }
 
     void OnApplicationQuit()
     {
-        Lib.FinalizeUDD();
+        Lib.Finalize();
         DestroyMonitors();
     }
 
@@ -107,6 +115,9 @@ public class Manager : MonoBehaviour
         if (!isFirstFrame_) {
             Reinitialize();
         }
+
+        Lib.SetDebugMode(debugMode);
+        Lib.SetLogFunc(onDebugLog);
     }
 
     void OnDisable()
@@ -115,6 +126,9 @@ public class Manager : MonoBehaviour
             StopCoroutine(renderCoroutine_);
             renderCoroutine_ = null;
         }
+
+        Lib.SetLogFunc(null);
+        Lib.SetErrorFunc(null);
     }
 
     void Update()

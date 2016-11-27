@@ -64,8 +64,12 @@ private:
                 {
                     switch (level)
                     {
-                        case Level::Log   : logFunc_(ss_.str().c_str()); break;
-                        case Level::Error : errFunc_(ss_.str().c_str()); break;
+                        case Level::Log   : 
+                            if (logFunc_) logFunc_(ss_.str().c_str()); 
+                            break;
+                        case Level::Error : 
+                            if (errFunc_) errFunc_(ss_.str().c_str()); 
+                            break;
                     }
                 }
                 break;
@@ -119,6 +123,7 @@ public:
     }
 
 private:
+    static bool isInitialized_;
     static Mode mode_;
     static std::ofstream fs_;
     static std::ostringstream ss_;
