@@ -10,7 +10,6 @@ using namespace Microsoft::WRL;
 
 Monitor::Monitor(int id)
     : id_(id)
-    , cursor_(std::make_unique<Cursor>(this))
 {
 }
 
@@ -197,7 +196,16 @@ void Monitor::Render(UINT timeout)
     }
 
     UpdateMetadata(frameInfo);
-    UpdateCursor(frameInfo);
+
+    if (frameInfo.PointerPosition.Visible)
+    {
+        GetMonitorManager()->SetCursorMonitorId(id_);
+    }
+
+    if (GetMonitorManager()->GetCursorMonitorId() == id_)
+    {
+        UpdateCursor(frameInfo);
+    }
 
     hr = deskDupl_->ReleaseFrame();
     if (FAILED(hr))
@@ -229,8 +237,9 @@ void Monitor::Render(UINT timeout)
 
 void Monitor::UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
-    cursor_->UpdateBuffer(frameInfo);
-    cursor_->UpdateTexture();
+    auto cursor_ = GetMonitorManager()->GetCursor();
+    cursor_->UpdateBuffer(this, frameInfo);
+    cursor_->Draw(this);
 }
 
 
@@ -357,18 +366,6 @@ ID3D11Texture2D* Monitor::GetUnityTexture() const
 IDXGIOutputDuplication* Monitor::GetDeskDupl() 
 { 
     return deskDupl_; 
-}
-
-
-const std::unique_ptr<Cursor>& Monitor::GetCursor() 
-{ 
-    return cursor_; 
-}
-
-
-void Monitor::GetCursorTexture(ID3D11Texture2D* texture)
-{
-    cursor_->GetTexture(texture);
 }
 
 

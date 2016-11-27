@@ -8,8 +8,7 @@
 using namespace Microsoft::WRL;
 
 
-Cursor::Cursor(Monitor* monitor)
-    : monitor_(monitor)
+Cursor::Cursor()
 {
 }
 
@@ -19,7 +18,7 @@ Cursor::~Cursor()
 }
 
 
-void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+void Cursor::UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
     if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
     {
@@ -29,17 +28,12 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     isVisible_ = frameInfo.PointerPosition.Visible != 0;
     if (isVisible_) 
     {
-        GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
+        GetMonitorManager()->SetCursorMonitorId(monitor->GetId());
     }
 
     x_ = frameInfo.PointerPosition.Position.x;
     y_ = frameInfo.PointerPosition.Position.y;
     timestamp_ = frameInfo.LastMouseUpdateTime;
-
-    if (!IsCursorOnParentMonitor())
-    {
-        return;
-    }
 
     if (frameInfo.PointerShapeBufferSize == 0)
     {
@@ -55,7 +49,7 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     // Get mouse pointer information
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
-    const auto hr = monitor_->GetDeskDupl()->GetFramePointerShape(
+    const auto hr = monitor->GetDeskDupl()->GetFramePointerShape(
         apiBuffer_.Size(),
         apiBuffer_.Get(),
         &bufferSize,
@@ -72,15 +66,10 @@ void Cursor::UpdateBuffer(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 }
 
 
-void Cursor::UpdateTexture()
+void Cursor::Draw(Monitor* monitor)
 {
-    if (!IsCursorOnParentMonitor())
-    {
-        return;
-    }
-
     // Check desktop texure
-    if (monitor_->GetUnityTexture() == nullptr) 
+    if (monitor->GetUnityTexture() == nullptr) 
     {
         Debug::Error("Cursor::UpdateTexture() => Monitor::GetUnityTexture() is null.");
         return;
@@ -107,15 +96,15 @@ void Cursor::UpdateTexture()
 
     // Calculate information to capture desktop image under cursor.
     D3D11_BOX box;
-    const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
+    const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(monitor->GetRotation());
     auto colMin = 0;
     auto colMax = cursorImageWidth;
     auto rowMin = 0;
     auto rowMax = cursorImageHeight;
 
     {
-        const auto monitorWidth = monitor_->GetWidth();
-        const auto monitorHeight = monitor_->GetHeight();
+        const auto monitorWidth = monitor->GetWidth();
+        const auto monitorHeight = monitor->GetHeight();
         const auto isVertical = 
             monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
             monitorRot == DXGI_MODE_ROTATION_ROTATE270;
@@ -230,7 +219,7 @@ void Cursor::UpdateTexture()
     {
         ComPtr<ID3D11DeviceContext> context;
         GetDevice()->GetImmediateContext(&context);
-        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor_->GetUnityTexture(), 0, &box);
+        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor->GetUnityTexture(), 0, &box);
     }
 
     // Get mapped surface
@@ -265,6 +254,7 @@ void Cursor::UpdateTexture()
                 return desktop32[col * desktopPitch + (capturedImageHeight - 1 - row)];
             case DXGI_MODE_ROTATION_IDENTITY:
             case DXGI_MODE_ROTATION_UNSPECIFIED:
+            default:
                 return desktop32[row * desktopPitch + col];
         }
     };
@@ -389,7 +379,7 @@ void Cursor::UpdateTexture()
     {
         ComPtr<ID3D11DeviceContext> context;
         GetDevice()->GetImmediateContext(&context);
-        context->UpdateSubresource(monitor_->GetUnityTexture(), 0, &box, bgraBuffer_.Get(), GetWidth() * 4, 0);
+        context->UpdateSubresource(monitor->GetUnityTexture(), 0, &box, bgraBuffer_.Get(), GetWidth() * 4, 0);
     }
 
     if (FAILED(surface->Unmap()))
@@ -474,10 +464,4 @@ int Cursor::GetPitch() const
 int Cursor::GetType() const
 {
     return shapeInfo_.Type;
-}
-
-
-bool Cursor::IsCursorOnParentMonitor() const
-{
-    return GetMonitorManager()->GetCursorMonitorId() == monitor_->GetId();
 }

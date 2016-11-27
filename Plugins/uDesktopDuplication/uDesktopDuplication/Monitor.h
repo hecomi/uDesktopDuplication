@@ -6,8 +6,6 @@
 #include <memory>
 #include "Common.h"
 
-class Cursor;
-
 enum class MonitorState
 {
     NotSet = -1,
@@ -31,7 +29,6 @@ public:
     ~Monitor();
     void Initialize(IDXGIOutput* output);
     void Render(UINT timeout = 0);
-    void GetCursorTexture(ID3D11Texture2D* texture);
 
 public:
     int GetId() const;
@@ -50,7 +47,6 @@ public:
     int GetDpiX() const;
     int GetDpiY() const;
     IDXGIOutputDuplication* GetDeskDupl();
-    const std::unique_ptr<Cursor>& GetCursor();
 	int GetMoveRectCount() const;
 	DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
 	int GetDirtyRectCount() const;
@@ -66,7 +62,6 @@ private:
     UINT dpiX_ = -1, dpiY_ = -1;
     int width_ = -1, height_ = -1;
     State state_ = State::NotSet;
-    std::unique_ptr<Cursor> cursor_;
     IDXGIOutputDuplication* deskDupl_ = nullptr;
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;

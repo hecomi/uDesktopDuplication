@@ -112,6 +112,12 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 }
 
 
+std::shared_ptr<Cursor> MonitorManager::GetCursor() const
+{
+    return cursor_;
+}
+
+
 void MonitorManager::Update()
 {
     if (isReinitializationRequired_)

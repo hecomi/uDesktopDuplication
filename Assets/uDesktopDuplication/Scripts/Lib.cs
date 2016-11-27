@@ -139,17 +139,17 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern bool IsCursorVisible(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern int GetCursorX(int id);
+    public static extern int GetCursorX();
     [DllImport("uDesktopDuplication")]
-    public static extern int GetCursorY(int id);
+    public static extern int GetCursorY();
     [DllImport("uDesktopDuplication")]
-    public static extern int GetCursorShapeWidth(int id);
+    public static extern int GetCursorShapeWidth();
     [DllImport("uDesktopDuplication")]
-    public static extern int GetCursorShapeHeight(int id);
+    public static extern int GetCursorShapeHeight();
     [DllImport("uDesktopDuplication")]
-    public static extern int GetCursorShapePitch(int id);
+    public static extern int GetCursorShapePitch();
     [DllImport("uDesktopDuplication")]
-    public static extern CursorShapeType GetCursorShapeType(int id);
+    public static extern CursorShapeType GetCursorShapeType();
     [DllImport("uDesktopDuplication")]
     public static extern void GetCursorTexture(int id, System.IntPtr ptr);
     [DllImport("uDesktopDuplication")]
