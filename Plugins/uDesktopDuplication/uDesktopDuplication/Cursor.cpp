@@ -176,8 +176,8 @@ void Cursor::Draw(Monitor* monitor)
     // Check if box is inner desktop area
     if (capturedImageLeft   < 0 || 
         capturedImageTop    < 0 || 
-        capturedImageRight  > desktopImageWidth || 
-        capturedImageBottom > desktopImageHeight)
+        capturedImageRight  >= desktopImageWidth || 
+        capturedImageBottom >= desktopImageHeight)
     {
         Debug::Error("Cursor::UpdateTexture() => box is out of area.");
         Debug::Error(

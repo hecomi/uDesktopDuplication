@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -78,6 +79,8 @@ public static class Lib
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void DebugLogDelegate(string str);
 
+    [DllImport("uDesktopDuplication")]
+    public static extern bool IsInitialized();
     [DllImport("uDesktopDuplication")]
     public static extern void Initialize();
     [DllImport("uDesktopDuplication")]
@@ -164,6 +167,12 @@ public static class Lib
     public static extern int GetDirtyRectCount(int id);
     [DllImport("uDesktopDuplication", EntryPoint = "GetDirtyRects")]
     private static extern IntPtr GetDirtyRects_Internal(int id);
+    [DllImport("uDesktopDuplication", EntryPoint = "GetPixels")]
+    private static extern bool GetPixels_Internal(int id, System.IntPtr ptr, int x, int y, int width, int height);
+    [DllImport("uDesktopDuplication")]
+    public static extern bool HasBeenUpdated(int id);
+    [DllImport("uDesktopDuplication")]
+    public static extern bool UseGetPixels(bool use);
 
     public static string GetName(int id)
     {
@@ -196,6 +205,38 @@ public static class Lib
             rects[i] = (RECT)Marshal.PtrToStructure(data, typeof(RECT));
         }
         return rects;
+    }
+
+    public static Color32[] GetPixels(int id, int x, int y, int width, int height)
+    {
+        var color = new Color32[width * height];       
+        GetPixels(id, color, x, y, width, height);
+        return color;
+    }
+
+    public static bool GetPixels(int id, Color32[] colors, int x, int y, int width, int height)
+    {
+        if (!Mathf.IsPowerOfTwo(width) || !Mathf.IsPowerOfTwo(height)) {
+            Debug.LogErrorFormat("width and height must be power of two.");
+            return false;
+        }
+        if (colors.Length < width * height) {
+            Debug.LogErrorFormat("colors is small.", id, x, y, width, height);
+            return false;
+        }
+		var handle = GCHandle.Alloc(colors, GCHandleType.Pinned);
+		var ptr = handle.AddrOfPinnedObject();
+        if (!GetPixels_Internal(id, ptr, x, y, width, height)) {
+            Debug.LogErrorFormat("GetPixels({0}, {1}, {2}, {3}, {4}) failed.", id, x, y, width, height);
+            return false;
+        }
+        handle.Free();
+        return true;
+    }
+
+    public static Color32 GetPixel(int id, int x, int y)
+    {
+        return GetPixels(id, x, y, 1, 1)[0];
     }
 }
 

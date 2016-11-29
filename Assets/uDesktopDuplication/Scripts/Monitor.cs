@@ -232,6 +232,11 @@ public class Monitor
         get { return Lib.GetDirtyRects(id); }
     }
 
+    public bool hasBeenUpdated
+    {
+        get { return Lib.HasBeenUpdated(id); }
+    }
+
     public bool shouldBeUpdated
     {
         get; 
@@ -316,6 +321,21 @@ public class Monitor
     public void Reinitialize()
     {
         CreateTextureIfNeeded();
+    }
+
+    public Color32[] GetPixels(int x, int y, int width, int height)
+    {
+        return Lib.GetPixels(id, x, y, width, height);
+    }
+
+    public bool GetPixels(Color32[] colors, int x, int y, int width, int height)
+    {
+        return Lib.GetPixels(id, colors, x, y, width, height);
+    }
+
+    public Color32 GetPixel(int x, int y)
+    {
+        return Lib.GetPixel(id, x, y);
     }
 }
 

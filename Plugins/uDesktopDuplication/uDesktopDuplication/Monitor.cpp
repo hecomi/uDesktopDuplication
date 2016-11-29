@@ -193,6 +193,22 @@ void Monitor::Render(UINT timeout)
             GetDevice()->GetImmediateContext(&context);
             context->CopyResource(unityTexture_, texture);
         }
+
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+
+            ComPtr<ID3D11DeviceContext> context;
+            if (!ddaTexture_)
+            {
+                if (FAILED(GetDevice()->CreateTexture2D(&dstDesc, nullptr, &ddaTexture_)))
+                {
+                    Debug::Error("Monitor::Render() => GetDevice()->CreateTexture2D() failed.");
+                    return;
+                }
+            }
+            GetDevice()->GetImmediateContext(&context);
+            context->CopyResource(ddaTexture_.Get(), texture);
+        }
     }
 
     UpdateMetadata(frameInfo);
@@ -232,6 +248,8 @@ void Monitor::Render(UINT timeout)
         }
         return;
     }
+
+    hasBeenUpdated_ = true;
 }
 
 
@@ -456,4 +474,155 @@ int Monitor::GetDirtyRectCount() const
 RECT* Monitor::GetDirtyRects() const
 {
     return metaData_.As<RECT>(moveRectSize_);
+}
+
+
+bool Monitor::GetPixels(UINT* ptr, int x, int y, int width, int height)
+{
+    if (!GetMonitorManager()->UseGetPixels())
+    {
+        Debug::Error("Monitor::GetPixels() => UseGetPixels(true) must have been called when you want to use GetPixels().");
+        return false;
+    }
+
+    if (!ddaTexture_)
+    {
+        Debug::Error("Monitor::GetPixels() => texture is not set.");
+        return false;
+    }
+
+    const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(GetRotation());
+    const auto monitorWidth = GetWidth();
+    const auto monitorHeight = GetHeight();
+    const auto isVertical = 
+        monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
+        monitorRot == DXGI_MODE_ROTATION_ROTATE270;
+    const auto desktopImageWidth  = !isVertical ? monitorWidth  : monitorHeight;
+    const auto desktopImageHeight = !isVertical ? monitorHeight : monitorWidth;
+
+    int left, top, right, bottom;
+
+    switch (monitorRot)
+    {
+        case DXGI_MODE_ROTATION_ROTATE90:
+        {
+            left   = y;
+            top    = monitorWidth - x - width;
+            right  = y + width;
+            bottom = monitorWidth - x;
+            break;
+        }
+        case DXGI_MODE_ROTATION_ROTATE180:
+        {
+            left   = monitorWidth - x - width;
+            top    = monitorHeight - y - height;
+            right  = monitorWidth - x;
+            bottom = monitorHeight - y;
+            break;
+        }
+        case DXGI_MODE_ROTATION_ROTATE270:
+        {
+            left   = monitorHeight - y - height;
+            top    = x;
+            right  = monitorHeight - y;
+            bottom = x + width;
+            break;
+        }
+        case DXGI_MODE_ROTATION_IDENTITY:
+        case DXGI_MODE_ROTATION_UNSPECIFIED:
+        default:
+        {
+            left   = x;
+            top    = y;
+            right  = x + width;
+            bottom = y + height;
+            break;
+        }
+    }
+
+    if (left   <  0 || 
+        top    <  0 || 
+        right  >= desktopImageWidth || 
+        bottom >= desktopImageHeight)
+    {
+        Debug::Error("Monitor::GetPixels() => is out of area.");
+        Debug::Error(
+            "    ",
+            "(", left, ", ", top, ")", 
+            " ~ (", right, ", ", bottom, ") > ",
+            "(", desktopImageWidth, ", ", desktopImageHeight, ")");
+        return false;
+    }
+
+    D3D11_BOX box;
+    box.left = left;
+    box.top = top;
+    box.front = 0;
+    box.right = right;
+    box.bottom = bottom;
+    box.back = 1;
+
+    // Create texture for capturing desktop image
+    ComPtr<ID3D11Texture2D> texture;
+    D3D11_TEXTURE2D_DESC desc;
+    desc.Width              = width;
+    desc.Height             = height;
+    desc.MipLevels          = 1;
+    desc.ArraySize          = 1;
+    desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
+    desc.SampleDesc.Count   = 1;
+    desc.SampleDesc.Quality = 0;
+    desc.Usage              = D3D11_USAGE_STAGING;
+    desc.BindFlags          = 0;
+    desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
+    desc.MiscFlags          = 0;
+
+    if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
+    {
+        Debug::Error("Monitor::GetPixels() => GetDevice()->CreateTexture2D() failed.");
+        return false;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    ComPtr<ID3D11DeviceContext> context;
+    GetDevice()->GetImmediateContext(&context);
+    context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, ddaTexture_.Get(), 0, &box);
+
+    ComPtr<IDXGISurface> surface;
+    if (FAILED(texture.As(&surface)))
+    {
+        Debug::Error("Monitor::GetPixels() => texture.As() failed.");
+        return false;
+    }
+
+    DXGI_MAPPED_RECT mappedSurface;
+    if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
+    {
+        Debug::Error("Monitor::GetPixels() => surface->Map() failed.");
+        return false;
+    }
+
+    const auto colors = reinterpret_cast<UINT*>(mappedSurface.pBits);
+    std::memcpy(ptr, colors, width * height * sizeof(UINT));
+    std::reverse(&ptr[0], &ptr[width * height - 1]);
+    for (int row = 0; row < height; ++row)
+    {
+        const auto start = width * row;
+        const auto end = width * (row + 1) - 1;
+        std::reverse(&ptr[start], &ptr[end]);
+    }
+
+    if (FAILED(surface->Unmap()))
+    {
+        Debug::Error("Monitor::GetPixels() => surface->Unmap() failed.");
+        return false;
+    }
+
+    return true;
+}
+
+bool Monitor::HasBeenUpdated() const
+{
+    return hasBeenUpdated_;
 }

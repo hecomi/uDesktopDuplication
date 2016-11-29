@@ -32,6 +32,8 @@ public:
     void Update();
     void SetTimeout(int timeout);
     int GetTimeout() const;
+    void UseGetPixels(bool use);
+    bool UseGetPixels() const;
 
 // Getters from Unity
 public:
@@ -41,6 +43,7 @@ public:
 
 private:
     int timeout_ = 10;
+    bool useGetPixels_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;
     std::shared_ptr<Cursor> cursor_ = std::make_shared<Cursor>();
     int cursorMonitorId_ = -1;

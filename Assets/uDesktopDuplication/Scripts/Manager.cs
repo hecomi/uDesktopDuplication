@@ -52,6 +52,14 @@ public class Manager : MonoBehaviour
         }
     }
 
+    static public bool useGetPixels
+    {
+        set
+        {
+            Lib.UseGetPixels(value);
+        }
+    }
+
     [Tooltip("Debug mode is not applied while running.")]
     [SerializeField] DebugMode debugMode = DebugMode.File;
 

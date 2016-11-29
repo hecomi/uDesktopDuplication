@@ -25,6 +25,11 @@ std::queue<Message> g_messages;
 
 extern "C"
 {
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API IsInitialized()
+    {
+        return g_unity && g_manager;
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Initialize()
     {
         if (g_unity && !g_manager)
@@ -386,5 +391,31 @@ extern "C"
             return monitor->GetDirtyRects();
         }
         return nullptr;
+    }
+
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API GetPixels(int id, UINT* ptr, int x, int y, int width, int height)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetPixels(ptr, x, y, width, height);
+        }
+        return false;
+    }
+
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API HasBeenUpdated(int id)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->HasBeenUpdated();
+        }
+        return false;
+    }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UseGetPixels(bool use)
+    {
+        if (!g_manager) return;
+        g_manager->UseGetPixels(use);
     }
 }
