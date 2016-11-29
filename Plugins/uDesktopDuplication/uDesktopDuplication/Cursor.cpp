@@ -188,6 +188,11 @@ void Cursor::Draw(Monitor* monitor)
         return;
     }
 
+    if (capturedImageWidth == 0 || capturedImageHeight == 0)
+    {
+        return;
+    }
+
     D3D11_BOX capturedImageArea 
     { 
         static_cast<UINT>(capturedImageLeft), 
