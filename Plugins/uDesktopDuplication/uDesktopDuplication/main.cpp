@@ -37,7 +37,6 @@ extern "C"
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
     {
         if (!g_manager) return;
-
         g_manager.reset();
 
         std::queue<Message> empty;

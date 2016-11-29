@@ -167,7 +167,7 @@ void Cursor::Draw(Monitor* monitor)
         capturedImageTop = 0;
     }
 
-    if (capturedImageBottom >= monitorHeight) 
+    if (capturedImageBottom >= desktopImageHeight) 
     {
         capturedImageHeight -= capturedImageBottom - desktopImageHeight;
         capturedImageBottom = desktopImageHeight - 1;
