@@ -14,15 +14,15 @@ public class GetPixelsExample : MonoBehaviour
 
     void Start()
     {
-        // must be called (performance will be slightly down).
-        uDesktopDuplication.Manager.useGetPixels = true;
-
         texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
         GetComponent<Renderer>().material.mainTexture = texture;
     }
 
     void Update()
     {
+        // must be called (performance will be slightly down).
+        uDesktopDuplication.Manager.primary.useGetPixels = true;
+
         var monitor = uddTexture.monitor;
         if (!monitor.hasBeenUpdated) return;
 

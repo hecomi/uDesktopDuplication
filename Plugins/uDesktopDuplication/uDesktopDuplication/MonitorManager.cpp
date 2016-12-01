@@ -140,18 +140,6 @@ int MonitorManager::GetTimeout() const
 }
 
 
-void MonitorManager::UseGetPixels(bool use)
-{
-    useGetPixels_ = use;
-}
-
-
-bool MonitorManager::UseGetPixels() const
-{
-    return useGetPixels_;
-}
-
-
 int MonitorManager::GetMonitorCount() const
 {
     return static_cast<int>(monitors_.size());

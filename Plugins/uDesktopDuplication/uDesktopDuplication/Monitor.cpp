@@ -162,16 +162,16 @@ void Monitor::Render(UINT timeout)
         return;
     }
 
+    ID3D11Texture2D* texture;
+    if (FAILED(resource.CopyTo(&texture)))
+    {
+        Debug::Error("Monitor::Render() => resource.As() failed.");
+        return;
+    }
+
     // Get texture
     if (unityTexture_)
     {
-        ID3D11Texture2D* texture;
-        if (FAILED(resource.CopyTo(&texture)))
-        {
-            Debug::Error("Monitor::Render() => resource.As() failed.");
-            return;
-        }
-
         D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
         texture->GetDesc(&srcDesc);
         unityTexture_->GetDesc(&dstDesc);
@@ -193,22 +193,6 @@ void Monitor::Render(UINT timeout)
             GetDevice()->GetImmediateContext(&context);
             context->CopyResource(unityTexture_, texture);
         }
-
-        {
-            std::lock_guard<std::mutex> lock(mutex_);
-
-            ComPtr<ID3D11DeviceContext> context;
-            if (!ddaTexture_)
-            {
-                if (FAILED(GetDevice()->CreateTexture2D(&dstDesc, nullptr, &ddaTexture_)))
-                {
-                    Debug::Error("Monitor::Render() => GetDevice()->CreateTexture2D() failed.");
-                    return;
-                }
-            }
-            GetDevice()->GetImmediateContext(&context);
-            context->CopyResource(ddaTexture_.Get(), texture);
-        }
     }
 
     UpdateMetadata(frameInfo);
@@ -221,6 +205,11 @@ void Monitor::Render(UINT timeout)
     if (GetMonitorManager()->GetCursorMonitorId() == id_)
     {
         UpdateCursor(frameInfo);
+    }
+
+    if (UseGetPixels())
+    {
+        CopyTextureFromGpuToCpu(texture);
     }
 
     hr = deskDupl_->ReleaseFrame();
@@ -399,6 +388,12 @@ bool Monitor::IsPrimary() const
 }
 
 
+bool Monitor::HasBeenUpdated() const
+{
+    return hasBeenUpdated_;
+}
+
+
 int Monitor::GetLeft() const
 {
     return static_cast<int>(outputDesc_.DesktopCoordinates.left);
@@ -477,17 +472,94 @@ RECT* Monitor::GetDirtyRects() const
 }
 
 
-bool Monitor::GetPixels(UINT* ptr, int x, int y, int width, int height)
+void Monitor::UseGetPixels(bool use)
 {
-    if (!GetMonitorManager()->UseGetPixels())
+    useGetPixels_ = use;
+}
+
+
+bool Monitor::UseGetPixels() const
+{
+    return useGetPixels_;
+}
+
+
+void Monitor::CopyTextureFromGpuToCpu(ID3D11Texture2D* texture)
+{
+    const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(GetRotation());
+    const auto monitorWidth = GetWidth();
+    const auto monitorHeight = GetHeight();
+    const auto isVertical = 
+        monitorRot == DXGI_MODE_ROTATION_ROTATE90 || 
+        monitorRot == DXGI_MODE_ROTATION_ROTATE270;
+    const auto desktopImageWidth  = !isVertical ? monitorWidth  : monitorHeight;
+    const auto desktopImageHeight = !isVertical ? monitorHeight : monitorWidth;
+
+    if (!textureForGetPixels_)
+    {
+        D3D11_TEXTURE2D_DESC desc;
+        desc.Width              = desktopImageWidth;
+        desc.Height             = desktopImageHeight;
+        desc.MipLevels          = 1;
+        desc.ArraySize          = 1;
+        desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
+        desc.SampleDesc.Count   = 1;
+        desc.SampleDesc.Quality = 0;
+        desc.Usage              = D3D11_USAGE_STAGING;
+        desc.BindFlags          = 0;
+        desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags          = 0;
+
+        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &textureForGetPixels_)))
+        {
+            Debug::Error("Monitor::CopyTextureFromGpuToCpu() => GetDevice()->CreateTexture2D() failed.");
+            return;
+        }
+    }
+
+    {
+        ComPtr<ID3D11DeviceContext> context;
+        GetDevice()->GetImmediateContext(&context);
+        context->CopyResource(textureForGetPixels_.Get(), texture);
+    }
+
+    ComPtr<IDXGISurface> surface;
+    if (FAILED(textureForGetPixels_.As(&surface)))
+    {
+        Debug::Error("Monitor::CopyTextureFromGpuToCpu() => texture.As() failed.");
+        return;
+    }
+
+    DXGI_MAPPED_RECT mappedSurface;
+    if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
+    {
+        Debug::Error("Monitor::CopyTextureFromGpuToCpu() => surface->Map() failed.");
+        return;
+    }
+
+    const UINT size = desktopImageWidth * desktopImageHeight * sizeof(UINT);
+    bufferForGetPixels_.ExpandIfNeeded(size);
+    std::memcpy(bufferForGetPixels_.Get(), mappedSurface.pBits, size);
+
+    if (FAILED(surface->Unmap()))
+    {
+        Debug::Error("Monitor::CopyTextureFromGpuToCpu() => surface->Unmap() failed.");
+        return;
+    }
+}
+
+
+bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
+{
+    if (!UseGetPixels())
     {
         Debug::Error("Monitor::GetPixels() => UseGetPixels(true) must have been called when you want to use GetPixels().");
         return false;
     }
 
-    if (!ddaTexture_)
+    if (!bufferForGetPixels_)
     {
-        Debug::Error("Monitor::GetPixels() => texture is not set.");
+        Debug::Error("Monitor::GetPixels() => CopyTextureFromGpuToCpu() has not been called yet.");
         return false;
     }
 
@@ -500,6 +572,7 @@ bool Monitor::GetPixels(UINT* ptr, int x, int y, int width, int height)
     const auto desktopImageWidth  = !isVertical ? monitorWidth  : monitorHeight;
     const auto desktopImageHeight = !isVertical ? monitorHeight : monitorWidth;
 
+    // check area in destop coorinates.
     int left, top, right, bottom;
 
     switch (monitorRot)
@@ -554,75 +627,46 @@ bool Monitor::GetPixels(UINT* ptr, int x, int y, int width, int height)
         return false;
     }
 
-    D3D11_BOX box;
-    box.left = left;
-    box.top = top;
-    box.front = 0;
-    box.right = right;
-    box.bottom = bottom;
-    box.back = 1;
-
-    // Create texture for capturing desktop image
-    ComPtr<ID3D11Texture2D> texture;
-    D3D11_TEXTURE2D_DESC desc;
-    desc.Width              = width;
-    desc.Height             = height;
-    desc.MipLevels          = 1;
-    desc.ArraySize          = 1;
-    desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
-    desc.SampleDesc.Count   = 1;
-    desc.SampleDesc.Quality = 0;
-    desc.Usage              = D3D11_USAGE_STAGING;
-    desc.BindFlags          = 0;
-    desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
-    desc.MiscFlags          = 0;
-
-    if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
-    {
-        Debug::Error("Monitor::GetPixels() => GetDevice()->CreateTexture2D() failed.");
-        return false;
-    }
-
-    std::lock_guard<std::mutex> lock(mutex_);
-
-    ComPtr<ID3D11DeviceContext> context;
-    GetDevice()->GetImmediateContext(&context);
-    context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, ddaTexture_.Get(), 0, &box);
-
-    ComPtr<IDXGISurface> surface;
-    if (FAILED(texture.As(&surface)))
-    {
-        Debug::Error("Monitor::GetPixels() => texture.As() failed.");
-        return false;
-    }
-
-    DXGI_MAPPED_RECT mappedSurface;
-    if (FAILED(surface->Map(&mappedSurface, DXGI_MAP_READ)))
-    {
-        Debug::Error("Monitor::GetPixels() => surface->Map() failed.");
-        return false;
-    }
-
-    const auto colors = reinterpret_cast<UINT*>(mappedSurface.pBits);
-    std::memcpy(ptr, colors, width * height * sizeof(UINT));
-    std::reverse(&ptr[0], &ptr[width * height - 1]);
     for (int row = 0; row < height; ++row)
     {
-        const auto start = width * row;
-        const auto end = width * (row + 1) - 1;
-        std::reverse(&ptr[start], &ptr[end]);
-    }
+        for (int col = 0; col < width; ++col)
+        {
+            int inRow, inCol;
+            switch (monitorRot)
+            {
+                case DXGI_MODE_ROTATION_ROTATE90:
+                    inCol = left + row;
+                    inRow = bottom - 1 - col;
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE180:
+                    inCol = right - 1 - col;
+                    inRow = bottom - 1 - row;
+                    break;
+                case DXGI_MODE_ROTATION_ROTATE270:
+                    inCol = right - 1 - row;
+                    inRow = top + col;
+                    break;
+                case DXGI_MODE_ROTATION_IDENTITY:
+                case DXGI_MODE_ROTATION_UNSPECIFIED:
+                default:
+                    inCol = left + col;
+                    inRow = top + row;
+                    break;
+            }
+            const auto inIndex = 4 * (inRow * desktopImageWidth + inCol);
 
-    if (FAILED(surface->Unmap()))
-    {
-        Debug::Error("Monitor::GetPixels() => surface->Unmap() failed.");
-        return false;
+            const auto outRow = height - 1 - row;
+            const auto outCol = col;
+            const auto outIndex = 4 * (outRow * width + outCol);
+
+
+            // BGRA -> RGBA
+            output[outIndex + 0] = bufferForGetPixels_[inIndex + 2];
+            output[outIndex + 1] = bufferForGetPixels_[inIndex + 1];
+            output[outIndex + 2] = bufferForGetPixels_[inIndex + 0];
+            output[outIndex + 3] = bufferForGetPixels_[inIndex + 3];
+        }
     }
 
     return true;
-}
-
-bool Monitor::HasBeenUpdated() const
-{
-    return hasBeenUpdated_;
 }

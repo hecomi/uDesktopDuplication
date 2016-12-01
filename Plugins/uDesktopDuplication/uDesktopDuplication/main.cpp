@@ -21,6 +21,7 @@
 IUnityInterfaces* g_unity = nullptr;
 std::unique_ptr<MonitorManager> g_manager;
 std::queue<Message> g_messages;
+ID3D11DeviceContext* g_deviceContextForMainThread = nullptr;
 
 
 extern "C"
@@ -393,12 +394,12 @@ extern "C"
         return nullptr;
     }
 
-    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API GetPixels(int id, UINT* ptr, int x, int y, int width, int height)
+    UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API GetPixels(int id, BYTE* output, int x, int y, int width, int height)
     {
         if (!g_manager) return nullptr;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            return monitor->GetPixels(ptr, x, y, width, height);
+            return monitor->GetPixels(output, x, y, width, height);
         }
         return false;
     }
@@ -413,9 +414,12 @@ extern "C"
         return false;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UseGetPixels(bool use)
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UseGetPixels(int id, bool use)
     {
         if (!g_manager) return;
-        g_manager->UseGetPixels(use);
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->UseGetPixels(use);
+        }
     }
 }
