@@ -172,7 +172,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern bool HasBeenUpdated(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern bool UseGetPixels(bool use);
+    public static extern bool UseGetPixels(int id, bool use);
 
     public static string GetName(int id)
     {
@@ -216,10 +216,6 @@ public static class Lib
 
     public static bool GetPixels(int id, Color32[] colors, int x, int y, int width, int height)
     {
-        if (!Mathf.IsPowerOfTwo(width) || !Mathf.IsPowerOfTwo(height)) {
-            Debug.LogErrorFormat("width and height must be power of two.");
-            return false;
-        }
         if (colors.Length < width * height) {
             Debug.LogErrorFormat("colors is small.", id, x, y, width, height);
             return false;

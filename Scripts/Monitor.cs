@@ -237,6 +237,20 @@ public class Monitor
         get { return Lib.HasBeenUpdated(id); }
     }
 
+    bool useGetPixels_ = false;
+    public bool useGetPixels
+    {
+        get
+        {
+            return useGetPixels_;
+        }
+        set
+        {
+            useGetPixels_ = value;
+            Lib.UseGetPixels(id, value);
+        }
+    }
+
     public bool shouldBeUpdated
     {
         get; 
@@ -325,16 +339,28 @@ public class Monitor
 
     public Color32[] GetPixels(int x, int y, int width, int height)
     {
+        if (!useGetPixels_) {
+            Debug.LogErrorFormat("Please set Monitor[{0}].useGetPixels as true.", id);
+            return null;
+        }
         return Lib.GetPixels(id, x, y, width, height);
     }
 
     public bool GetPixels(Color32[] colors, int x, int y, int width, int height)
     {
+        if (!useGetPixels_) {
+            Debug.LogErrorFormat("Please set Monitor[{0}].useGetPixels as true.", id);
+            return false;
+        }
         return Lib.GetPixels(id, colors, x, y, width, height);
     }
 
     public Color32 GetPixel(int x, int y)
     {
+        if (!useGetPixels_) {
+            Debug.LogErrorFormat("Please set Monitor[{0}].useGetPixels as true.", id);
+            return Color.black;
+        }
         return Lib.GetPixel(id, x, y);
     }
 }
