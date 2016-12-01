@@ -49,19 +49,19 @@ public:
     int GetDpiX() const;
     int GetDpiY() const;
     IDXGIOutputDuplication* GetDeskDupl();
-	int GetMoveRectCount() const;
-	DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
-	int GetDirtyRectCount() const;
-	RECT* GetDirtyRects() const;
+    int GetMoveRectCount() const;
+    DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
+    int GetDirtyRectCount() const;
+    RECT* GetDirtyRects() const;
     void UseGetPixels(bool use);
     bool UseGetPixels() const;
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
 
 private:
-	void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-	void UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-	void UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-	void UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+    void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+    void UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+    void UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+    void UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);
 
     int id_ = -1;
@@ -74,9 +74,9 @@ private:
     ID3D11Texture2D* unityTexture_ = nullptr;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;
-	Buffer<BYTE> metaData_;
+    Buffer<BYTE> metaData_;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> textureForGetPixels_;
-	Buffer<BYTE> bufferForGetPixels_;
-	UINT moveRectSize_ = 0;
-	UINT dirtyRectSize_ = 0;;
+    Buffer<BYTE> bufferForGetPixels_;
+    UINT moveRectSize_ = 0;
+    UINT dirtyRectSize_ = 0;;
 };
