@@ -40,7 +40,6 @@ public class Monitor
 
     ~Monitor()
     {
-        DestroyTexture();
     }
 
     public int id 
