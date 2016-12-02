@@ -104,7 +104,7 @@ bool MonitorManager::HasMonitorCountChanged() const
 
 std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 {
-    if (id >= 0 && id < monitors_.size())
+    if (id >= 0 && id < static_cast<int>(monitors_.size()))
     {
         return monitors_[id];
     }
