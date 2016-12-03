@@ -47,7 +47,7 @@ public class UddSceneManager : MonoBehaviour
 
     void Prev()
     {
-        sceneNo = (sceneNo - 1) % scenes.Length;
+        sceneNo = (sceneNo + scenes.Length - 1) % scenes.Length;
         Load();
     }
 
