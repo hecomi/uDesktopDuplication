@@ -116,7 +116,7 @@ public class MultipleMonitorCreator : MonoBehaviour
         for (int i = 0; i < n; ++i) {
             // Create monitor obeject
             var go = Instantiate(monitorPrefab);
-            go.name = "Monitor " + i;
+            go.name = uDesktopDuplication.Manager.monitors[i].name;
 
             // Saved infomation
             if (savedInfoList.Count == i) {

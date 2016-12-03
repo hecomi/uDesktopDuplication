@@ -6,7 +6,7 @@ namespace uDesktopDuplication
 [AddComponentMenu("uDesktopDuplication/Texture")] 
 public class Texture : MonoBehaviour
 {
-    private Monitor monitor_;
+    Monitor monitor_;
     public Monitor monitor 
     { 
         get { return monitor_; }
@@ -14,33 +14,112 @@ public class Texture : MonoBehaviour
         { 
             monitor_ = value;
             if (monitor_ != null) {
-                material = GetComponent<Renderer>().material; // clone
                 material.mainTexture = monitor_.texture;
-                material.SetFloat("_Width", transform.localScale.x);
+                width = transform.localScale.x;
+                rotation = monitor.rotation;
+                invertX = invertX_;
+                invertY = invertY_;
+                useClip = useClip_;
             }
         }
     }
 
-    private int lastMonitorId_ = 0;
+    int lastMonitorId_ = 0;
     public int monitorId
     { 
         get { return monitor.id; }
         set { monitor = Manager.GetMonitor(value); }
     }
 
-    [Header("Invert UVs")]
-    public bool invertX = false;
-    public bool invertY = false;
+    [SerializeField] bool invertX_ = false;
+    public bool invertX
+    {
+        get 
+        {
+            return invertX_;
+        }
+        set 
+        {
+            invertX_ = value;
+            if (invertX_) {
+                material.EnableKeyword("INVERT_X");
+            } else {
+                material.DisableKeyword("INVERT_X");
+            }
+        }
+    }
 
-    [Header("Clip")]
-    public bool useClip = false;
+    [SerializeField] bool invertY_ = false;
+    public bool invertY
+    {
+        get 
+        {
+            return invertY_;
+        }
+        set 
+        {
+            invertY_ = value;
+            if (invertY_) {
+                material.EnableKeyword("INVERT_Y");
+            } else {
+                material.DisableKeyword("INVERT_Y");
+            }
+        }
+    }
+
+    public MonitorRotation rotation
+    {
+        get
+        {
+            return monitor.rotation;
+        }
+        set
+        {
+            switch (value)
+            {
+                case MonitorRotation.Identity:
+                    material.DisableKeyword("ROTATE90");
+                    material.DisableKeyword("ROTATE180");
+                    material.DisableKeyword("ROTATE270");
+                    break;
+                case MonitorRotation.Rotate90:
+                    material.EnableKeyword("ROTATE90");
+                    material.DisableKeyword("ROTATE180");
+                    material.DisableKeyword("ROTATE270");
+                    break;
+                case MonitorRotation.Rotate180:
+                    material.DisableKeyword("ROTATE90");
+                    material.EnableKeyword("ROTATE180");
+                    material.DisableKeyword("ROTATE270");
+                    break;
+                case MonitorRotation.Rotate270:
+                    material.DisableKeyword("ROTATE90");
+                    material.DisableKeyword("ROTATE180");
+                    material.EnableKeyword("ROTATE270");
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    [SerializeField] bool useClip_ = false;
     public Vector2 clipPos = Vector2.zero;
     public Vector2 clipScale = new Vector2(0.2f, 0.2f);
-
-    public enum MeshForwardDirection
+    public bool useClip
     {
-        Y = 0,
-        Z = 1,
+        get
+        {
+            return useClip_;
+        }
+        set
+        {
+            if (useClip_) {
+                material.EnableKeyword("USE_CLIP");
+            } else {
+                material.DisableKeyword("USE_CLIP");
+            }
+        }
     }
 
     public bool bend
@@ -61,6 +140,11 @@ public class Texture : MonoBehaviour
         }
     }
 
+    public enum MeshForwardDirection
+    {
+        Y = 0,
+        Z = 1,
+    }
     public MeshForwardDirection meshForwardDirection
     {
         get 
@@ -84,6 +168,24 @@ public class Texture : MonoBehaviour
         }
     }
 
+    public enum Culling
+    {
+        Off   = 0,
+        Front = 1,
+        Back  = 2,
+    }
+    public Culling culling
+    {
+        get 
+        {
+            return (Culling)material.GetInt("_Cull");
+        }
+        set 
+        {
+            material.SetInt("_Cull", (int)value);
+        }
+    }
+
     public float radius
     {
         get { return material.GetFloat("_Radius"); }
@@ -102,10 +204,39 @@ public class Texture : MonoBehaviour
         set { material.SetFloat("_Thickness", value); }
     }
 
+    Material material_;
     public Material material
     {
-        get;
-        private set;
+        get
+        {
+            if (Application.isPlaying) {
+                return material_ ?? (material_ = GetComponent<Renderer>().material); // clone
+            } else {
+                return GetComponent<Renderer>().sharedMaterial;
+            }
+        }
+    }
+
+    Mesh mesh
+    {
+        get 
+        { 
+            return GetComponent<MeshFilter>().sharedMesh; 
+        }
+    }
+    public float worldWidth
+    {
+        get
+        {
+            return transform.localScale.x * (mesh.bounds.extents.x * 2f);
+        }
+    }
+    public float worldHeight
+    {
+        get
+        {
+            return transform.localScale.y * (mesh.bounds.extents.y * 2f);
+        }
     }
 
     void OnEnable()
@@ -124,7 +255,7 @@ public class Texture : MonoBehaviour
     void Update()
     {
         KeepMonitor();
-        monitor.shouldBeUpdated = true;
+        RequireUpdate();
         UpdateMaterial();
     }
 
@@ -137,6 +268,11 @@ public class Texture : MonoBehaviour
         }
     }
 
+    void RequireUpdate()
+    {
+        monitor.shouldBeUpdated = true;
+    }
+
     void Reinitialize()
     {
         // Monitor instance is released here when initialized.
@@ -145,76 +281,17 @@ public class Texture : MonoBehaviour
 
     void UpdateMaterial()
     {
-        Invert();
-        Rotate();
-        Clip();
-    }
-
-    void Invert()
-    {
-        if (invertX) {
-            material.EnableKeyword("INVERT_X");
-        } else {
-            material.DisableKeyword("INVERT_X");
-        }
-
-        if (invertY) {
-            material.EnableKeyword("INVERT_Y");
-        } else {
-            material.DisableKeyword("INVERT_Y");
-        }
-    }
-
-    void Rotate()
-    {
-        switch (monitor.rotation)
-        {
-            case MonitorRotation.Identity:
-                material.DisableKeyword("ROTATE90");
-                material.DisableKeyword("ROTATE180");
-                material.DisableKeyword("ROTATE270");
-                break;
-            case MonitorRotation.Rotate90:
-                material.EnableKeyword("ROTATE90");
-                material.DisableKeyword("ROTATE180");
-                material.DisableKeyword("ROTATE270");
-                break;
-            case MonitorRotation.Rotate180:
-                material.DisableKeyword("ROTATE90");
-                material.EnableKeyword("ROTATE180");
-                material.DisableKeyword("ROTATE270");
-                break;
-            case MonitorRotation.Rotate270:
-                material.DisableKeyword("ROTATE90");
-                material.DisableKeyword("ROTATE180");
-                material.EnableKeyword("ROTATE270");
-                break;
-            default:
-                break;
-        }
-    }
-
-    void Clip()
-    {
-        if (useClip) {
-            material.EnableKeyword("USE_CLIP");
-            material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
-        } else {
-            material.DisableKeyword("USE_CLIP");
-        }
+        width = transform.localScale.x;
+        rotation = monitor.rotation;
+        material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
     }
 
     public Vector3 GetWorldPositionFromCoord(int u, int v)
     {
-        // Mesh & Scale information
-        var mesh = GetComponent<MeshFilter>().sharedMesh;
-        var width  = transform.localScale.x * (mesh.bounds.extents.x * 2f);
-        var height = transform.localScale.y * (mesh.bounds.extents.y * 2f);
-
         // Local position (scale included).
         var x =  (float)(u - monitor.width  / 2) / monitor.width;
         var y = -(float)(v - monitor.height / 2) / monitor.height;
-        var localPos = new Vector3(width * x, height * y, 0f);
+        var localPos = new Vector3(worldWidth * x, worldHeight * y, 0f);
 
         // Bending
         if (bend) {

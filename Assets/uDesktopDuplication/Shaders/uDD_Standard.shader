@@ -7,6 +7,11 @@ Properties
     _MainTex ("Albedo (RGB)", 2D) = "white" {}
     _Glossiness ("Smoothness", Range(0, 1)) = 0.5
     _Metallic ("Metallic", Range(0, 1)) = 0.0
+    [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
+    [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
+    [PowerSlider(10.0)] _Radius("Bend Radius", Range(1, 100)) = 30
+    [PowerSlider(10.0)] _Thickness("Thickness", Range(0.01, 10)) = 1
+    _Width("Width", Range(0.0, 10.0)) = 1.0
     [KeywordEnum(Off, Front, Back)] _Cull("Culling", Int) = 2
 }
 
@@ -19,18 +24,27 @@ SubShader
     CGPROGRAM
 
     #pragma target 3.0
-    #pragma surface surf Standard fullforwardshadows
+    #pragma surface surf Standard fullforwardshadows vertex:vert
     #pragma multi_compile ___ INVERT_X
     #pragma multi_compile ___ INVERT_Y
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
-    #pragma multi_compile ___ USE_BEND
     #pragma multi_compile ___ USE_CLIP
+    #pragma multi_compile ___ BEND_ON
+    #pragma multi_compile _FORWARD_Y _FORWARD_Z
 
     #define SURFACE_SHADER
     #include "./uDD_Common.cginc"
 
     half _Glossiness;
     half _Metallic;
+    half _Radius;
+    half _Width;
+    half _Thickness;
+
+    void vert(inout appdata_full v)
+    {
+        uddBendVertex(v.vertex.xyz, _Radius, _Width, _Thickness);
+    }
 
     void surf(Input IN, inout SurfaceOutputStandard o) 
     {
