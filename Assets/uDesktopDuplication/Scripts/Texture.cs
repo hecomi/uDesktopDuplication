@@ -114,6 +114,7 @@ public class Texture : MonoBehaviour
         }
         set
         {
+            useClip_ = value;
             if (useClip_) {
                 material.EnableKeyword("USE_CLIP");
             } else {
