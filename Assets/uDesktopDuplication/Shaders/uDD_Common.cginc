@@ -95,9 +95,9 @@ inline void uddBendVertex(inout float3 v, half radius, half width, half thicknes
     v.x = radius * sin(angle) / width;
 #else
     #ifdef _FORWARD_Z
-    v.y *= thickness;
-    #elif _FORWARD_Y
     v.z *= thickness;
+    #elif _FORWARD_Y
+    v.y *= thickness;
     #endif
 #endif
 }
