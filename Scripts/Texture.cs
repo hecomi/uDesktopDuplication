@@ -73,7 +73,7 @@ public class Texture : MonoBehaviour
         {
             return monitor.rotation;
         }
-        set
+        private set
         {
             switch (value)
             {
