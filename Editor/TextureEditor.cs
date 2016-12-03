@@ -77,6 +77,7 @@ public class TextureEditor : Editor
             if (id != monitor.id) { texture.monitorId = id; }
             EditorGUILayout.IntField("ID", monitor.id);
             EditorGUILayout.Toggle("Is Primary", monitor.isPrimary);
+            EditorGUILayout.EnumPopup("Rotation", monitor.rotation);
             EditorGUILayout.Vector2Field("Resolution", new Vector2(monitor.width, monitor.height));
             EditorGUILayout.Vector2Field("DPI", new Vector2(monitor.dpiX, monitor.dpiY));
         });
