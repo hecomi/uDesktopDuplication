@@ -43,6 +43,7 @@ SubShader
 
     void vert(inout appdata_full v)
     {
+        uddBendNormal(v.vertex.x, v.normal, _Radius, _Width);
         uddBendVertex(v.vertex.xyz, _Radius, _Width, _Thickness);
     }
 
