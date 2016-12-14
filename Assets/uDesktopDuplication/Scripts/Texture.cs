@@ -308,6 +308,87 @@ public class Texture : MonoBehaviour
         // To world position
         return transform.position + (transform.rotation * localPos);
     }
+
+    public struct RayCastResult
+    {
+        public bool hit;
+        public Vector3 position;
+        public Vector3 normal;
+    }
+
+    static readonly RayCastResult raycastFailedResult = new RayCastResult {
+        hit      = false,
+        position = Vector3.zero,
+        normal   = Vector3.forward
+    };
+
+    // This function can be used only for vertical (= MeshForwardDirection.Z) plane.
+    public RayCastResult RayCast(Vector3 from, Vector3 dir)
+    {
+        var r = radius;
+        var center = transform.position - transform.forward * r;
+
+        var rot = transform.rotation;//Quaternion.FromToRotation(Vector3.forward, (transform.position - center).normalized);
+        var trs = Matrix4x4.TRS(center, rot, Vector3.one);
+        var invTrs = trs.inverse;
+
+        Vector3 localFrom = invTrs.MultiplyPoint3x4(from);
+        Vector3 localDir = invTrs.MultiplyVector(dir).normalized;
+
+        var a = localDir.z / localDir.x;
+        var b = localFrom.z - a * localFrom.x;
+
+        var aa = a * a;
+        var bb = b * b;
+        var ab = a * b;
+        var rr = r * r;
+
+        var s = aa * rr - bb + rr;
+        if (s < 0f) {
+            return raycastFailedResult;
+        }
+        s = Mathf.Sqrt(s);
+
+        var t = aa + 1;
+
+        var lx0 = (-s - ab) / t;
+        var lz0 = (b - a * s) / t;
+        var to0 = new Vector3(lx0, 0f, lz0);
+
+        var lx1 = (s - ab) / t;
+        var lz1 = (a * s + b) / t;
+        var to1 = new Vector3(lx1, 0f, lz1);
+
+        var to = (Vector3.Dot(localDir, to0) > 0f) ? to0 : to1;
+
+        var toAngle = Mathf.Abs(Mathf.Atan2(to.x, to.z));
+        var halfWidthAngle = (worldWidth / radius) * 0.5f;
+        if (toAngle > halfWidthAngle) {
+            return raycastFailedResult;
+        }
+
+        var v = to - localFrom;
+        var l = Mathf.Sqrt(Mathf.Pow(v.x, 2f) + Mathf.Pow(v.z, 2f));
+        var ly = localFrom.y + l * localDir.y / Mathf.Sqrt(Mathf.Pow(localDir.x, 2f) + Mathf.Pow(localDir.z, 2f));
+
+        var halfHeight = worldHeight * 0.5f;
+        if (Mathf.Abs(ly) > halfHeight) {
+            return raycastFailedResult;
+        }
+
+        to.y = ly;
+        var hitPos = trs.MultiplyPoint(to);
+
+        if ((hitPos - from).magnitude > dir.magnitude) {
+            return raycastFailedResult;
+        }
+
+        return new RayCastResult {
+            hit      = true,
+            position = trs.MultiplyPoint(to),
+            normal   = trs.MultiplyVector(-to).normalized
+        };
+    }
 }
 
 }
