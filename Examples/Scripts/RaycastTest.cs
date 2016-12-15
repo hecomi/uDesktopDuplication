@@ -16,6 +16,7 @@ public class RaycastTest : MonoBehaviour
             var result = uddTexture.RayCast(from.position, to.position - from.position);
             if (result.hit) {
                 Debug.DrawLine(result.position, result.position + result.normal, Color.yellow);
+                Debug.Log("COORDS: " + result.coords + ", DESKTOP: " + result.desktopCoords);
             }
         }
     }
