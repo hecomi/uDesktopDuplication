@@ -312,8 +312,11 @@ public class Texture : MonoBehaviour
     public struct RayCastResult
     {
         public bool hit;
+        public Texture texture;
         public Vector3 position;
         public Vector3 normal;
+        public Vector2 coords;
+        public Vector2 desktopCoords;
     }
 
     static readonly RayCastResult raycastFailedResult = new RayCastResult {
@@ -328,13 +331,13 @@ public class Texture : MonoBehaviour
         var r = radius;
         var center = transform.position - transform.forward * r;
 
-        var rot = transform.rotation;//Quaternion.FromToRotation(Vector3.forward, (transform.position - center).normalized);
-        var trs = Matrix4x4.TRS(center, rot, Vector3.one);
+        // Localize the start point of the ray and the direction.
+        var trs = Matrix4x4.TRS(center, transform.rotation, Vector3.one);
         var invTrs = trs.inverse;
-
         Vector3 localFrom = invTrs.MultiplyPoint3x4(from);
         Vector3 localDir = invTrs.MultiplyVector(dir).normalized;
 
+        // Calculate the intersection points of circle and line on the X-Z plane.
         var a = localDir.z / localDir.x;
         var b = localFrom.z - a * localFrom.x;
 
@@ -361,21 +364,25 @@ public class Texture : MonoBehaviour
 
         var to = (Vector3.Dot(localDir, to0) > 0f) ? to0 : to1;
 
-        var toAngle = Mathf.Abs(Mathf.Atan2(to.x, to.z));
+        // Check if the point is inner angle of mesh width.
+        var toAngle = Mathf.Atan2(to.x, to.z);
         var halfWidthAngle = (worldWidth / radius) * 0.5f;
-        if (toAngle > halfWidthAngle) {
+        if (Mathf.Abs(toAngle) > halfWidthAngle) {
             return raycastFailedResult;
         }
 
+        // Calculate the intersection points on XZ-Y plane.
         var v = to - localFrom;
         var l = Mathf.Sqrt(Mathf.Pow(v.x, 2f) + Mathf.Pow(v.z, 2f));
         var ly = localFrom.y + l * localDir.y / Mathf.Sqrt(Mathf.Pow(localDir.x, 2f) + Mathf.Pow(localDir.z, 2f));
 
+        // Check if the point is inner mesh height.
         var halfHeight = worldHeight * 0.5f;
         if (Mathf.Abs(ly) > halfHeight) {
             return raycastFailedResult;
         }
 
+        // Check hit position is in the range of the ray.
         to.y = ly;
         var hitPos = trs.MultiplyPoint(to);
 
@@ -383,10 +390,20 @@ public class Texture : MonoBehaviour
             return raycastFailedResult;
         }
 
+        // Calculate coordinates.
+        var coordX = toAngle / halfWidthAngle * 0.5f;
+        var coordY = ly / halfHeight * 0.5f;
+        int desktopX = monitor.left + (int)((coordX + 0.5f) * monitor.width);
+        int desktopY = monitor.top + (int)((0.5f - coordY) * monitor.height);
+
+        // Result
         return new RayCastResult {
-            hit      = true,
+            hit = true,
+            texture = this,
             position = trs.MultiplyPoint(to),
-            normal   = trs.MultiplyVector(-to).normalized
+            normal = trs.MultiplyVector(-to).normalized,
+            coords = new Vector2(coordX, coordY),
+            desktopCoords = new Vector2(desktopX, desktopY)
         };
     }
 }
