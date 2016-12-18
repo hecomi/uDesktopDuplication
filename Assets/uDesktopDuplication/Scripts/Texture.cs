@@ -287,6 +287,11 @@ public class Texture : MonoBehaviour
         material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
     }
 
+    public Vector3 GetWorldPositionFromCoord(Vector2 coord)
+    {
+        return GetWorldPositionFromCoord((int)coord.x, (int)coord.y);
+    }
+
     public Vector3 GetWorldPositionFromCoord(int u, int v)
     {
         // Local position (scale included).
@@ -316,13 +321,16 @@ public class Texture : MonoBehaviour
         public Vector3 position;
         public Vector3 normal;
         public Vector2 coords;
-        public Vector2 desktopCoords;
+        public Vector2 desktopCoord;
     }
 
     static readonly RayCastResult raycastFailedResult = new RayCastResult {
-        hit      = false,
-        position = Vector3.zero,
-        normal   = Vector3.forward
+        hit          = false,
+        texture      = null,
+        position     = Vector3.zero,
+        normal       = Vector3.forward,
+        coords       = Vector2.zero,
+        desktopCoord = Vector2.zero,
     };
 
     // This function can be used only for vertical (= MeshForwardDirection.Z) plane.
@@ -396,15 +404,27 @@ public class Texture : MonoBehaviour
         int desktopX = monitor.left + (int)((coordX + 0.5f) * monitor.width);
         int desktopY = monitor.top + (int)((0.5f - coordY) * monitor.height);
 
+        // Calculate normal.
+        var normal = new Vector3(-to.x, 0f, -to.z);
+
         // Result
         return new RayCastResult {
             hit = true,
             texture = this,
             position = trs.MultiplyPoint(to),
-            normal = trs.MultiplyVector(-to).normalized,
+            normal = trs.MultiplyVector(normal).normalized,
             coords = new Vector2(coordX, coordY),
-            desktopCoords = new Vector2(desktopX, desktopY)
+            desktopCoord = new Vector2(desktopX, desktopY)
         };
+    }
+
+    public static RayCastResult RayCastAll(Vector3 from, Vector3 dir)
+    {
+        foreach (var uddTexture in GameObject.FindObjectsOfType<uDesktopDuplication.Texture>()) {
+            var result = uddTexture.RayCast(from, dir);
+            if (result.hit) return result;
+        }
+        return raycastFailedResult;
     }
 }
 
