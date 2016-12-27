@@ -13,9 +13,9 @@ class Cursor;
 class MonitorManager
 {
 public:
-    explicit MonitorManager();
+    explicit MonitorManager(LUID unityAdapterLuid_);
     ~MonitorManager();
-    void Reinitialize();
+    void Reinitialize(bool useThread);
     bool HasMonitorCountChanged() const;
     void RequireReinitilization();
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
@@ -24,7 +24,8 @@ public:
     std::shared_ptr<Cursor> GetCursor() const;
 
 private:
-    void Initialize();
+	void Initialize(){ Initialize(unityAdapterLuid_, useThread_); }
+	void Initialize(LUID unityAdapterLuid, bool useThread);
     void Finalize();
 
 // Setters from Unity
@@ -38,8 +39,12 @@ public:
     int GetMonitorCount() const;
     int GetTotalWidth() const;
     int GetTotalHeight() const;
+	bool UseThread()const { return useThread_; }
 
 private:
+	LUID unityAdapterLuid_;
+	bool useThread_ = false;
+
     int timeout_ = 10;
     bool enableTextureCopyFromGpuToCpu_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;

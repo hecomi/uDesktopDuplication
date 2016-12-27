@@ -5,6 +5,7 @@
 #include <wrl/client.h>
 #include <memory>
 #include <mutex>
+#include <thread>
 #include "Common.h"
 
 enum class MonitorState
@@ -23,6 +24,8 @@ enum class MonitorState
 
 class Monitor
 {
+	class ThreadedDesktopDuplicator *m_threaded = nullptr;
+
 public:
     using State = MonitorState;
 
@@ -56,6 +59,19 @@ public:
     void UseGetPixels(bool use);
     bool UseGetPixels() const;
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
+
+public:
+	void InitializeThreaded(const Microsoft::WRL::ComPtr<struct IDXGIAdapter> &adapter
+		, bool isUnityDeviceAdapter
+		, const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
+	void CopyTextureFromThread();
+private:
+	void DuplicateAndCopyLoop();
+	void DuplicateAndMapLoop();
+	std::shared_ptr<class IsolatedD3D11Device> m_pIsolated;
+	std::thread m_desktopDuplicationThread;
+	volatile bool m_stopLoop = false;
+	std::shared_ptr<class TextureQueue> m_textureQueue;
 
 private:
     void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);

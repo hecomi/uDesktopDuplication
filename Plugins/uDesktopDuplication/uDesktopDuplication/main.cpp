@@ -7,6 +7,7 @@
 
 #include "IUnityInterface.h"
 #include "IUnityGraphics.h"
+#include "include/IUnityGraphicsD3D11.h"
 
 #include "Common.h"
 #include "Debug.h"
@@ -36,7 +37,25 @@ extern "C"
         if (g_unity && !g_manager)
         {
             Debug::Initialize();
-            g_manager = std::make_unique<MonitorManager>();
+
+			auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
+
+			Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
+			if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){
+				Debug::Error("fatal");
+				return;
+			}
+
+			Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
+			if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) {
+				Debug::Error("fatal");
+				return;
+			}
+
+			DXGI_ADAPTER_DESC desc;
+			dxgiAdapter->GetDesc(&desc);
+
+            g_manager = std::make_unique<MonitorManager>(desc.AdapterLuid);
         }
     }
 
@@ -87,7 +106,12 @@ extern "C"
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            monitor->Render(g_manager->GetTimeout());
+			if (g_manager->UseThread()) {
+				monitor->CopyTextureFromThread();
+			}
+			else {
+				monitor->Render(g_manager->GetTimeout());
+			}
         }
     }
 
@@ -96,10 +120,10 @@ extern "C"
         return OnRenderEvent;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize()
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize(int useThread)
     {
         if (!g_manager) return;
-        return g_manager->Reinitialize();
+        return g_manager->Reinitialize(useThread);
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Update()

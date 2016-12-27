@@ -11,16 +11,23 @@ using namespace Microsoft::WRL;
 Monitor::Monitor(int id)
     : id_(id)
 {
+	ZeroMemory(&monitorInfo_, sizeof(monitorInfo_));
 }
 
 
 Monitor::~Monitor()
 {
+	m_stopLoop = true;
+
     if (deskDupl_) 
     {
         deskDupl_->Release();
         deskDupl_ = nullptr;
     }
+
+	if (m_desktopDuplicationThread.joinable()) {
+		m_desktopDuplicationThread.join();
+	}
 }
 
 

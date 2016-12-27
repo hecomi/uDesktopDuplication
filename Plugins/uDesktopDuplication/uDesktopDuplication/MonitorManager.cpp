@@ -17,9 +17,9 @@
 using namespace Microsoft::WRL;
 
 
-MonitorManager::MonitorManager()
+MonitorManager::MonitorManager(LUID unityAdapterLuid)
+	: unityAdapterLuid_(unityAdapterLuid)
 {
-    Initialize();
 }
 
 
@@ -29,7 +29,7 @@ MonitorManager::~MonitorManager()
 }
 
 
-void MonitorManager::Initialize()
+void MonitorManager::Initialize(LUID unityAdapterLuid, bool useThread)
 {
     Finalize();
 
@@ -46,12 +46,23 @@ void MonitorManager::Initialize()
     ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
+		DXGI_ADAPTER_DESC desc;
+		adapter->GetDesc(&desc);
+
         // Search the main monitor from all outputs
         ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
-            monitor->Initialize(output.Get());
+			if (useThread) {
+				monitor->InitializeThreaded(adapter
+					, desc.AdapterLuid.HighPart == unityAdapterLuid.HighPart
+					&& desc.AdapterLuid.LowPart == unityAdapterLuid.LowPart
+					, output);
+			}
+			else {
+				monitor->Initialize(output.Get());
+			}
             monitors_.push_back(monitor);
         }
     }
@@ -70,8 +81,9 @@ void MonitorManager::RequireReinitilization()
 }
 
 
-void MonitorManager::Reinitialize()
+void MonitorManager::Reinitialize(bool useThread)
 {
+	useThread_ = useThread;
     Debug::Log("MonitorManager::Reinitialize()");
     Initialize();
     SendMessageToUnity(Message::Reinitialized);
@@ -104,6 +116,9 @@ bool MonitorManager::HasMonitorCountChanged() const
 
 std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 {
+	if(monitors_.empty()) {
+		const_cast<MonitorManager*>(this)->Initialize();
+	}
     if (id >= 0 && id < static_cast<int>(monitors_.size()))
     {
         return monitors_[id];
@@ -122,7 +137,7 @@ void MonitorManager::Update()
 {
     if (isReinitializationRequired_)
     {
-        Reinitialize();
+        Reinitialize(useThread_);
         isReinitializationRequired_ = false;
     }
 }
@@ -142,6 +157,9 @@ int MonitorManager::GetTimeout() const
 
 int MonitorManager::GetMonitorCount() const
 {
+	if (monitors_.empty()) {
+		const_cast<MonitorManager*>(this)->Initialize();
+	}
     return static_cast<int>(monitors_.size());
 }
 
