@@ -86,7 +86,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern void Finalize();
     [DllImport("uDesktopDuplication")]
-    public static extern void Reinitialize();
+    public static extern void Reinitialize(bool useThread);
     [DllImport("uDesktopDuplication")]
     public static extern void Update();
     [DllImport("uDesktopDuplication")]
