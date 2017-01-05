@@ -17,6 +17,7 @@
 using namespace Microsoft::WRL;
 
 
+
 MonitorManager::MonitorManager(LUID unityAdapterLuid)
 	: unityAdapterLuid_(unityAdapterLuid)
 {

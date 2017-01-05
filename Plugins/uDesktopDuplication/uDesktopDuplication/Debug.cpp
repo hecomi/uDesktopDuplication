@@ -4,6 +4,7 @@
 #include "Debug.h"
 
 
+
 decltype(Debug::isInitialized_) Debug::isInitialized_ = false;
 decltype(Debug::mode_)          Debug::mode_ = Debug::Mode::File;
 decltype(Debug::logFunc_)       Debug::logFunc_ = nullptr;

@@ -11,6 +11,7 @@
 using namespace Microsoft::WRL;
 
 
+
 extern IUnityInterfaces* g_unity;
 extern std::unique_ptr<MonitorManager> g_manager;
 extern std::queue<Message> g_messages;
