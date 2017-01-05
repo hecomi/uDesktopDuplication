@@ -105,9 +105,6 @@ bool MonitorManager::HasMonitorCountChanged() const
 
 std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 {
-	if(monitors_.empty()) {
-		const_cast<MonitorManager*>(this)->Initialize();
-	}
     if (id >= 0 && id < static_cast<int>(monitors_.size()))
     {
         return monitors_[id];
@@ -146,9 +143,6 @@ int MonitorManager::GetTimeout() const
 
 int MonitorManager::GetMonitorCount() const
 {
-	if (monitors_.empty()) {
-		const_cast<MonitorManager*>(this)->Initialize();
-	}
     return static_cast<int>(monitors_.size());
 }
 
