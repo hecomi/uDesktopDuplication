@@ -7,6 +7,8 @@
 #include <mutex>
 #include <wrl/client.h>
 
+#include "Common.h"
+
 
 class Monitor;
 
@@ -32,10 +34,18 @@ class Duplicator
 public:
     using State = DuplicatorState;
 
+    struct Metadata
+    {
+        Buffer<BYTE> buffer;
+        UINT moveRectSize = 0;
+        UINT dirtyRectSize = 0;
+    };
+
     struct Frame
     {
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
         DXGI_OUTDUPL_FRAME_INFO info;
+        Metadata metaData;
     };
 
     explicit Duplicator(Monitor* monitor);
@@ -52,7 +62,11 @@ private:
     void InitializeDevice();
     void InitializeDuplication();
     void CheckUnityAdapter();
+
     bool Duplicate();
+	void UpdateMetadata();
+    void UpdateMoveRects();
+    void UpdateDirtyRects();
 
     Monitor* monitor_ = nullptr;
     State state_ = State::Ready;
@@ -64,4 +78,6 @@ private:
     volatile bool shouldRun_ = false;
     std::thread thread_;
     mutable std::mutex mutex_;
+
+    Metadata metaData_;
 };

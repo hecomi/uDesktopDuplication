@@ -3,7 +3,6 @@
 #include "Duplicator.h"
 #include "Monitor.h"
 #include "Device.h"
-#include "Common.h"
 #include "Debug.h"
 
 #include "IUnityInterface.h"
@@ -213,30 +212,30 @@ bool Duplicator::Duplicate()
             {
                 // If any monitor setting has changed (e.g. monitor size has changed),
                 // it is necessary to re-initialize monitors.
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
+                Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
                 state_ = State::AccessLost;
                 break;
             }
             case DXGI_ERROR_WAIT_TIMEOUT:
             {
                 // This often occurs when timeout value is small and it is not problem. 
-                // Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
+                // Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_WAIT_TIMEOUT.");
                 break;
             }
             case DXGI_ERROR_INVALID_CALL:
             {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
+                Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
                 break;
             }
             case E_INVALIDARG:
             {
-                Debug::Error("Monitor::Render() => E_INVALIDARG.");
+                Debug::Error("Duplicator::Duplicate() => E_INVALIDARG.");
                 break;
             }
             default:
             {
                 state_ = State::Unknown;
-                Debug::Error("Monitor::Render() => Unknown Error.");
+                Debug::Error("Duplicator::Duplicate() => Unknown Error.");
                 break;
             }
         }
@@ -252,19 +251,19 @@ bool Duplicator::Duplicate()
             {
                 case DXGI_ERROR_ACCESS_LOST:
                 {
-                    Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
+                    Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
                     state_ = State::AccessLost;
                     break;
                 }
                 case DXGI_ERROR_INVALID_CALL:
                 {
-                    Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
+                    Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
                     break;
                 }
                 default:
                 {
                     state_ = State::Unknown;
-                    Debug::Error("Monitor::Render() => Unknown Error.");
+                    Debug::Error("Duplicator::Duplicate() => Unknown Error.");
                     break;
                 }
             }
@@ -289,8 +288,115 @@ bool Duplicator::Duplicate()
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        lastFrame_ = Frame { copyTarget, frameInfo };
+        lastFrame_.texture = copyTarget;
+        lastFrame_.info = frameInfo;
     }
 
+    UpdateMetadata();
+
     return true;
+}
+
+
+void Duplicator::UpdateMetadata()
+{
+    metaData_.buffer.ExpandIfNeeded(lastFrame_.info.TotalMetadataBufferSize);
+    if (!metaData_.buffer.Empty())
+    {
+        UpdateMoveRects();
+        UpdateDirtyRects();
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        lastFrame_.metaData = metaData_;
+    }
+}
+
+
+void Duplicator::UpdateMoveRects()
+{
+    metaData_.moveRectSize = metaData_.buffer.Size();
+
+    const auto hr = dupl_->GetFrameMoveRects(
+        metaData_.moveRectSize,
+        metaData_.buffer.As<DXGI_OUTDUPL_MOVE_RECT>(), 
+        &metaData_.moveRectSize);
+
+    if (FAILED(hr))
+    {
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+            {
+                Debug::Log("Duplicator::UpdateMoveRects() => DXGI_ERROR_ACCESS_LOST.");
+                break;
+            }
+            case DXGI_ERROR_MORE_DATA:
+            {
+                Debug::Error("Duplicator::UpdateMoveRects() => DXGI_ERROR_MORE_DATA.");
+                break;
+            }
+            case DXGI_ERROR_INVALID_CALL:
+            {
+                Debug::Error("Duplicator::UpdateMoveRects() => DXGI_ERROR_INVALID_CALL.");
+                break;
+            }
+            case E_INVALIDARG:
+            {
+                Debug::Error("Duplicator::UpdateMoveRects() => E_INVALIDARG.");
+                break;
+            }
+            default:
+            {
+                Debug::Error("Duplicator::UpdateMoveRects() => Unknown Error.");
+                break;
+            }
+        }
+        return;
+    }
+}
+
+
+void Duplicator::UpdateDirtyRects()
+{
+    metaData_.dirtyRectSize = metaData_.buffer.Size() - metaData_.moveRectSize;
+
+    const auto hr = dupl_->GetFrameDirtyRects(
+        metaData_.dirtyRectSize,
+        metaData_.buffer.As<RECT>(metaData_.moveRectSize /* offset */), 
+        &metaData_.dirtyRectSize);
+
+    if (FAILED(hr))
+    {
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+            {
+                Debug::Log("Duplicator::UpdateDirtyRects() => DXGI_ERROR_ACCESS_LOST.");
+                break;
+            }
+            case DXGI_ERROR_MORE_DATA:
+            {
+                Debug::Error("Duplicator::UpdateDirtyRects() => DXGI_ERROR_MORE_DATA.");
+                break;
+            }
+            case DXGI_ERROR_INVALID_CALL:
+            {
+                Debug::Error("Duplicator::UpdateDirtyRects() => DXGI_ERROR_INVALID_CALL.");
+                break;
+            }
+            case E_INVALIDARG:
+            {
+                Debug::Error("Duplicator::UpdateDirtyRects() => E_INVALIDARG.");
+                break;
+            }
+            default:
+            {
+                Debug::Error("Duplicator::UpdateDirtyRects() => Unknown Error.");
+                break;
+            }
+        }
+        return;
+    }
 }

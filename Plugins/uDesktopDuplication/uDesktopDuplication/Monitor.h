@@ -54,9 +54,6 @@ public:
 
 private:
     void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-    void UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-    void UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-    void UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);
 
     int id_ = -1;
@@ -77,8 +74,4 @@ private:
     ID3D11Texture2D* unityTexture_ = nullptr;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> textureForGetPixels_;
     Buffer<BYTE> bufferForGetPixels_;
-
-    Buffer<BYTE> metaData_;
-    UINT moveRectSize_ = 0;
-    UINT dirtyRectSize_ = 0;
 };

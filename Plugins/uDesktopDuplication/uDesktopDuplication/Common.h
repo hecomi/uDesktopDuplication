@@ -54,8 +54,30 @@ template <class T>
 class Buffer
 {
 public:
-    Buffer() {}
-    ~Buffer() {}
+    Buffer() 
+    {
+    }
+
+    Buffer<T>& operator=(const Buffer& other)
+    {
+        if (&other == this) return *this;
+
+        value_.reset();
+        size_ = 0;
+        ExpandIfNeeded(other.size_);
+        memcpy_s(value_.get(), size_, other.value_.get(), other.size_);
+
+        return *this;
+    }
+
+    ~Buffer() 
+    {
+    }
+
+    bool Empty() const
+    {
+        return !value_;
+    }
 
     void ExpandIfNeeded(UINT size)
     {

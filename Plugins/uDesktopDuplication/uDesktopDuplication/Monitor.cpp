@@ -67,9 +67,9 @@ void Monitor::Initialize(
 
 void Monitor::Render()
 {
-    const auto frame = duplicator_->GetFrame(); // copy
+    const auto& frame = duplicator_->GetFrame();
     const auto texture = frame.texture;
-    const auto frameInfo = frame.info;
+    const auto& frameInfo = frame.info;
 
 	if (!texture) return;
 
@@ -100,8 +100,6 @@ void Monitor::Render()
 		}
 	}
 
-	UpdateMetadata(frameInfo);
-
 	if (frameInfo.PointerPosition.Visible)
 	{
 		GetMonitorManager()->SetCursorMonitorId(id_);
@@ -126,102 +124,6 @@ void Monitor::UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
     auto cursor_ = GetMonitorManager()->GetCursor();
     cursor_->UpdateBuffer(this, frameInfo);
     cursor_->Draw(this);
-}
-
-
-void Monitor::UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    metaData_.ExpandIfNeeded(frameInfo.TotalMetadataBufferSize);
-    UpdateMoveRects(frameInfo);
-    UpdateDirtyRects(frameInfo);
-}
-
-
-void Monitor::UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    moveRectSize_ = metaData_.Size();
-
-    const auto hr = GetDeskDupl()->GetFrameMoveRects(
-        moveRectSize_,
-        metaData_.As<DXGI_OUTDUPL_MOVE_RECT>(), 
-        &moveRectSize_);
-
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameMoveRects()).");
-                break;
-            }
-            case DXGI_ERROR_MORE_DATA:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameMoveRects()).");
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameMoveRects()).");
-                break;
-            }
-            case E_INVALIDARG:
-            {
-                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameMoveRects()).");
-                break;
-            }
-            default:
-            {
-                Debug::Error("Monitor::Render() => Unknown Error (GetFrameMoveRects()).");
-                break;
-            }
-        }
-        return;
-    }
-}
-
-
-void Monitor::UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    dirtyRectSize_ = metaData_.Size() - moveRectSize_;
-
-    const auto hr = GetDeskDupl()->GetFrameDirtyRects(
-        dirtyRectSize_,
-        metaData_.As<RECT>(moveRectSize_ /* offset */), 
-        &dirtyRectSize_);
-
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameDirtyRects()).");
-                break;
-            }
-            case DXGI_ERROR_MORE_DATA:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameDirtyRects()).");
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameDirtyRects()).");
-                break;
-            }
-            case E_INVALIDARG:
-            {
-                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameDirtyRects()).");
-                break;
-            }
-            default:
-            {
-                Debug::Error("Monitor::Render() => Unknown Error (GetFrameDirtyRects()).");
-                break;
-            }
-        }
-        return;
-    }
 }
 
 
@@ -341,25 +243,29 @@ int Monitor::GetHeight() const
 
 int Monitor::GetMoveRectCount() const
 {
-    return moveRectSize_ / sizeof(DXGI_OUTDUPL_MOVE_RECT);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.moveRectSize / sizeof(DXGI_OUTDUPL_MOVE_RECT);
 }
 
 
 DXGI_OUTDUPL_MOVE_RECT* Monitor::GetMoveRects() const
 {
-    return metaData_.As<DXGI_OUTDUPL_MOVE_RECT>();
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.buffer.As<DXGI_OUTDUPL_MOVE_RECT>();
 }
 
 
 int Monitor::GetDirtyRectCount() const
 {
-    return dirtyRectSize_ / sizeof(RECT);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.dirtyRectSize / sizeof(RECT);
 }
 
 
 RECT* Monitor::GetDirtyRects() const
 {
-    return metaData_.As<RECT>(moveRectSize_);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.buffer.As<RECT>(metaData.moveRectSize);
 }
 
 
