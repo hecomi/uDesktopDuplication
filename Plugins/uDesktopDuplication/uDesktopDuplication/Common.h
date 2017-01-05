@@ -5,6 +5,7 @@
 #include <wrl/client.h>
 
 
+
 // Unity interface getter
 struct IUnityInterfaces;
 IUnityInterfaces* GetUnity();
@@ -21,6 +22,21 @@ const std::unique_ptr<MonitorManager>& GetMonitorManager();
 LUID GetUnityAdapterLuid();
 
 
+
+// Releaser
+class ScopedReleaser
+{
+public:
+    using ReleaseFuncType = std::function<void()>;
+    ScopedReleaser(ReleaseFuncType&& func) : func_(func) {}
+    ~ScopedReleaser() { func_(); }
+
+private:
+    ReleaseFuncType func_;
+};
+
+
+
 // Message is pooled and fetch from Unity.
 enum class Message
 {
@@ -30,6 +46,7 @@ enum class Message
 };
 
 void SendMessageToUnity(Message message);
+
 
 
 // Buffer

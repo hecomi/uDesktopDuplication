@@ -78,25 +78,6 @@ public:
 };
 
 
-// RAII helper
-class ReleaseGuard
-{
-	ComPtr<IDXGIOutputDuplication> m_dd;
-
-	ReleaseGuard(const ReleaseGuard &)=delete;
-	ReleaseGuard& operator=(const ReleaseGuard &)=delete;
-public:
-	ReleaseGuard(const ComPtr<IDXGIOutputDuplication> &dd)
-		: m_dd(dd)
-	{}
-
-	~ReleaseGuard()
-	{
-		m_dd->ReleaseFrame();
-	}
-};
-
-
 struct QueueItem
 {
 	ComPtr<ID3D11Texture2D> Texture;
@@ -357,7 +338,33 @@ void Monitor::DuplicateAndCopyLoop()
 		}
 		else
 		{
-			ReleaseGuard guard(deskDupl_);
+            ScopedReleaser releaser([this] 
+            {
+                const auto hr = deskDupl_->ReleaseFrame();
+                if (FAILED(hr))
+                {
+                    switch (hr)
+                    {
+                        case DXGI_ERROR_ACCESS_LOST:
+                        {
+                            Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
+                            state_ = State::AccessLost;
+                            break;
+                        }
+                        case DXGI_ERROR_INVALID_CALL:
+                        {
+                            Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
+                            break;
+                        }
+                        default:
+                        {
+                            state_ = State::Unknown;
+                            Debug::Error("Monitor::Render() => Unknown Error.");
+                            break;
+                        }
+                    }
+                }
+            });
 
 			ComPtr<ID3D11Texture2D> texture;
 			if (FAILED(resource.As(&texture))) {
