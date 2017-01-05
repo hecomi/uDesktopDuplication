@@ -2,7 +2,7 @@
 using UnityEngine.Assertions;
 using System.Collections.Generic;
 using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
-using MonitorState = uDesktopDuplication.MonitorState;
+using DuplicatorState = uDesktopDuplication.DuplicatorState;
 
 public class MultipleMonitorCreator : MonoBehaviour
 {
@@ -92,11 +92,11 @@ public class MultipleMonitorCreator : MonoBehaviour
             if (removeWaitTimer_ > removeWaitDuration) {
                 hasMonitorUnsupportStateChecked_ = true;
                 foreach (var info in monitors) {
-                    if (info.uddTexture.monitor.state == MonitorState.Unsupported) {
+                    if (info.uddTexture.monitor.state == DuplicatorState.Unsupported) {
                         Destroy(info.gameObject);
                     }
                 }
-                monitors.RemoveAll(info => info.uddTexture.monitor.state == MonitorState.Unsupported);
+                monitors.RemoveAll(info => info.uddTexture.monitor.state == DuplicatorState.Unsupported);
             }
         }
     }
