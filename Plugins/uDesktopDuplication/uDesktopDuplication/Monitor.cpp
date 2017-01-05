@@ -1,84 +1,14 @@
 #include <d3d11.h>
 #include <ShellScalingAPI.h>
 #include <queue>
+#include "Monitor.h"
 #include "Debug.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
-#include "Monitor.h"
-
-#pragma comment(lib, "d3d11.lib")
+#include "Device.h"
 
 using namespace Microsoft::WRL;
 
-
-///
-/// Thraed safe self created ID3D11Device from specified adapter
-///
-class IsolatedD3D11Device
-{
-	ComPtr<ID3D11Device> m_device;
-	ComPtr<ID3D11Texture2D> m_copyTarget;
-
-public:
-	ComPtr<ID3D11Device> GetDevice()const { return m_device; }
-
-	bool CreateDevice(const ComPtr<IDXGIAdapter> &adapter)
-	{
-		UINT flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT // D2D Compatible
-													  //| D3D11_CREATE_DEVICE_SINGLETHREADED
-													  //| D3D11_CREATE_DEVICE_VIDEO_SUPPORT // MediaFoundation
-			;
-
-		D3D_FEATURE_LEVEL FeatureLevelsRequested[6] = {
-			D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1,
-			D3D_FEATURE_LEVEL_10_0, D3D_FEATURE_LEVEL_9_3,
-			D3D_FEATURE_LEVEL_9_2, D3D_FEATURE_LEVEL_9_1 };
-
-		UINT               numLevelsRequested = sizeof(FeatureLevelsRequested) / sizeof(D3D_FEATURE_LEVEL);
-		D3D_FEATURE_LEVEL  FeatureLevelsSupported;
-
-		if (FAILED(D3D11CreateDevice(adapter.Get()
-			, adapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE, nullptr
-			, flags
-			, FeatureLevelsRequested, numLevelsRequested
-			, D3D11_SDK_VERSION
-			, &m_device
-			, &FeatureLevelsSupported
-			, nullptr
-		))) {
-			return false;
-		}
-		return true;
-	}
-
-	ComPtr<ID3D11Texture2D> CreateCopyTargetWithSharedFlag(const ComPtr<ID3D11Texture2D> &src)
-	{
-		D3D11_TEXTURE2D_DESC desc;
-		src->GetDesc(&desc);
-
-		if (m_copyTarget) {
-			D3D11_TEXTURE2D_DESC target_desc;
-			m_copyTarget->GetDesc(&target_desc);
-			if (
-				target_desc.Format == desc.Format
-				&& target_desc.Width == desc.Width
-				&& target_desc.Height == desc.Height
-				) {
-				// already created
-				return m_copyTarget;
-			}
-		}
-
-		//desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE; 
-		desc.MiscFlags = D3D11_RESOURCE_MISC_SHARED; // for share texture with unity device
-
-		if (FAILED(m_device->CreateTexture2D(&desc, NULL, &m_copyTarget)))
-		{
-			return nullptr;
-		}
-		return m_copyTarget;
-	}
-};
 
 
 struct QueueItem
@@ -151,7 +81,9 @@ void Monitor::Initialize(
 	m_pIsolated = std::make_shared<IsolatedD3D11Device>();
 	m_textureQueue = std::make_shared<TextureQueue>();
 
-	if (!m_pIsolated->CreateDevice(adapter)) {
+	if (FAILED(m_pIsolated->Create(adapter)))
+    {
+		Debug::Error("Monitor::Initialize() => IsolatedD3D11Device::Create() failed.");
 		return;
 	}
 
@@ -535,7 +467,7 @@ void Monitor::DuplicateAndCopyLoop()
         }
 
         // copy target
-        auto copyTarget = m_pIsolated->CreateCopyTargetWithSharedFlag(texture);
+        auto copyTarget = m_pIsolated->GetCompatibleSharedTexture(texture);
         if (!copyTarget) {
             return;
         }
