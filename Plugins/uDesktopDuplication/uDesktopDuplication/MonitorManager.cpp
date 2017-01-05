@@ -63,6 +63,11 @@ void MonitorManager::Initialize()
 
 void MonitorManager::Finalize()
 {
+    for (const auto& monitor : monitors_)
+    {
+        monitor->Finalize();
+    }
+
     monitors_.clear();
 }
 

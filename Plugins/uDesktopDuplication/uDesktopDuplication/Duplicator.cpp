@@ -307,16 +307,7 @@ bool Duplicator::Duplicate()
     }
 
     UpdateMetadata();
-
-	if (frameInfo.PointerPosition.Visible)
-	{
-		GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
-	}
-
-	if (GetMonitorManager()->GetCursorMonitorId() == monitor_->GetId())
-	{
-		UpdateCursor();
-	}
+    UpdateCursor();
 
     return true;
 }
@@ -324,9 +315,20 @@ bool Duplicator::Duplicate()
 
 void Duplicator::UpdateCursor()
 {
-    auto cursor = GetMonitorManager()->GetCursor();
-    cursor->UpdateBuffer(this);
-    cursor->Draw(this);
+    auto& manager = GetMonitorManager();
+    if (!manager) return;
+
+	if (lastFrame_.info.PointerPosition.Visible)
+	{
+        manager->SetCursorMonitorId(monitor_->GetId());
+	}
+
+    if (monitor_->GetId() == manager->GetCursorMonitorId())
+    {
+        auto cursor = GetMonitorManager()->GetCursor();
+        cursor->UpdateBuffer(this);
+        cursor->Draw(this);
+    }
 }
 
 

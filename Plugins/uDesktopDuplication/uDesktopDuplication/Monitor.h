@@ -22,6 +22,7 @@ public:
 	void Initialize(
         const Microsoft::WRL::ComPtr<struct IDXGIAdapter> &adapter,
 		const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
+    void Finalize();
     void Render();
 
 public:

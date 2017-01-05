@@ -3,7 +3,6 @@
 
 #include "Cursor.h"
 #include "Debug.h"
-#include "MonitorManager.h"
 #include "Monitor.h"
 #include "Duplicator.h"
 
@@ -32,11 +31,6 @@ void Cursor::UpdateBuffer(Duplicator* duplicator)
     }
 
     isVisible_ = frameInfo.PointerPosition.Visible != 0;
-    if (isVisible_) 
-    {
-        GetMonitorManager()->SetCursorMonitorId(monitor->GetId());
-    }
-
     x_ = frameInfo.PointerPosition.Position.x;
     y_ = frameInfo.PointerPosition.Position.y;
     timestamp_ = frameInfo.LastMouseUpdateTime;

@@ -21,6 +21,7 @@ Monitor::Monitor(int id)
 
 Monitor::~Monitor()
 {
+    duplicator_->Stop();
 }
 
 
@@ -62,6 +63,12 @@ void Monitor::Initialize(
     {
         duplicator_->Start();
     }
+}
+
+
+void Monitor::Finalize()
+{
+    duplicator_->Stop();
 }
 
 
