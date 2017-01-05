@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <dxgi1_2.h>
 #include <memory>
+#include <atomic>
 #include <thread>
 #include <mutex>
 #include <wrl/client.h>
@@ -73,7 +74,7 @@ private:
     void UpdateDirtyRects();
 
     Monitor* monitor_ = nullptr;
-    State state_ = State::Ready;
+    std::atomic<State> state_ = State::Ready;
 
     std::shared_ptr<class IsolatedD3D11Device> device_;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;

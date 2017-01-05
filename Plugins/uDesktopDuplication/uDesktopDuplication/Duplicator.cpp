@@ -214,9 +214,11 @@ bool Duplicator::Duplicate()
 {
     if (!dupl_ || !device_) return false;
 
+    const UINT timeout = 16;
+
     ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
-    const auto hr = dupl_->AcquireNextFrame(INFINITE, &frameInfo, &resource);
+    const auto hr = dupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
 
     if (FAILED(hr)) 
     {
@@ -228,32 +230,31 @@ bool Duplicator::Duplicate()
                 // it is necessary to re-initialize monitors.
                 Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
                 state_ = State::AccessLost;
-                break;
+                return false;
             }
             case DXGI_ERROR_WAIT_TIMEOUT:
             {
                 // This often occurs when timeout value is small and it is not problem. 
                 // Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_WAIT_TIMEOUT.");
-                break;
+                return true;
             }
             case DXGI_ERROR_INVALID_CALL:
             {
                 Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
-                break;
+                return false;
             }
             case E_INVALIDARG:
             {
                 Debug::Error("Duplicator::Duplicate() => E_INVALIDARG.");
-                break;
+                return false;
             }
             default:
             {
                 state_ = State::Unknown;
                 Debug::Error("Duplicator::Duplicate() => Unknown Error.");
-                break;
+                return false;
             }
         }
-        return false;
     }
 
     ScopedReleaser releaser([this] 
