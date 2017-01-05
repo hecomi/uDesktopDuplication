@@ -20,6 +20,8 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="MonitorManager.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="Device.h" />
+    <ClInclude Include="Duplicator.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Monitor.cpp" />
@@ -28,5 +30,7 @@
     <ClCompile Include="MonitorManager.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Duplicator.cpp" />
   </ItemGroup>
 </Project>

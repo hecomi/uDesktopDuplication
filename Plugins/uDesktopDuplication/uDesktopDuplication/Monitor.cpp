@@ -1,348 +1,118 @@
 #include <d3d11.h>
 #include <ShellScalingAPI.h>
+#include <queue>
+#include "Monitor.h"
+#include "Duplicator.h"
 #include "Debug.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
-#include "Monitor.h"
+#include "Device.h"
 
 using namespace Microsoft::WRL;
+
 
 
 Monitor::Monitor(int id)
     : id_(id)
 {
+	ZeroMemory(&monitorInfo_, sizeof(monitorInfo_));
 }
 
 
 Monitor::~Monitor()
 {
-    if (deskDupl_) 
+    duplicator_->Stop();
+}
+
+
+void Monitor::Initialize(
+	const ComPtr<IDXGIAdapter> &adapter,
+    const ComPtr<IDXGIOutput> &output
+)
+{
+    adapter_ = adapter;
+    output_ = output;
+
+	if (FAILED(output->GetDesc(&outputDesc_)))
+	{
+		Debug::Error("Monitor::Initialize() => IDXGIOutput::GetDesc() failed.");
+		return;
+	}
+
+	monitorInfo_.cbSize = sizeof(MONITORINFOEX);
+	if (!GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_))
+	{
+		Debug::Error("Monitor::Initialize() => GetMonitorInfo() failed.");
+		return;
+	}
+	else
+	{
+		const auto rect = monitorInfo_.rcMonitor;
+		width_ = rect.right - rect.left;
+		height_ = rect.bottom - rect.top;
+	}
+
+	if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
+	{
+		Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
+		// DPI is set as -1, so the application has to use the appropriate value.
+	}
+
+    duplicator_ = std::make_shared<Duplicator>(this);
+    if (duplicator_->GetState() == DuplicatorState::Ready)
     {
-        deskDupl_->Release();
-        deskDupl_ = nullptr;
+        duplicator_->Start();
     }
 }
 
 
-void Monitor::Initialize(IDXGIOutput* output)
+void Monitor::Finalize()
 {
-    if (FAILED(output->GetDesc(&outputDesc_)))
-    {
-        Debug::Error("Monitor::Initialize() => IDXGIOutput::GetDesc() failed.");
-        return;
-    }
-
-    monitorInfo_.cbSize = sizeof(MONITORINFOEX);
-    if (!GetMonitorInfo(outputDesc_.Monitor, &monitorInfo_))
-    {
-        Debug::Error("Monitor::Initialize() => GetMonitorInfo() failed.");
-        return;
-    }
-    else
-    {
-        const auto rect = monitorInfo_.rcMonitor;
-        width_ = rect.right - rect.left;
-        height_ = rect.bottom - rect.top;
-    }
-
-    if (FAILED(GetDpiForMonitor(outputDesc_.Monitor, MDT_RAW_DPI, &dpiX_, &dpiY_)))
-    {
-        Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
-        // DPI is set as -1, so the application has to use the appropriate value.
-    }
-
-    auto output1 = reinterpret_cast<IDXGIOutput1*>(output);
-    switch (output1->DuplicateOutput(GetDevice().Get(), &deskDupl_))
-    {
-        case S_OK:
-        {
-            state_ = State::Available;
-            const auto rot = static_cast<DXGI_MODE_ROTATION>(GetRotation());
-            Debug::Log("Monitor::Initialize() => OK.");
-            Debug::Log("    ID    : ", GetId());
-            Debug::Log("    Size  : (", GetWidth(), ", ", GetHeight(), ")");
-            Debug::Log("    DPI   : (", GetDpiX(), ", ", GetDpiY(), ")");
-            Debug::Log("    Rot   : ", 
-                rot == DXGI_MODE_ROTATION_IDENTITY  ? "Landscape" :
-                rot == DXGI_MODE_ROTATION_ROTATE90  ? "Portrait" :
-                rot == DXGI_MODE_ROTATION_ROTATE180 ? "Landscape (flipped)" :
-                rot == DXGI_MODE_ROTATION_ROTATE270 ? "Portrait (flipped)" : 
-                "Unspecified");
-            break;
-        }
-        case E_INVALIDARG:
-        {
-            state_ = State::InvalidArg;
-            Debug::Error("Monitor::Initialize() => Invalid arguments.");
-            break;
-        }
-        case E_ACCESSDENIED:
-        {
-            // For example, when the user presses Ctrl + Alt + Delete and the screen
-            // switches to admin screen, this error occurs. 
-            state_ = State::AccessDenied;
-            Debug::Error("Monitor::Initialize() => Access denied.");
-            break;
-        }
-        case DXGI_ERROR_UNSUPPORTED:
-        {
-            // If the display adapter on the computer is running under the Microsoft Hybrid system,
-            // this error occurs.
-            state_ = State::Unsupported;
-            Debug::Error("Monitor::Initialize() => Unsupported display.");
-            break;
-        }
-        case DXGI_ERROR_NOT_CURRENTLY_AVAILABLE:
-        {
-            // When other application use Desktop Duplication API, this error occurs.
-            state_ = State::CurrentlyNotAvailable;
-            Debug::Error("Monitor::Initialize() => Currently not available.");
-            break;
-        }
-        case DXGI_ERROR_SESSION_DISCONNECTED:
-        {
-            state_ = State::SessionDisconnected;
-            Debug::Error("Monitor::Initialize() => Session disconnected.");
-            break;
-        }
-        default:
-        {
-            state_ = State::Unknown;
-            Debug::Error("Monitor::Render() => Unknown Error.");
-            break;
-        }
-    }
+    duplicator_->Stop();
 }
 
 
-void Monitor::Render(UINT timeout)
+void Monitor::Render()
 {
-    if (!deskDupl_) return;
+    const auto& frame = duplicator_->GetFrame();
+    const auto texture = frame.texture;
+    const auto& frameInfo = frame.info;
 
-    HRESULT hr;
-    ComPtr<IDXGIResource> resource;
-    DXGI_OUTDUPL_FRAME_INFO frameInfo;
+	if (!texture) return;
 
-    hr = deskDupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                // If any monitor setting has changed (e.g. monitor size has changed),
-                // it is necessary to re-initialize monitors.
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
-                state_ = State::AccessLost;
-                break;
-            }
-            case DXGI_ERROR_WAIT_TIMEOUT:
-            {
-                // This often occurs when timeout value is small and it is not problem. 
-                // Debug::Log("Monitor::Render() => DXGI_ERROR_WAIT_TIMEOUT.");
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
-                break;
-            }
-            case E_INVALIDARG:
-            {
-                Debug::Error("Monitor::Render() => E_INVALIDARG.");
-                break;
-            }
-            default:
-            {
-                state_ = State::Unknown;
-                Debug::Error("Monitor::Render() => Unknown Error.");
-                break;
-            }
-        }
-        return;
-    }
+	// Get texture
+	if (unityTexture_)
+	{
+		D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
+		texture->GetDesc(&srcDesc);
+		unityTexture_->GetDesc(&dstDesc);
+		if (srcDesc.Width  != dstDesc.Width ||
+			srcDesc.Height != dstDesc.Height)
+		{
+			Debug::Error("Monitor::Render() => Texture sizes are defferent.");
+			Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
+			Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
+			//Debug::Log("    => Try modifying width/height using reported value from DDA.");
+			//width_ = srcDesc.Width;
+			//height_ = srcDesc.Height;
+			//state_ = MonitorState::TextureSizeInconsistent;
+			//SendMessageToUnity(Message::TextureSizeChanged);
+            return;
+		}
+		else
+		{
+			ComPtr<ID3D11DeviceContext> context;
+			GetDevice()->GetImmediateContext(&context);
+			context->CopyResource(unityTexture_, texture.Get());
+		}
+	}
 
-    ID3D11Texture2D* texture;
-    if (FAILED(resource.CopyTo(&texture)))
-    {
-        Debug::Error("Monitor::Render() => resource.As() failed.");
-        return;
-    }
+	if (UseGetPixels())
+	{
+		CopyTextureFromGpuToCpu(unityTexture_);
+	}
 
-    // Get texture
-    if (unityTexture_)
-    {
-        D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
-        texture->GetDesc(&srcDesc);
-        unityTexture_->GetDesc(&dstDesc);
-        if (srcDesc.Width != dstDesc.Width ||
-            srcDesc.Height != dstDesc.Height)
-        {
-            Debug::Error("Monitor::Render() => Texture sizes are defferent.");
-            Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
-            Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
-            //Debug::Log("    => Try modifying width/height using reported value from DDA.");
-            //width_ = srcDesc.Width;
-            //height_ = srcDesc.Height;
-            state_ = MonitorState::TextureSizeInconsistent;
-            //SendMessageToUnity(Message::TextureSizeChanged);
-        }
-        else
-        {
-            ComPtr<ID3D11DeviceContext> context;
-            GetDevice()->GetImmediateContext(&context);
-            context->CopyResource(unityTexture_, texture);
-        }
-    }
-
-    UpdateMetadata(frameInfo);
-
-    if (frameInfo.PointerPosition.Visible)
-    {
-        GetMonitorManager()->SetCursorMonitorId(id_);
-    }
-
-    if (GetMonitorManager()->GetCursorMonitorId() == id_)
-    {
-        UpdateCursor(frameInfo);
-    }
-
-    if (UseGetPixels())
-    {
-        CopyTextureFromGpuToCpu(texture);
-    }
-
-    hr = deskDupl_->ReleaseFrame();
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST.");
-                state_ = State::AccessLost;
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL.");
-                break;
-            }
-            default:
-            {
-                state_ = State::Unknown;
-                Debug::Error("Monitor::Render() => Unknown Error.");
-                break;
-            }
-        }
-        return;
-    }
-
-    hasBeenUpdated_ = true;
-}
-
-
-void Monitor::UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    auto cursor_ = GetMonitorManager()->GetCursor();
-    cursor_->UpdateBuffer(this, frameInfo);
-    cursor_->Draw(this);
-}
-
-
-void Monitor::UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    metaData_.ExpandIfNeeded(frameInfo.TotalMetadataBufferSize);
-    UpdateMoveRects(frameInfo);
-    UpdateDirtyRects(frameInfo);
-}
-
-
-void Monitor::UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    moveRectSize_ = metaData_.Size();
-
-    const auto hr = deskDupl_->GetFrameMoveRects(
-        moveRectSize_,
-        metaData_.As<DXGI_OUTDUPL_MOVE_RECT>(), 
-        &moveRectSize_);
-
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameMoveRects()).");
-                break;
-            }
-            case DXGI_ERROR_MORE_DATA:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameMoveRects()).");
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameMoveRects()).");
-                break;
-            }
-            case E_INVALIDARG:
-            {
-                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameMoveRects()).");
-                break;
-            }
-            default:
-            {
-                Debug::Error("Monitor::Render() => Unknown Error (GetFrameMoveRects()).");
-                break;
-            }
-        }
-        return;
-    }
-}
-
-
-void Monitor::UpdateDirtyRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    dirtyRectSize_ = metaData_.Size() - moveRectSize_;
-
-    const auto hr = deskDupl_->GetFrameDirtyRects(
-        dirtyRectSize_,
-        metaData_.As<RECT>(moveRectSize_ /* offset */), 
-        &dirtyRectSize_);
-
-    if (FAILED(hr))
-    {
-        switch (hr)
-        {
-            case DXGI_ERROR_ACCESS_LOST:
-            {
-                Debug::Log("Monitor::Render() => DXGI_ERROR_ACCESS_LOST (GetFrameDirtyRects()).");
-                break;
-            }
-            case DXGI_ERROR_MORE_DATA:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_MORE_DATA (GetFrameDirtyRects()).");
-                break;
-            }
-            case DXGI_ERROR_INVALID_CALL:
-            {
-                Debug::Error("Monitor::Render() => DXGI_ERROR_INVALID_CALL (GetFrameDirtyRects()).");
-                break;
-            }
-            case E_INVALIDARG:
-            {
-                Debug::Error("Monitor::Render() => E_INVALIDARG (GetFrameDirtyRects()).");
-                break;
-            }
-            default:
-            {
-                Debug::Error("Monitor::Render() => Unknown Error (GetFrameDirtyRects()).");
-                break;
-            }
-        }
-        return;
-    }
+	hasBeenUpdated_ = true;
 }
 
 
@@ -352,9 +122,21 @@ int Monitor::GetId() const
 }
 
 
-MonitorState Monitor::GetState() const
+ComPtr<struct IDXGIAdapter> Monitor::GetAdapter()
 {
-    return state_;
+    return adapter_;
+}
+
+
+ComPtr<struct IDXGIOutput> Monitor::GetOutput()
+{
+    return output_;
+}
+
+
+DuplicatorState Monitor::GetDuplicatorState() const
+{
+    return duplicator_->GetState();
 }
 
 
@@ -370,9 +152,9 @@ ID3D11Texture2D* Monitor::GetUnityTexture() const
 }
 
 
-IDXGIOutputDuplication* Monitor::GetDeskDupl() 
+ComPtr<IDXGIOutputDuplication> Monitor::GetDeskDupl() 
 { 
-    return deskDupl_; 
+    return duplicator_->GetDuplication(); 
 }
 
 
@@ -450,25 +232,29 @@ int Monitor::GetHeight() const
 
 int Monitor::GetMoveRectCount() const
 {
-    return moveRectSize_ / sizeof(DXGI_OUTDUPL_MOVE_RECT);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.moveRectSize / sizeof(DXGI_OUTDUPL_MOVE_RECT);
 }
 
 
 DXGI_OUTDUPL_MOVE_RECT* Monitor::GetMoveRects() const
 {
-    return metaData_.As<DXGI_OUTDUPL_MOVE_RECT>();
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.buffer.As<DXGI_OUTDUPL_MOVE_RECT>();
 }
 
 
 int Monitor::GetDirtyRectCount() const
 {
-    return dirtyRectSize_ / sizeof(RECT);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.dirtyRectSize / sizeof(RECT);
 }
 
 
 RECT* Monitor::GetDirtyRects() const
 {
-    return metaData_.As<RECT>(moveRectSize_);
+    const auto& metaData = duplicator_->GetFrame().metaData;
+    return metaData.buffer.As<RECT>(metaData.moveRectSize);
 }
 
 

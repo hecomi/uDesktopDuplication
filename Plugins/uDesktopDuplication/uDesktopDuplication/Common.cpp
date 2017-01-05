@@ -6,8 +6,10 @@
 #include "IUnityInterface.h"
 #include "IUnityGraphicsD3D11.h"
 #include "Common.h"
+#include "Debug.h"
 
 using namespace Microsoft::WRL;
+
 
 
 extern IUnityInterfaces* g_unity;
@@ -30,6 +32,29 @@ ComPtr<ID3D11Device> GetDevice()
 const std::unique_ptr<MonitorManager>& GetMonitorManager()
 {
     return g_manager;
+}
+
+
+LUID GetUnityAdapterLuid()
+{
+    const auto device = GetUnity()->Get<IUnityGraphicsD3D11>()->GetDevice();
+
+    Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
+    if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){
+        Debug::Error("QueryInterface from IUnityGraphicsD3D11 to IDXGIDevice1 failed.");
+        return LUID();
+    }
+
+    Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
+    if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) {
+        Debug::Error("QueryInterface from IDXGIDevice1 to IDXGIAdapter failed.");
+        return LUID();
+    }
+
+    DXGI_ADAPTER_DESC adapterDesc;
+    dxgiAdapter->GetDesc(&adapterDesc);
+
+    return adapterDesc.AdapterLuid;
 }
 
 

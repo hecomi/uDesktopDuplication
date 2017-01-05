@@ -57,6 +57,8 @@ public class Manager : MonoBehaviour
 
     [SerializeField] int desktopDuplicationApiTimeout = 0;
     [SerializeField] float retryReinitializationDuration = 1f;
+        [SerializeField]
+        bool useThread = false;
 
     private Coroutine renderCoroutine_ = null;
     private bool shouldReinitialize_ = false;
@@ -143,7 +145,7 @@ public class Manager : MonoBehaviour
     public void Reinitialize()
     {
         Debug.Log("[uDD] Reinitialize");
-        Lib.Reinitialize();
+        Lib.Reinitialize(useThread);
         CreateMonitors();
         if (onReinitialized != null) {
             onReinitialized();
@@ -158,11 +160,11 @@ public class Manager : MonoBehaviour
             var monitor = monitors[i];
             var state = monitor.state;
             if (
-                state == MonitorState.NotSet ||
-                state == MonitorState.AccessLost || 
-                state == MonitorState.AccessDenied ||
-                state == MonitorState.SessionDisconnected ||
-                state == MonitorState.Unknown
+                state == DuplicatorState.NotSet ||
+                state == DuplicatorState.AccessLost || 
+                state == DuplicatorState.AccessDenied ||
+                state == DuplicatorState.SessionDisconnected ||
+                state == DuplicatorState.Unknown
             ) {
                 reinitializeNeeded = true;
                 break;

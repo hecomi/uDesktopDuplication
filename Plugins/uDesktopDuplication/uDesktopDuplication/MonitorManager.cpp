@@ -17,7 +17,9 @@
 using namespace Microsoft::WRL;
 
 
-MonitorManager::MonitorManager()
+
+MonitorManager::MonitorManager(LUID unityAdapterLuid)
+	: unityAdapterLuid_(unityAdapterLuid)
 {
     Initialize();
 }
@@ -51,7 +53,8 @@ void MonitorManager::Initialize()
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
-            monitor->Initialize(output.Get());
+            const auto unityAdapterLuid = GetUnityAdapterLuid();
+            monitor->Initialize(adapter, output);
             monitors_.push_back(monitor);
         }
     }
@@ -60,6 +63,11 @@ void MonitorManager::Initialize()
 
 void MonitorManager::Finalize()
 {
+    for (const auto& monitor : monitors_)
+    {
+        monitor->Finalize();
+    }
+
     monitors_.clear();
 }
 

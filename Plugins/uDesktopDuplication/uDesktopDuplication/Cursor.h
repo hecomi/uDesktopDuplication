@@ -5,15 +5,15 @@
 #include <memory>
 #include "Common.h"
 
-class Monitor;
+class Duplicator;
 
 class Cursor
 {
 public:
     explicit Cursor();
     ~Cursor();
-    void UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-    void Draw(Monitor* monitor);
+    void UpdateBuffer(Duplicator* duplicator);
+    void Draw(Duplicator* duplicator);
     void GetTexture(ID3D11Texture2D* texture);
 
     bool IsVisible() const;

@@ -1,20 +1,40 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <wrl/client.h>
 
 
-// Unity interface and ID3D11Device getters
+
+// Unity interface getter
 struct IUnityInterfaces;
 IUnityInterfaces* GetUnity();
 
+// ID3D11Device (in Unity) getter
 struct ID3D11Device;
 Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
-
 
 // Manager getter
 class MonitorManager;
 const std::unique_ptr<MonitorManager>& GetMonitorManager();
+
+// Get adapter LUID to check the adapter of the monitor is same as Unity one.
+LUID GetUnityAdapterLuid();
+
+
+
+// Releaser
+class ScopedReleaser
+{
+public:
+    using ReleaseFuncType = std::function<void()>;
+    ScopedReleaser(ReleaseFuncType&& func) : func_(func) {}
+    ~ScopedReleaser() { func_(); }
+
+private:
+    ReleaseFuncType func_;
+};
+
 
 
 // Message is pooled and fetch from Unity.
@@ -28,13 +48,36 @@ enum class Message
 void SendMessageToUnity(Message message);
 
 
+
 // Buffer
 template <class T>
 class Buffer
 {
 public:
-    Buffer() {}
-    ~Buffer() {}
+    Buffer() 
+    {
+    }
+
+    Buffer<T>& operator=(const Buffer& other)
+    {
+        if (&other == this) return *this;
+
+        value_.reset();
+        size_ = 0;
+        ExpandIfNeeded(other.size_);
+        memcpy_s(value_.get(), size_, other.value_.get(), other.size_);
+
+        return *this;
+    }
+
+    ~Buffer() 
+    {
+    }
+
+    bool Empty() const
+    {
+        return !value_;
+    }
 
     void ExpandIfNeeded(UINT size)
     {

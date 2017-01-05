@@ -7,10 +7,12 @@
 
 #include "IUnityInterface.h"
 #include "IUnityGraphics.h"
+#include "include/IUnityGraphicsD3D11.h"
 
 #include "Common.h"
 #include "Debug.h"
 #include "Monitor.h"
+#include "Duplicator.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
 
@@ -36,7 +38,25 @@ extern "C"
         if (g_unity && !g_manager)
         {
             Debug::Initialize();
-            g_manager = std::make_unique<MonitorManager>();
+
+			auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
+
+			Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
+			if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){
+				Debug::Error("fatal");
+				return;
+			}
+
+			Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
+			if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) {
+				Debug::Error("fatal");
+				return;
+			}
+
+			DXGI_ADAPTER_DESC desc;
+			dxgiAdapter->GetDesc(&desc);
+
+            g_manager = std::make_unique<MonitorManager>(desc.AdapterLuid);
         }
     }
 
@@ -87,7 +107,7 @@ extern "C"
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            monitor->Render(g_manager->GetTimeout());
+            monitor->Render();
         }
     }
 
@@ -177,14 +197,14 @@ extern "C"
         }
     }
 
-    UNITY_INTERFACE_EXPORT MonitorState UNITY_INTERFACE_API GetState(int id)
+    UNITY_INTERFACE_EXPORT DuplicatorState UNITY_INTERFACE_API GetState(int id)
     {
-        if (!g_manager) return MonitorState::NotSet;
+        if (!g_manager) return DuplicatorState::NotSet;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            return monitor->GetState();
+            return monitor->GetDuplicatorState();
         }
-        return MonitorState::NotSet;
+        return DuplicatorState::NotSet;
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)

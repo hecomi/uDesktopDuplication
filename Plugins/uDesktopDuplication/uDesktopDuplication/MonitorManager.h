@@ -13,7 +13,7 @@ class Cursor;
 class MonitorManager
 {
 public:
-    explicit MonitorManager();
+    explicit MonitorManager(LUID unityAdapterLuid_);
     ~MonitorManager();
     void Reinitialize();
     bool HasMonitorCountChanged() const;
@@ -24,7 +24,7 @@ public:
     std::shared_ptr<Cursor> GetCursor() const;
 
 private:
-    void Initialize();
+	void Initialize();
     void Finalize();
 
 // Setters from Unity
@@ -40,6 +40,8 @@ public:
     int GetTotalHeight() const;
 
 private:
+	LUID unityAdapterLuid_;
+
     int timeout_ = 10;
     bool enableTextureCopyFromGpuToCpu_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;

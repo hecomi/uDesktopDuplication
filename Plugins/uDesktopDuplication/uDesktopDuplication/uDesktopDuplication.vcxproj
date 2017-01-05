@@ -140,6 +140,8 @@
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="Debug.cpp" />
+    <ClCompile Include="Device.cpp" />
+    <ClCompile Include="Duplicator.cpp" />
     <ClCompile Include="MonitorManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Monitor.cpp" />
@@ -148,6 +150,8 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Debug.h" />
+    <ClInclude Include="Device.h" />
+    <ClInclude Include="Duplicator.h" />
     <ClInclude Include="MonitorManager.h" />
     <ClInclude Include="include\IUnityGraphics.h" />
     <ClInclude Include="include\IUnityGraphicsD3D11.h" />

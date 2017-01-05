@@ -1,11 +1,13 @@
 #include <d3d11.h>
 #include <wrl/client.h>
-#include "Debug.h"
-#include "MonitorManager.h"
-#include "Monitor.h"
+
 #include "Cursor.h"
+#include "Debug.h"
+#include "Monitor.h"
+#include "Duplicator.h"
 
 using namespace Microsoft::WRL;
+
 
 
 Cursor::Cursor()
@@ -18,19 +20,17 @@ Cursor::~Cursor()
 }
 
 
-void Cursor::UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
+void Cursor::UpdateBuffer(Duplicator* duplicator)
 {
+    auto monitor = duplicator->GetMonitor();
+    const auto& frameInfo = duplicator->GetFrame().info;
+
     if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
     {
         return;
     }
 
     isVisible_ = frameInfo.PointerPosition.Visible != 0;
-    if (isVisible_) 
-    {
-        GetMonitorManager()->SetCursorMonitorId(monitor->GetId());
-    }
-
     x_ = frameInfo.PointerPosition.Position.x;
     y_ = frameInfo.PointerPosition.Position.y;
     timestamp_ = frameInfo.LastMouseUpdateTime;
@@ -49,7 +49,7 @@ void Cursor::UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frame
     // Get mouse pointer information
     UINT bufferSize;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo;
-    const auto hr = monitor->GetDeskDupl()->GetFramePointerShape(
+    const auto hr = duplicator->GetDuplication()->GetFramePointerShape(
         buffer_.Size(),
         buffer_.Get(),
         &bufferSize,
@@ -66,12 +66,15 @@ void Cursor::UpdateBuffer(Monitor* monitor, const DXGI_OUTDUPL_FRAME_INFO& frame
 }
 
 
-void Cursor::Draw(Monitor* monitor)
+void Cursor::Draw(Duplicator* duplicator)
 {
+    auto monitor = duplicator->GetMonitor();
+    const auto& frame = duplicator->GetFrame();
+
     // Check desktop texure
-    if (monitor->GetUnityTexture() == nullptr) 
+    if (frame.texture == nullptr) 
     {
-        Debug::Error("Cursor::UpdateTexture() => Monitor::GetUnityTexture() is null.");
+        Debug::Error("Cursor::UpdateTexture() => texture is null.");
         return;
     }
 
@@ -219,7 +222,7 @@ void Cursor::Draw(Monitor* monitor)
         desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags          = 0;
 
-        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
+        if (FAILED(duplicator->GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
         {
             Debug::Error("Cursor::UpdateTexture() => GetDevice()->CreateTexture2D() failed.");
             return;
@@ -229,8 +232,8 @@ void Cursor::Draw(Monitor* monitor)
     // Copy desktop image to the texture
     {
         ComPtr<ID3D11DeviceContext> context;
-        GetDevice()->GetImmediateContext(&context);
-        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, monitor->GetUnityTexture(), 0, &capturedImageArea);
+        duplicator->GetDevice()->GetImmediateContext(&context);
+        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, frame.texture.Get(), 0, &capturedImageArea);
     }
 
     // Get mapped surface to access pixels in CPU
@@ -360,8 +363,8 @@ void Cursor::Draw(Monitor* monitor)
 
     {
         ComPtr<ID3D11DeviceContext> context;
-        GetDevice()->GetImmediateContext(&context);
-        context->UpdateSubresource(monitor->GetUnityTexture(), 0, &capturedImageArea, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
+        duplicator->GetDevice()->GetImmediateContext(&context);
+        context->UpdateSubresource(frame.texture.Get(), 0, &capturedImageArea, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
     }
 
     if (FAILED(surface->Unmap()))

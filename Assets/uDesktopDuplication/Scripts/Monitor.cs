@@ -11,21 +11,23 @@ public class Monitor
 
         switch (state)
         {
-            case MonitorState.Available:
+            case DuplicatorState.Ready:
                 break;
-            case MonitorState.InvalidArg:
+            case DuplicatorState.Running:
+                break;
+            case DuplicatorState.InvalidArg:
                 Debug.LogErrorFormat("[uDD] {0}:{1} => Invalid.", id, name);
                 break;
-            case MonitorState.AccessDenied:
+            case DuplicatorState.AccessDenied:
                 Debug.LogWarningFormat("[uDD] {0}:{1} => Access Denied.", id, name);
                 break;
-            case MonitorState.Unsupported:
+            case DuplicatorState.Unsupported:
                 Debug.LogWarningFormat("[uDD] {0}:{1} => Unsupported.", id, name);
                 break;
-            case MonitorState.SessionDisconnected:
+            case DuplicatorState.SessionDisconnected:
                 Debug.LogWarningFormat("[uDD] {0}:{1} => Disconnected.", id, name);
                 break;
-            case MonitorState.NotSet:
+            case DuplicatorState.NotSet:
                 Debug.LogErrorFormat("[uDD] {0}:{1} => Something wrong.", id, name);
                 break;
             default:
@@ -53,14 +55,19 @@ public class Monitor
         get { return id < Manager.monitorCount; } 
     }
 
-    public MonitorState state
+    public DuplicatorState state
     {
         get { return Lib.GetState(id); }
     }
 
     public bool available
     {
-        get { return state == MonitorState.Available; }
+        get 
+        { 
+            return 
+                state == DuplicatorState.Ready || 
+                state == DuplicatorState.Running; 
+        }
     }
 
     public string name
