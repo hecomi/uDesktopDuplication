@@ -31,7 +31,10 @@ public:
 
     explicit Monitor(int id);
     ~Monitor();
-    void Initialize(IDXGIOutput* output);
+	void Initialize(
+        const Microsoft::WRL::ComPtr<struct IDXGIAdapter> &adapter,
+		const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
+	void CopyTextureFromThread();
     void Render(UINT timeout = 0);
 
 public:
@@ -60,11 +63,6 @@ public:
     bool UseGetPixels() const;
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
 
-public:
-	void InitializeThreaded(const Microsoft::WRL::ComPtr<struct IDXGIAdapter> &adapter
-		, bool isUnityDeviceAdapter
-		, const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
-	void CopyTextureFromThread();
 private:
 	void DuplicateAndCopyLoop();
 	void DuplicateAndMapLoop();

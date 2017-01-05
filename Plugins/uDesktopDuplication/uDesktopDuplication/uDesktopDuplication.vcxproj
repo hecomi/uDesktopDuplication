@@ -145,7 +145,6 @@ copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName).pdb" "$(Soluti
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Monitor.cpp" />
     <ClCompile Include="Cursor.cpp" />
-    <ClCompile Include="ThreadedDesktopDuplicator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />

@@ -46,19 +46,13 @@ void MonitorManager::Initialize()
     ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
-		DXGI_ADAPTER_DESC desc;
-		adapter->GetDesc(&desc);
-
         // Search the main monitor from all outputs
         ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
             const auto unityAdapterLuid = GetUnityAdapterLuid();
-            monitor->InitializeThreaded(adapter
-                , desc.AdapterLuid.HighPart == unityAdapterLuid.HighPart
-                && desc.AdapterLuid.LowPart == unityAdapterLuid.LowPart
-                , output);
+            monitor->Initialize(adapter, output);
             monitors_.push_back(monitor);
         }
     }

@@ -28,6 +28,5 @@
     <ClCompile Include="MonitorManager.cpp" />
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="Debug.cpp" />
-    <ClCompile Include="ThreadedDesktopDuplicator.cpp" />
   </ItemGroup>
 </Project>
