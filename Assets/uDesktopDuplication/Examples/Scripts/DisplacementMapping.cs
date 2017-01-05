@@ -45,10 +45,6 @@ public class DisplacementMapping : MonoBehaviour
             case TargetMonitor.Next: ++id; break;
             case TargetMonitor.Prev: --id; break;
         }
-        if (uDesktopDuplication.Manager.monitorCount == 0)
-        {
-            return;
-        }
         id = Mathf.Clamp(id, 0, uDesktopDuplication.Manager.monitorCount - 1);
         var monitor = uDesktopDuplication.Manager.GetMonitor(id);
         monitor.shouldBeUpdated = true;
