@@ -182,12 +182,6 @@ extern "C"
         return g_manager->GetTotalHeight();
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetTimeout(int timeout)
-    {
-        if (!g_manager) return;
-        g_manager->SetTimeout(timeout);
-    }
-
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetId(int id)
     {
         if (!g_manager) return;

@@ -72,6 +72,16 @@ void MonitorManager::Finalize()
 }
 
 
+void MonitorManager::Update()
+{
+    if (isReinitializationRequired_)
+    {
+        Reinitialize();
+        isReinitializationRequired_ = false;
+    }
+}
+
+
 void MonitorManager::RequireReinitilization()
 {
     isReinitializationRequired_ = true;
@@ -123,28 +133,6 @@ std::shared_ptr<Monitor> MonitorManager::GetMonitor(int id) const
 std::shared_ptr<Cursor> MonitorManager::GetCursor() const
 {
     return cursor_;
-}
-
-
-void MonitorManager::Update()
-{
-    if (isReinitializationRequired_)
-    {
-        Reinitialize();
-        isReinitializationRequired_ = false;
-    }
-}
-
-
-void MonitorManager::SetTimeout(int timeout)
-{
-    timeout_ = timeout;
-}
-
-
-int MonitorManager::GetTimeout() const
-{
-    return timeout_;
 }
 
 

@@ -16,6 +16,7 @@ public:
     explicit MonitorManager(LUID unityAdapterLuid_);
     ~MonitorManager();
     void Reinitialize();
+    void Update();
     bool HasMonitorCountChanged() const;
     void RequireReinitilization();
     void SetCursorMonitorId(int id) { cursorMonitorId_ = id; }
@@ -27,13 +28,6 @@ private:
 	void Initialize();
     void Finalize();
 
-// Setters from Unity
-public:
-    void Update();
-    void SetTimeout(int timeout);
-    int GetTimeout() const;
-
-// Getters from Unity
 public:
     int GetMonitorCount() const;
     int GetTotalWidth() const;
@@ -42,7 +36,6 @@ public:
 private:
 	LUID unityAdapterLuid_;
 
-    int timeout_ = 10;
     bool enableTextureCopyFromGpuToCpu_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;
     std::shared_ptr<Cursor> cursor_ = std::make_shared<Cursor>();
