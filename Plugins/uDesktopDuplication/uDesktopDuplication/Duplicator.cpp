@@ -2,6 +2,8 @@
 
 #include "Duplicator.h"
 #include "Monitor.h"
+#include "MonitorManager.h"
+#include "Cursor.h"
 #include "Device.h"
 #include "Debug.h"
 
@@ -183,6 +185,18 @@ Duplicator::State Duplicator::GetState() const
 }
 
 
+Monitor* Duplicator::GetMonitor() const
+{
+    return monitor_;
+}
+
+
+Microsoft::WRL::ComPtr<ID3D11Device> Duplicator::GetDevice()
+{
+    return device_->GetDevice();
+}
+
+
 ComPtr<IDXGIOutputDuplication> Duplicator::GetDuplication()
 {
     return dupl_;
@@ -294,7 +308,25 @@ bool Duplicator::Duplicate()
 
     UpdateMetadata();
 
+	if (frameInfo.PointerPosition.Visible)
+	{
+		GetMonitorManager()->SetCursorMonitorId(monitor_->GetId());
+	}
+
+	if (GetMonitorManager()->GetCursorMonitorId() == monitor_->GetId())
+	{
+		UpdateCursor();
+	}
+
     return true;
+}
+
+
+void Duplicator::UpdateCursor()
+{
+    auto cursor = GetMonitorManager()->GetCursor();
+    cursor->UpdateBuffer(this);
+    cursor->Draw(this);
 }
 
 

@@ -100,30 +100,12 @@ void Monitor::Render()
 		}
 	}
 
-	if (frameInfo.PointerPosition.Visible)
-	{
-		GetMonitorManager()->SetCursorMonitorId(id_);
-	}
-
-	if (GetMonitorManager()->GetCursorMonitorId() == id_)
-	{
-		UpdateCursor(frameInfo);
-	}
-
 	if (UseGetPixels())
 	{
-		CopyTextureFromGpuToCpu(texture.Get());
+		CopyTextureFromGpuToCpu(unityTexture_);
 	}
 
 	hasBeenUpdated_ = true;
-}
-
-
-void Monitor::UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
-{
-    auto cursor_ = GetMonitorManager()->GetCursor();
-    cursor_->UpdateBuffer(this, frameInfo);
-    cursor_->Draw(this);
 }
 
 

@@ -53,7 +53,6 @@ public:
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
 
 private:
-    void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);
 
     int id_ = -1;

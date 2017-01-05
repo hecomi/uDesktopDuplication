@@ -55,6 +55,8 @@ public:
     bool IsRunning() const;
     bool IsError() const;
     State GetState() const;
+    Monitor* GetMonitor() const;
+    Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDuplication();
     const Frame& GetFrame() const;
 
@@ -64,6 +66,8 @@ private:
     void CheckUnityAdapter();
 
     bool Duplicate();
+
+    void UpdateCursor();
 	void UpdateMetadata();
     void UpdateMoveRects();
     void UpdateDirtyRects();
