@@ -90,8 +90,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(TargetFileName)" "$(SolutionDir)..\..\Assets\$(ProjectName)\Plugins\x86_64"
-copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(TargetName).pdb" "$(SolutionDir)..\..\Assets\$(ProjectName)\Plugins\x86_64"</Command>
+      <Command>copy /Y "$(SolutionDir)$(Platform)\$(Configuration)\$(TargetFileName)" "$(SolutionDir)..\..\Assets\$(ProjectName)\Plugins\x86_64"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
