@@ -29,7 +29,7 @@ MonitorManager::~MonitorManager()
 }
 
 
-void MonitorManager::Initialize(LUID unityAdapterLuid, bool useThread)
+void MonitorManager::Initialize()
 {
     Finalize();
 
@@ -54,15 +54,11 @@ void MonitorManager::Initialize(LUID unityAdapterLuid, bool useThread)
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
-			if (useThread) {
-				monitor->InitializeThreaded(adapter
-					, desc.AdapterLuid.HighPart == unityAdapterLuid.HighPart
-					&& desc.AdapterLuid.LowPart == unityAdapterLuid.LowPart
-					, output);
-			}
-			else {
-				monitor->Initialize(output.Get());
-			}
+            const auto unityAdapterLuid = GetUnityAdapterLuid();
+            monitor->InitializeThreaded(adapter
+                , desc.AdapterLuid.HighPart == unityAdapterLuid.HighPart
+                && desc.AdapterLuid.LowPart == unityAdapterLuid.LowPart
+                , output);
             monitors_.push_back(monitor);
         }
     }
@@ -81,9 +77,8 @@ void MonitorManager::RequireReinitilization()
 }
 
 
-void MonitorManager::Reinitialize(bool useThread)
+void MonitorManager::Reinitialize()
 {
-	useThread_ = useThread;
     Debug::Log("MonitorManager::Reinitialize()");
     Initialize();
     SendMessageToUnity(Message::Reinitialized);
@@ -137,7 +132,7 @@ void MonitorManager::Update()
 {
     if (isReinitializationRequired_)
     {
-        Reinitialize(useThread_);
+        Reinitialize();
         isReinitializationRequired_ = false;
     }
 }

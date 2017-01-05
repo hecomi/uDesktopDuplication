@@ -106,12 +106,7 @@ extern "C"
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-			if (g_manager->UseThread()) {
-				monitor->CopyTextureFromThread();
-			}
-			else {
-				monitor->Render(g_manager->GetTimeout());
-			}
+            monitor->CopyTextureFromThread();
         }
     }
 
@@ -120,10 +115,10 @@ extern "C"
         return OnRenderEvent;
     }
 
-    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize(int useThread)
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize()
     {
         if (!g_manager) return;
-        return g_manager->Reinitialize(useThread);
+        return g_manager->Reinitialize();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Update()

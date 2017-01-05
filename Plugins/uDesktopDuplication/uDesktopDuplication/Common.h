@@ -1,20 +1,24 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <wrl/client.h>
 
 
-// Unity interface and ID3D11Device getters
+// Unity interface getter
 struct IUnityInterfaces;
 IUnityInterfaces* GetUnity();
 
+// ID3D11Device (in Unity) getter
 struct ID3D11Device;
 Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
-
 
 // Manager getter
 class MonitorManager;
 const std::unique_ptr<MonitorManager>& GetMonitorManager();
+
+// Get adapter LUID to check the adapter of the monitor is same as Unity one.
+LUID GetUnityAdapterLuid();
 
 
 // Message is pooled and fetch from Unity.
