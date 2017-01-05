@@ -87,7 +87,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern void Finalize();
     [DllImport("uDesktopDuplication")]
-    public static extern void Reinitialize(bool useThread);
+    public static extern void Reinitialize();
     [DllImport("uDesktopDuplication")]
     public static extern void Update();
     [DllImport("uDesktopDuplication")]
@@ -112,8 +112,6 @@ public static class Lib
     public static extern int GetTotalWidth();
     [DllImport("uDesktopDuplication")]
     public static extern int GetTotalHeight();
-    [DllImport("uDesktopDuplication")]
-    public static extern void SetTimeout(int timeout);
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetRenderEventFunc();
     [DllImport("uDesktopDuplication")]

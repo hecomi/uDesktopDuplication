@@ -55,10 +55,7 @@ public class Manager : MonoBehaviour
     [Tooltip("Debug mode is not applied while running.")]
     [SerializeField] DebugMode debugMode = DebugMode.File;
 
-    [SerializeField] int desktopDuplicationApiTimeout = 0;
     [SerializeField] float retryReinitializationDuration = 1f;
-        [SerializeField]
-        bool useThread = false;
 
     private Coroutine renderCoroutine_ = null;
     private bool shouldReinitialize_ = false;
@@ -99,7 +96,6 @@ public class Manager : MonoBehaviour
         Lib.SetLogFunc(onDebugLog);
         Lib.SetErrorFunc(onDebugErr);
 
-        Lib.SetTimeout(desktopDuplicationApiTimeout);
         Lib.Initialize();
 
         CreateMonitors();
@@ -145,7 +141,7 @@ public class Manager : MonoBehaviour
     public void Reinitialize()
     {
         Debug.Log("[uDD] Reinitialize");
-        Lib.Reinitialize(useThread);
+        Lib.Reinitialize();
         CreateMonitors();
         if (onReinitialized != null) {
             onReinitialized();
