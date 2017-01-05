@@ -12,6 +12,7 @@
 #include "Common.h"
 #include "Debug.h"
 #include "Monitor.h"
+#include "Duplicator.h"
 #include "Cursor.h"
 #include "MonitorManager.h"
 
@@ -106,7 +107,7 @@ extern "C"
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            monitor->CopyTextureFromThread();
+            monitor->Render();
         }
     }
 
@@ -196,14 +197,14 @@ extern "C"
         }
     }
 
-    UNITY_INTERFACE_EXPORT MonitorState UNITY_INTERFACE_API GetState(int id)
+    UNITY_INTERFACE_EXPORT DuplicatorState UNITY_INTERFACE_API GetState(int id)
     {
-        if (!g_manager) return MonitorState::NotSet;
+        if (!g_manager) return DuplicatorState::NotSet;
         if (auto monitor = g_manager->GetMonitor(id))
         {
-            return monitor->GetState();
+            return monitor->GetDuplicatorState();
         }
-        return MonitorState::NotSet;
+        return DuplicatorState::NotSet;
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetName(int id, char* buf, int len)

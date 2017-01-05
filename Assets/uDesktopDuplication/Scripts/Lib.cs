@@ -32,17 +32,18 @@ public enum MonitorRotation
     Rotate270 = 4
 }
 
-public enum MonitorState
+public enum DuplicatorState
 {
     NotSet = -1,
-    Available = 0,
-    InvalidArg = 1,
-    AccessDenied = 2,
-    Unsupported = 3,
-    CurrentlyNotAvailable = 4,
-    SessionDisconnected = 5,
-    AccessLost = 6,
-    TextureSizeInconsistent = 7,
+    Ready = 0,
+    Running = 1,
+    InvalidArg = 2,
+    AccessDenied = 3,
+    Unsupported = 4,
+    CurrentlyNotAvailable = 5,
+    SessionDisconnected = 6,
+    AccessLost = 7,
+    TextureSizeInconsistent = 8,
     Unknown = 999,
 }
 
@@ -118,7 +119,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern int GetId(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern MonitorState GetState(int id);
+    public static extern DuplicatorState GetState(int id);
     [DllImport("uDesktopDuplication")]
     public static extern void GetName(int id, StringBuilder buf, int len);
     [DllImport("uDesktopDuplication")]

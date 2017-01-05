@@ -8,38 +8,27 @@
 #include <thread>
 #include "Common.h"
 
-enum class MonitorState
-{
-    NotSet = -1,
-    Available = 0,
-    InvalidArg = 1,
-    AccessDenied = 2,
-    Unsupported = 3,
-    CurrentlyNotAvailable = 4,
-    SessionDisconnected = 5,
-    AccessLost = 6,
-    TextureSizeInconsistent = 7,
-    Unknown = 999,
-};
+
+enum class DuplicatorState;
+
 
 class Monitor
 {
 	class ThreadedDesktopDuplicator *m_threaded = nullptr;
 
 public:
-    using State = MonitorState;
-
     explicit Monitor(int id);
     ~Monitor();
 	void Initialize(
         const Microsoft::WRL::ComPtr<struct IDXGIAdapter> &adapter,
 		const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
-	void CopyTextureFromThread();
-    void Render(UINT timeout = 0);
+    void Render();
 
 public:
     int GetId() const;
-    State GetState() const;
+    Microsoft::WRL::ComPtr<struct IDXGIAdapter> GetAdapter();
+    Microsoft::WRL::ComPtr<struct IDXGIOutput> GetOutput();
+    DuplicatorState GetDuplicatorState() const;
     void SetUnityTexture(ID3D11Texture2D* texture);
     ID3D11Texture2D* GetUnityTexture() const;
     void GetName(char* buf, int len) const;
@@ -54,7 +43,7 @@ public:
     int GetRotation() const;
     int GetDpiX() const;
     int GetDpiY() const;
-    IDXGIOutputDuplication* GetDeskDupl();
+    Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDeskDupl();
     int GetMoveRectCount() const;
     DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
     int GetDirtyRectCount() const;
@@ -64,14 +53,6 @@ public:
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
 
 private:
-	void DuplicateAndCopyLoop();
-	void DuplicateAndMapLoop();
-	std::shared_ptr<class IsolatedD3D11Device> m_pIsolated;
-	std::thread m_desktopDuplicationThread;
-	volatile bool m_stopLoop = false;
-	std::shared_ptr<class TextureQueue> m_textureQueue;
-
-private:
     void UpdateCursor(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
     void UpdateMetadata(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
     void UpdateMoveRects(const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
@@ -79,18 +60,25 @@ private:
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);
 
     int id_ = -1;
+
     UINT dpiX_ = -1, dpiY_ = -1;
     int width_ = -1, height_ = -1;
+
     bool hasBeenUpdated_ = false;
     bool useGetPixels_ = false;
-    State state_ = State::NotSet;
-    IDXGIOutputDuplication* deskDupl_ = nullptr;
-    ID3D11Texture2D* unityTexture_ = nullptr;
+
+    Microsoft::WRL::ComPtr<IDXGIOutput> output_;
+    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter_;
     DXGI_OUTPUT_DESC outputDesc_;
     MONITORINFOEX monitorInfo_;
-    Buffer<BYTE> metaData_;
+
+    std::shared_ptr<class Duplicator> duplicator_;
+
+    ID3D11Texture2D* unityTexture_ = nullptr;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> textureForGetPixels_;
     Buffer<BYTE> bufferForGetPixels_;
+
+    Buffer<BYTE> metaData_;
     UINT moveRectSize_ = 0;
-    UINT dirtyRectSize_ = 0;;
+    UINT dirtyRectSize_ = 0;
 };
