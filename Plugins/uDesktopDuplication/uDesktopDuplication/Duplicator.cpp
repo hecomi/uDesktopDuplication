@@ -1,5 +1,7 @@
 #pragma once
 
+#include <chrono>
+
 #include "Duplicator.h"
 #include "Monitor.h"
 #include "MonitorManager.h"
@@ -139,12 +141,25 @@ void Duplicator::Start()
 
     thread_ = std::thread([this] 
     {
+        using namespace std::chrono;
+
         state_ = State::Running;
 
         shouldRun_ = true;
         while (shouldRun_)
         {
-            if (!Duplicate()) break;
+            const UINT timeout = 16 /* milliseconds */;
+
+            ScopedTimer timer([timeout] (microseconds us)
+            {
+                const auto waitTime = milliseconds(timeout) - us;
+                if (waitTime > microseconds::zero())
+                {
+                    std::this_thread::sleep_for(waitTime);
+                }
+            });
+
+            if (!Duplicate(timeout)) break;
         }
 
         if (state_ == State::Running)
@@ -211,11 +226,9 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 }
 
 
-bool Duplicator::Duplicate()
+bool Duplicator::Duplicate(UINT timeout)
 {
     if (!dupl_ || !device_) return false;
-
-    const UINT timeout = 16;
 
     ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;

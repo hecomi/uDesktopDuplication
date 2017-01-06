@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <chrono>
 #include <wrl/client.h>
 
 
@@ -32,7 +33,23 @@ public:
     ~ScopedReleaser() { func_(); }
 
 private:
-    ReleaseFuncType func_;
+    const ReleaseFuncType func_;
+};
+
+
+
+// Timer
+class ScopedTimer
+{
+public:
+    using microseconds = std::chrono::microseconds;
+    using TimerFuncType = std::function<void(microseconds)>;
+    ScopedTimer(TimerFuncType&& func);
+    ~ScopedTimer();
+
+private:
+    const TimerFuncType func_;
+    const std::chrono::time_point<std::chrono::steady_clock> start_;
 };
 
 
