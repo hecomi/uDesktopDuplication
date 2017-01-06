@@ -1,9 +1,17 @@
 #pragma once
+
 #include <time.h>
 #include <fstream>
 #include <sstream>
 #include <mutex>
+
+#include "Common.h"
 #include "IUnityInterface.h"
+
+
+// Debug flag
+#define UDD_DEBUG_ON
+
 
 // Logging
 class Debug
@@ -134,3 +142,14 @@ private:
     static DebugLogFuncPtr errFunc_;
     static std::mutex mutex_;
 };
+
+
+#ifdef UDD_DEBUG_ON
+#define UDD_FUNCTION_SCOPE_TIMER \
+    ScopedTimer _timer_##__COUNTER__([](std::chrono::microseconds us) \
+    { \
+        Debug::Log(__FUNCTION__, "@", __FILE__, ":", __LINE__, " => ", us.count(), " (us)"); \
+    });
+#else
+#define UDD_FUNCTION_SCOPE_TIMER
+#endif
