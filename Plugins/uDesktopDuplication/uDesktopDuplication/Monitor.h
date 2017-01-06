@@ -14,8 +14,6 @@ enum class DuplicatorState;
 
 class Monitor
 {
-	class ThreadedDesktopDuplicator *m_threaded = nullptr;
-
 public:
     explicit Monitor(int id);
     ~Monitor();
