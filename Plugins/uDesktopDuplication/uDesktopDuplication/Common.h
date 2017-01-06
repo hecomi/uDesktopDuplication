@@ -75,6 +75,14 @@ public:
     {
     }
 
+    Buffer(const Buffer& other)
+    {
+        value_.reset();
+        size_ = 0;
+        ExpandIfNeeded(other.size_);
+        memcpy_s(value_.get(), size_, other.value_.get(), other.size_);
+    }
+
     Buffer<T>& operator=(const Buffer& other)
     {
         if (&other == this) return *this;
