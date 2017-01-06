@@ -11,6 +11,7 @@ decltype(Debug::logFunc_)       Debug::logFunc_ = nullptr;
 decltype(Debug::errFunc_)       Debug::errFunc_ = nullptr;
 decltype(Debug::fs_)            Debug::fs_;
 decltype(Debug::ss_)            Debug::ss_;
+decltype(Debug::mutex_)         Debug::mutex_;
 
 
 void Debug::Initialize()

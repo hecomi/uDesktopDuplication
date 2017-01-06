@@ -2,6 +2,7 @@
 #include <time.h>
 #include <fstream>
 #include <sstream>
+#include <mutex>
 #include "IUnityInterface.h"
 
 // Logging
@@ -107,6 +108,7 @@ public:
     template <class Arg, class... RestArgs>
     static void Log(Arg&& arg, RestArgs&&... restArgs)
     {
+        std::lock_guard<std::mutex> lock(mutex_);
         Output("[uDD::Log]");
         OutputTime();
         Output(" ");
@@ -116,6 +118,7 @@ public:
     template <class Arg, class... RestArgs>
     static void Error(Arg&& arg, RestArgs&&... restArgs)
     {
+        std::lock_guard<std::mutex> lock(mutex_);
         Output("[uDD::Err]");
         OutputTime();
         Output(" ");
@@ -129,4 +132,5 @@ private:
     static std::ostringstream ss_;
     static DebugLogFuncPtr logFunc_;
     static DebugLogFuncPtr errFunc_;
+    static std::mutex mutex_;
 };
