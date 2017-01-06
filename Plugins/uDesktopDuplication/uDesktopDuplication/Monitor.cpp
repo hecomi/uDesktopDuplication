@@ -87,11 +87,6 @@ void Monitor::Render()
 			Debug::Error("Monitor::Render() => Texture sizes are defferent.");
 			Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
 			Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
-			//Debug::Log("    => Try modifying width/height using reported value from DDA.");
-			//width_ = srcDesc.Width;
-			//height_ = srcDesc.Height;
-			//state_ = MonitorState::TextureSizeInconsistent;
-			//SendMessageToUnity(Message::TextureSizeChanged);
             return;
 		}
 		else
