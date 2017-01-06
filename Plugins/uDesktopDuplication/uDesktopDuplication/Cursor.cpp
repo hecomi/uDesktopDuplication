@@ -1,5 +1,4 @@
 #include <d3d11.h>
-#include <wrl/client.h>
 
 #include "Cursor.h"
 #include "Debug.h"
@@ -20,11 +19,8 @@ Cursor::~Cursor()
 }
 
 
-void Cursor::UpdateBuffer(Duplicator* duplicator)
+void Cursor::UpdateBuffer(Duplicator* duplicator, const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
-    auto monitor = duplicator->GetMonitor();
-    const auto& frameInfo = duplicator->GetFrame().info;
-
     if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
     {
         return;
@@ -66,15 +62,16 @@ void Cursor::UpdateBuffer(Duplicator* duplicator)
 }
 
 
-void Cursor::Draw(Duplicator* duplicator)
+void Cursor::Draw(
+    Duplicator* duplicator, 
+    const ComPtr<ID3D11Texture2D>& targetTexture)
 {
     auto monitor = duplicator->GetMonitor();
-    const auto& frame = duplicator->GetFrame();
 
     // Check desktop texure
-    if (frame.texture == nullptr) 
+    if (targetTexture == nullptr) 
     {
-        Debug::Error("Cursor::UpdateTexture() => texture is null.");
+        Debug::Error("Cursor::UpdateTexture() => target texture is null.");
         return;
     }
 
@@ -233,7 +230,7 @@ void Cursor::Draw(Duplicator* duplicator)
     {
         ComPtr<ID3D11DeviceContext> context;
         duplicator->GetDevice()->GetImmediateContext(&context);
-        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, frame.texture.Get(), 0, &capturedImageArea);
+        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, targetTexture.Get(), 0, &capturedImageArea);
     }
 
     // Get mapped surface to access pixels in CPU
@@ -364,7 +361,7 @@ void Cursor::Draw(Duplicator* duplicator)
     {
         ComPtr<ID3D11DeviceContext> context;
         duplicator->GetDevice()->GetImmediateContext(&context);
-        context->UpdateSubresource(frame.texture.Get(), 0, &capturedImageArea, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
+        context->UpdateSubresource(targetTexture.Get(), 0, &capturedImageArea, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
     }
 
     if (FAILED(surface->Unmap()))

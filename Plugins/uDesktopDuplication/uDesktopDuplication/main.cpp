@@ -57,12 +57,15 @@ extern "C"
 			dxgiAdapter->GetDesc(&desc);
 
             g_manager = std::make_unique<MonitorManager>(desc.AdapterLuid);
+            g_manager->Initialize();
         }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
     {
         if (!g_manager) return;
+
+        g_manager->Finalize();
         g_manager.reset();
 
         std::queue<Message> empty;

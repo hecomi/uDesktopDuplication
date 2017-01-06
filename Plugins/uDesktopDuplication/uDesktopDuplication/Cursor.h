@@ -2,7 +2,9 @@
 
 #include <d3d11.h>
 #include <dxgi1_2.h>
+#include <wrl/client.h>
 #include <memory>
+
 #include "Common.h"
 
 class Duplicator;
@@ -12,8 +14,12 @@ class Cursor
 public:
     explicit Cursor();
     ~Cursor();
-    void UpdateBuffer(Duplicator* duplicator);
-    void Draw(Duplicator* duplicator);
+    void UpdateBuffer(
+        Duplicator* duplicator, 
+        const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+    void Draw(
+        Duplicator* duplicator, 
+        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& targetTexture);
     void GetTexture(ID3D11Texture2D* texture);
 
     bool IsVisible() const;

@@ -68,8 +68,10 @@ private:
 
     bool Duplicate();
 
-    void UpdateCursor();
-	void UpdateMetadata();
+    void UpdateCursor(
+        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
+        const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
+	void UpdateMetadata(UINT totalBufferSize);
     void UpdateMoveRects();
     void UpdateDirtyRects();
 

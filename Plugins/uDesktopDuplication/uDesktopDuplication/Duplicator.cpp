@@ -301,60 +301,55 @@ bool Duplicator::Duplicate()
     device_->GetDevice()->GetImmediateContext(&context);
     context->CopyResource(copyTarget.Get(), texture.Get());
 
+    UpdateCursor(copyTarget, frameInfo);
+    UpdateMetadata(frameInfo.TotalMetadataBufferSize);
+
     {
         std::lock_guard<std::mutex> lock(mutex_);
         lastFrame_.texture = copyTarget;
         lastFrame_.info = frameInfo;
+        lastFrame_.metaData = metaData_;
     }
-
-    UpdateMetadata();
-    UpdateCursor();
 
     return true;
 }
 
 
-void Duplicator::UpdateCursor()
+void Duplicator::UpdateCursor(
+    const ComPtr<ID3D11Texture2D>& texture,
+    const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
     auto& manager = GetMonitorManager();
-    if (!manager) return;
 
-	if (lastFrame_.info.PointerPosition.Visible)
+	if (frameInfo.PointerPosition.Visible)
 	{
         manager->SetCursorMonitorId(monitor_->GetId());
 	}
 
     if (monitor_->GetId() == manager->GetCursorMonitorId())
     {
-        auto cursor = GetMonitorManager()->GetCursor();
-        cursor->UpdateBuffer(this);
-        cursor->Draw(this);
+        auto cursor = manager->GetCursor();
+        cursor->UpdateBuffer(this, frameInfo);
+        cursor->Draw(this, texture);
     }
 }
 
 
-void Duplicator::UpdateMetadata()
+void Duplicator::UpdateMetadata(UINT totalBufferSize)
 {
-    metaData_.buffer.ExpandIfNeeded(lastFrame_.info.TotalMetadataBufferSize);
+    metaData_.buffer.ExpandIfNeeded(totalBufferSize);
     if (!metaData_.buffer.Empty())
     {
         UpdateMoveRects();
         UpdateDirtyRects();
-    }
-
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        lastFrame_.metaData = metaData_;
     }
 }
 
 
 void Duplicator::UpdateMoveRects()
 {
-    metaData_.moveRectSize = metaData_.buffer.Size();
-
     const auto hr = dupl_->GetFrameMoveRects(
-        metaData_.moveRectSize,
+        metaData_.buffer.Size(),
         metaData_.buffer.As<DXGI_OUTDUPL_MOVE_RECT>(), 
         &metaData_.moveRectSize);
 
@@ -395,10 +390,8 @@ void Duplicator::UpdateMoveRects()
 
 void Duplicator::UpdateDirtyRects()
 {
-    metaData_.dirtyRectSize = metaData_.buffer.Size() - metaData_.moveRectSize;
-
     const auto hr = dupl_->GetFrameDirtyRects(
-        metaData_.dirtyRectSize,
+        metaData_.buffer.Size() - metaData_.moveRectSize,
         metaData_.buffer.As<RECT>(metaData_.moveRectSize /* offset */), 
         &metaData_.dirtyRectSize);
 

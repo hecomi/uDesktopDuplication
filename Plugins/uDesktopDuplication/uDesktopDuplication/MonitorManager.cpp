@@ -21,7 +21,6 @@ using namespace Microsoft::WRL;
 MonitorManager::MonitorManager(LUID unityAdapterLuid)
 	: unityAdapterLuid_(unityAdapterLuid)
 {
-    Initialize();
 }
 
 
@@ -55,6 +54,7 @@ void MonitorManager::Initialize()
             auto monitor = std::make_shared<Monitor>(id++);
             const auto unityAdapterLuid = GetUnityAdapterLuid();
             monitor->Initialize(adapter, output);
+            monitor->StartCapture();
             monitors_.push_back(monitor);
         }
     }

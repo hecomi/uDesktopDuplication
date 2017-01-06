@@ -59,16 +59,12 @@ void Monitor::Initialize(
 	}
 
     duplicator_ = std::make_shared<Duplicator>(this);
-    if (duplicator_->GetState() == DuplicatorState::Ready)
-    {
-        duplicator_->Start();
-    }
 }
 
 
 void Monitor::Finalize()
 {
-    duplicator_->Stop();
+    StopCapture();
 }
 
 
@@ -113,6 +109,21 @@ void Monitor::Render()
 	}
 
 	hasBeenUpdated_ = true;
+}
+
+
+void Monitor::StartCapture()
+{
+    if (duplicator_->GetState() == DuplicatorState::Ready)
+    {
+        duplicator_->Start();
+    }
+}
+
+
+void Monitor::StopCapture()
+{
+    duplicator_->Stop();
 }
 
 

@@ -24,6 +24,8 @@ public:
 		const Microsoft::WRL::ComPtr<struct IDXGIOutput> &output);
     void Finalize();
     void Render();
+    void StartCapture();
+    void StopCapture();
 
 public:
     int GetId() const;

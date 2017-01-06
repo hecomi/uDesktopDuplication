@@ -15,6 +15,8 @@ class MonitorManager
 public:
     explicit MonitorManager(LUID unityAdapterLuid_);
     ~MonitorManager();
+	void Initialize();
+    void Finalize();
     void Reinitialize();
     void Update();
     bool HasMonitorCountChanged() const;
@@ -23,10 +25,6 @@ public:
     int GetCursorMonitorId() const { return cursorMonitorId_; }
     std::shared_ptr<Monitor> GetMonitor(int id) const;
     std::shared_ptr<Cursor> GetCursor() const;
-
-private:
-	void Initialize();
-    void Finalize();
 
 public:
     int GetMonitorCount() const;
