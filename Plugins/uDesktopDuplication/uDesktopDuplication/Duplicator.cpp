@@ -308,7 +308,7 @@ bool Duplicator::Duplicate(UINT timeout)
         return false;
     }
 
-    auto sharedTexture = device_->GetCompatibleSharedTexture(texture, frame % 2);
+    auto sharedTexture = device_->GetCompatibleSharedTexture(texture, frame_ % 2);
     if (!sharedTexture)
     {
         return false;
@@ -323,10 +323,13 @@ bool Duplicator::Duplicate(UINT timeout)
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        lastFrame_.frame = frame++;
-        lastFrame_.texture = sharedTexture;
-        lastFrame_.info = frameInfo;
-        lastFrame_.metaData = metaData_;
+        lastFrame_ = Frame
+        {
+            frame_++,
+            sharedTexture,
+            frameInfo,
+            metaData_
+        }; 
     }
 
     return true;
