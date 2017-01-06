@@ -96,7 +96,9 @@ void Monitor::Render()
 		}
 		else
 		{
-            duplicator_->CopyLastTexture(GetDevice(), unityTexture_);
+			ComPtr<ID3D11DeviceContext> context;
+			GetDevice()->GetImmediateContext(&context);
+			context->CopyResource(unityTexture_, texture.Get());
 		}
 	}
 

@@ -211,17 +211,6 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 }
 
 
-void Duplicator::CopyLastTexture(
-    const Microsoft::WRL::ComPtr<ID3D11Device>& device,
-    const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
-{
-    std::lock_guard<std::mutex> lock(mutex_);
-    ComPtr<ID3D11DeviceContext> context;
-    device->GetImmediateContext(&context);
-    context->CopyResource(texture.Get(), lastFrame_.texture.Get());
-}
-
-
 bool Duplicator::Duplicate()
 {
     if (!dupl_ || !device_) return false;

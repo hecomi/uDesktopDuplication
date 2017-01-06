@@ -61,9 +61,6 @@ public:
     Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDuplication();
     const Frame& GetLastFrame() const;
-    void CopyLastTexture(
-        const Microsoft::WRL::ComPtr<ID3D11Device>& device,
-        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture);
 
 private:
     void InitializeDevice();
