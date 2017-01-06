@@ -168,3 +168,15 @@ int MonitorManager::GetTotalHeight() const
     const auto maxBottom = *std::max_element(bottoms.begin(), bottoms.end());
     return maxBottom - minTop;
 }
+
+
+void MonitorManager::SetFrameRate(UINT frameRate)
+{
+    frameRate_ = frameRate;
+}
+
+
+UINT MonitorManager::GetFrameRate() const
+{
+    return frameRate_;
+}

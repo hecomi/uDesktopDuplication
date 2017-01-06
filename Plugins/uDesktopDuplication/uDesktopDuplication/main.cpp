@@ -439,4 +439,10 @@ extern "C"
             return monitor->UseGetPixels(use);
         }
     }
+
+    UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API SetFrameRate(UINT frameRate)
+    {
+        if (!g_manager) return;
+        g_manager->SetFrameRate(frameRate);
+    }
 }

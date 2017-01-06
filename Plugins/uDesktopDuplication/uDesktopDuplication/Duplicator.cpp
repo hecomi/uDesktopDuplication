@@ -148,17 +148,20 @@ void Duplicator::Start()
         shouldRun_ = true;
         while (shouldRun_)
         {
-            const UINT timeout = 16 /* milliseconds */;
+            const auto frameRate = GetMonitorManager()->GetFrameRate();
+            const UINT frameMicroSeconds = 1000000 / frameRate;
+            const UINT frameMilliSeconds = 1000 / frameRate;
 
-            ScopedTimer timer([timeout] (microseconds us)
+            ScopedTimer timer([frameMicroSeconds] (microseconds us)
             {
-                const auto waitTime = milliseconds(timeout) - us;
+                const auto waitTime = microseconds(frameMicroSeconds) - us;
                 if (waitTime > microseconds::zero())
                 {
                     std::this_thread::sleep_for(waitTime);
                 }
             });
 
+            const auto timeout = static_cast<UINT>(frameMilliSeconds);
             if (!Duplicate(timeout)) break;
         }
 

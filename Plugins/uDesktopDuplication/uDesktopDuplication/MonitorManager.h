@@ -25,6 +25,8 @@ public:
     int GetCursorMonitorId() const { return cursorMonitorId_; }
     std::shared_ptr<Monitor> GetMonitor(int id) const;
     std::shared_ptr<Cursor> GetCursor() const;
+    void SetFrameRate(UINT frameRate);
+    UINT GetFrameRate() const;
 
 public:
     int GetMonitorCount() const;
@@ -33,7 +35,7 @@ public:
 
 private:
 	LUID unityAdapterLuid_;
-
+    UINT frameRate_ = 60;
     bool enableTextureCopyFromGpuToCpu_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;
     std::shared_ptr<Cursor> cursor_ = std::make_shared<Cursor>();
