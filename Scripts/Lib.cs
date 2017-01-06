@@ -172,6 +172,8 @@ public static class Lib
     public static extern bool HasBeenUpdated(int id);
     [DllImport("uDesktopDuplication")]
     public static extern bool UseGetPixels(int id, bool use);
+    [DllImport("uDesktopDuplication")]
+    public static extern void SetFrameRate(uint frameRate);
 
     public static string GetName(int id)
     {
