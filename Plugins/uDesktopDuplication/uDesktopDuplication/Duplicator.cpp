@@ -203,7 +203,7 @@ ComPtr<IDXGIOutputDuplication> Duplicator::GetDuplication()
 }
 
 
-const Duplicator::Frame& Duplicator::GetFrame() const
+const Duplicator::Frame& Duplicator::GetLastFrame() const
 {
     std::lock_guard<std::mutex> lock(mutex_);
     return lastFrame_;

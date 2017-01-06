@@ -59,7 +59,7 @@ public:
     Monitor* GetMonitor() const;
     Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDuplication();
-    const Frame& GetFrame() const;
+    const Frame& GetLastFrame() const;
 
 private:
     void InitializeDevice();

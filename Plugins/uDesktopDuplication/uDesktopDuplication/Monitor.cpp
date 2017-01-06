@@ -70,9 +70,9 @@ void Monitor::Finalize()
 
 void Monitor::Render()
 {
-    const auto& frame = duplicator_->GetFrame();
+    const auto& frame = duplicator_->GetLastFrame();
     const auto texture = frame.texture;
-    const auto& frameInfo = frame.info;
+    const auto frameInfo = frame.info; // clone
 
 	if (!texture) return;
 
@@ -243,28 +243,28 @@ int Monitor::GetHeight() const
 
 int Monitor::GetMoveRectCount() const
 {
-    const auto& metaData = duplicator_->GetFrame().metaData;
+    const auto& metaData = duplicator_->GetLastFrame().metaData;
     return metaData.moveRectSize / sizeof(DXGI_OUTDUPL_MOVE_RECT);
 }
 
 
 DXGI_OUTDUPL_MOVE_RECT* Monitor::GetMoveRects() const
 {
-    const auto& metaData = duplicator_->GetFrame().metaData;
+    const auto& metaData = duplicator_->GetLastFrame().metaData;
     return metaData.buffer.As<DXGI_OUTDUPL_MOVE_RECT>();
 }
 
 
 int Monitor::GetDirtyRectCount() const
 {
-    const auto& metaData = duplicator_->GetFrame().metaData;
+    const auto& metaData = duplicator_->GetLastFrame().metaData;
     return metaData.dirtyRectSize / sizeof(RECT);
 }
 
 
 RECT* Monitor::GetDirtyRects() const
 {
-    const auto& metaData = duplicator_->GetFrame().metaData;
+    const auto& metaData = duplicator_->GetLastFrame().metaData;
     return metaData.buffer.As<RECT>(metaData.moveRectSize);
 }
 
