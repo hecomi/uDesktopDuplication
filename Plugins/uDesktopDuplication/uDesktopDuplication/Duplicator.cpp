@@ -31,7 +31,8 @@ Duplicator::~Duplicator()
 
 void Duplicator::InitializeDevice()
 {
-    device_ = std::make_shared<IsolatedD3D11Device>();
+    const UINT cachedTextureNum = 2;
+    device_ = std::make_shared<IsolatedD3D11Device>(cachedTextureNum);
 
     if (FAILED(device_->Create(monitor_->GetAdapter())))
     {
@@ -210,6 +211,17 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 }
 
 
+void Duplicator::CopyLastTexture(
+    const Microsoft::WRL::ComPtr<ID3D11Device>& device,
+    const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    ComPtr<ID3D11DeviceContext> context;
+    device->GetImmediateContext(&context);
+    context->CopyResource(texture.Get(), lastFrame_.texture.Get());
+}
+
+
 bool Duplicator::Duplicate()
 {
     if (!dupl_ || !device_) return false;
@@ -291,22 +303,23 @@ bool Duplicator::Duplicate()
         return false;
     }
 
-    auto copyTarget = device_->GetCompatibleSharedTexture(texture);
-    if (!copyTarget)
+    auto sharedTexture = device_->GetCompatibleSharedTexture(texture, frame % 2);
+    if (!sharedTexture)
     {
         return false;
     }
 
     ComPtr<ID3D11DeviceContext> context;
     device_->GetDevice()->GetImmediateContext(&context);
-    context->CopyResource(copyTarget.Get(), texture.Get());
+    context->CopyResource(sharedTexture.Get(), texture.Get());
 
-    UpdateCursor(copyTarget, frameInfo);
+    UpdateCursor(sharedTexture, frameInfo);
     UpdateMetadata(frameInfo.TotalMetadataBufferSize);
 
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        lastFrame_.texture = copyTarget;
+        lastFrame_.frame = frame++;
+        lastFrame_.texture = sharedTexture;
         lastFrame_.info = frameInfo;
         lastFrame_.metaData = metaData_;
     }

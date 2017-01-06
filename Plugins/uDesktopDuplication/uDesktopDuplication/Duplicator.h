@@ -44,6 +44,7 @@ public:
 
     struct Frame
     {
+        UINT frame = 0;
         Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
         DXGI_OUTDUPL_FRAME_INFO info;
         Metadata metaData;
@@ -60,6 +61,9 @@ public:
     Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDuplication();
     const Frame& GetLastFrame() const;
+    void CopyLastTexture(
+        const Microsoft::WRL::ComPtr<ID3D11Device>& device,
+        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture);
 
 private:
     void InitializeDevice();
@@ -81,6 +85,7 @@ private:
     std::shared_ptr<class IsolatedD3D11Device> device_;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;
     Frame lastFrame_;
+    UINT frame = 0;
 
     volatile bool shouldRun_ = false;
     std::thread thread_;

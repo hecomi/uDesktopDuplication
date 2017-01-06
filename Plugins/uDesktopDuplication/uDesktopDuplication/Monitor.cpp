@@ -71,8 +71,7 @@ void Monitor::Finalize()
 void Monitor::Render()
 {
     const auto& frame = duplicator_->GetLastFrame();
-    const auto texture = frame.texture;
-    const auto frameInfo = frame.info; // clone
+    const auto& texture = frame.texture;
 
 	if (!texture) return;
 
@@ -97,9 +96,7 @@ void Monitor::Render()
 		}
 		else
 		{
-			ComPtr<ID3D11DeviceContext> context;
-			GetDevice()->GetImmediateContext(&context);
-			context->CopyResource(unityTexture_, texture.Get());
+            duplicator_->CopyLastTexture(GetDevice(), unityTexture_);
 		}
 	}
 
