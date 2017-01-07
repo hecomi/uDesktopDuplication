@@ -67,7 +67,7 @@ private:
     void InitializeDuplication();
     void CheckUnityAdapter();
 
-    bool Duplicate(UINT timeout);
+    void Duplicate(UINT timeout);
 
     void UpdateCursor(
         const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
