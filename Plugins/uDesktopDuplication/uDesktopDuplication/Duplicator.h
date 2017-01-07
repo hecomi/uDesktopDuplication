@@ -45,7 +45,7 @@ public:
     struct Frame
     {
         UINT id;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        std::shared_ptr<class SharedTextureWrapper> texture;
         DXGI_OUTDUPL_FRAME_INFO info;
         Metadata metaData;
     };

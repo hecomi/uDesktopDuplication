@@ -75,10 +75,13 @@ void Monitor::Render()
     if (frame.id == lastFrameId_) return;
     lastFrameId_ = frame.id;
 
-    const auto& texture = frame.texture;
-	if (!texture) return;
+    const auto& sharedTextureWrapper = frame.texture;
+    if (!sharedTextureWrapper->Lock()) return;
+    ScopedReleaser releaser([&] { sharedTextureWrapper->Unlock(); });
 
-	// Get texture
+    auto texture = sharedTextureWrapper->Get();
+    if (!texture) return;
+
 	if (unityTexture_)
 	{
 		D3D11_TEXTURE2D_DESC srcDesc, dstDesc;

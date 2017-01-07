@@ -315,12 +315,15 @@ void Duplicator::Duplicate(UINT timeout)
         return;
     }
 
-    auto sharedTexture = device_->GetCompatibleSharedTexture(texture, lastFrameId_ % 2);
-    if (!sharedTexture)
+    auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, 0);
+    if (!sharedTextureWrapper)
     {
         Debug::Error("Duplicator::Duplicate() => Shared Texture was null.");
         return;
     }
+
+    if (sharedTextureWrapper->IsLocked()) return;
+    auto sharedTexture = sharedTextureWrapper->Get();
 
     ComPtr<ID3D11DeviceContext> context;
     device_->GetDevice()->GetImmediateContext(&context);
@@ -334,7 +337,7 @@ void Duplicator::Duplicate(UINT timeout)
         lastFrame_ = Frame
         {
             lastFrameId_++,
-            sharedTexture,
+            sharedTextureWrapper,
             frameInfo,
             metaData_
         };
