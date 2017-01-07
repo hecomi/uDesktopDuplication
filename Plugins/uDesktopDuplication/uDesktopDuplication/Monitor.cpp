@@ -94,8 +94,11 @@ void Monitor::Render()
 			GetDevice()->GetImmediateContext(&context);
 			context->CopyResource(unityTexture_, frame.texture.Get());
 
-            auto cursor = GetMonitorManager()->GetCursor();
-            cursor->Draw(unityTexture_);
+            auto& manager = GetMonitorManager();
+            if (id_ == manager->GetCursorMonitorId())
+            {
+                manager->GetCursor()->Draw(unityTexture_);
+            }
 		}
 	}
 
