@@ -157,4 +157,5 @@ private:
     });
 #else
 #define UDD_FUNCTION_SCOPE_TIMER
+#define UDD_SCOPE_TIMER(Name)
 #endif
