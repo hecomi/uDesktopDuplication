@@ -315,7 +315,8 @@ void Duplicator::Duplicate(UINT timeout)
         return;
     }
 
-    auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, lastFrameId_ % 2);
+    //auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, lastFrameId_ % 2);
+    auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, 0);
     if (!sharedTextureWrapper)
     {
         Debug::Error("Duplicator::Duplicate() => Shared texture is null.");

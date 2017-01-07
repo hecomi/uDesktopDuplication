@@ -78,7 +78,7 @@ void Monitor::Render()
     const auto& sharedTextureWrapper = frame.texture;
     auto sharedTexture = sharedTextureWrapper->Lock();
     if (!sharedTexture) return;
-    ScopedReleaser releaser([&] { sharedTextureWrapper->Unlock(); });
+    ScopedReleaser sharedTextureReleaser([&] { sharedTextureWrapper->Unlock(); });
 
 	if (unityTexture_)
 	{

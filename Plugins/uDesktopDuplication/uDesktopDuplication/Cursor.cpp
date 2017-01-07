@@ -97,6 +97,7 @@ void Cursor::Draw(
     // Check buffers
     if (!bgraBuffer_ || !buffer_) 
     {
+        Debug::Error("Cursor::UpdateTexture() => no buffer.");
         return;
     }
 
