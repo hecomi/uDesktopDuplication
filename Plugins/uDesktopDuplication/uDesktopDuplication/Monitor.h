@@ -70,6 +70,7 @@ private:
     MONITORINFOEX monitorInfo_;
 
     std::shared_ptr<class Duplicator> duplicator_;
+    UINT lastFrameId_ = -1;
 
     ID3D11Texture2D* unityTexture_ = nullptr;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> textureForGetPixels_;

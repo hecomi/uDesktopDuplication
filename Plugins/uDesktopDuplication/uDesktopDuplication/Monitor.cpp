@@ -71,8 +71,11 @@ void Monitor::Finalize()
 void Monitor::Render()
 {
     const auto& frame = duplicator_->GetLastFrame();
-    const auto& texture = frame.texture;
 
+    if (frame.id == lastFrameId_) return;
+    lastFrameId_ = frame.id;
+
+    const auto& texture = frame.texture;
 	if (!texture) return;
 
 	// Get texture
