@@ -71,15 +71,19 @@ void Monitor::Finalize()
 void Monitor::Render()
 {
     const auto& frame = duplicator_->GetLastFrame();
-    const auto& texture = frame.texture;
 
-	if (!texture) return;
+    if (frame.id == lastFrameId_) return;
+    lastFrameId_ = frame.id;
 
-	// Get texture
+    const auto& sharedTextureWrapper = frame.texture;
+    auto sharedTexture = sharedTextureWrapper->Lock();
+    if (!sharedTexture) return;
+    ScopedReleaser releaser([&] { sharedTextureWrapper->Unlock(); });
+
 	if (unityTexture_)
 	{
 		D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
-		texture->GetDesc(&srcDesc);
+		sharedTexture->GetDesc(&srcDesc);
 		unityTexture_->GetDesc(&dstDesc);
 		if (srcDesc.Width  != dstDesc.Width ||
 			srcDesc.Height != dstDesc.Height)
@@ -93,7 +97,7 @@ void Monitor::Render()
 		{
 			ComPtr<ID3D11DeviceContext> context;
 			GetDevice()->GetImmediateContext(&context);
-			context->CopyResource(unityTexture_, texture.Get());
+			context->CopyResource(unityTexture_, sharedTexture.Get());
 		}
 	}
 

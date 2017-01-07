@@ -44,8 +44,8 @@ public:
 
     struct Frame
     {
-        UINT frame;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        UINT id;
+        std::shared_ptr<class SharedTextureWrapper> texture;
         DXGI_OUTDUPL_FRAME_INFO info;
         Metadata metaData;
     };
@@ -67,7 +67,7 @@ private:
     void InitializeDuplication();
     void CheckUnityAdapter();
 
-    bool Duplicate(UINT timeout);
+    void Duplicate(UINT timeout);
 
     void UpdateCursor(
         const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
@@ -82,7 +82,7 @@ private:
     std::shared_ptr<class IsolatedD3D11Device> device_;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;
     Frame lastFrame_;
-    UINT frame_ = 0;
+    UINT lastFrameId_ = 0;
 
     volatile bool shouldRun_ = false;
     std::thread thread_;

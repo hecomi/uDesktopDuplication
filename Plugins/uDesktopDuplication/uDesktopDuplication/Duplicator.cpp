@@ -162,7 +162,12 @@ void Duplicator::Start()
             });
 
             const auto timeout = static_cast<UINT>(frameMilliSeconds);
-            if (!Duplicate(timeout)) break;
+            Duplicate(timeout);
+
+            if (state_ != State::Running)
+            {
+                break;
+            }
         }
 
         if (state_ == State::Running)
@@ -229,9 +234,9 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 }
 
 
-bool Duplicator::Duplicate(UINT timeout)
+void Duplicator::Duplicate(UINT timeout)
 {
-    if (!dupl_ || !device_) return false;
+    if (!dupl_ || !device_) return;
 
     ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
@@ -247,31 +252,32 @@ bool Duplicator::Duplicate(UINT timeout)
                 // it is necessary to re-initialize monitors.
                 Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
                 state_ = State::AccessLost;
-                return false;
+                break;
             }
             case DXGI_ERROR_WAIT_TIMEOUT:
             {
                 // This often occurs when timeout value is small and it is not problem. 
                 // Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_WAIT_TIMEOUT.");
-                return true;
+                break;
             }
             case DXGI_ERROR_INVALID_CALL:
             {
                 Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
-                return false;
+                break;
             }
             case E_INVALIDARG:
             {
                 Debug::Error("Duplicator::Duplicate() => E_INVALIDARG.");
-                return false;
+                break;
             }
             default:
             {
                 state_ = State::Unknown;
                 Debug::Error("Duplicator::Duplicate() => Unknown Error.");
-                return false;
+                break;
             }
         }
+        return;
     }
 
     ScopedReleaser releaser([this] 
@@ -305,14 +311,20 @@ bool Duplicator::Duplicate(UINT timeout)
     ComPtr<ID3D11Texture2D> texture;
     if (FAILED(resource.As(&texture))) 
     {
-        return false;
+        Debug::Error("Duplicator::Duplicate() => IDXGIResource could not be converted to ID3D11Texture2D.");
+        return;
     }
 
-    auto sharedTexture = device_->GetCompatibleSharedTexture(texture, frame_ % 2);
-    if (!sharedTexture)
+    auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, lastFrameId_ % 2);
+    if (!sharedTextureWrapper)
     {
-        return false;
+        Debug::Error("Duplicator::Duplicate() => Shared texture is null.");
+        return;
     }
+
+    auto sharedTexture = sharedTextureWrapper->Lock();
+    if (!sharedTexture) return;
+    ScopedReleaser sharedTextureReleaser([&] { sharedTextureWrapper->Unlock(); });
 
     ComPtr<ID3D11DeviceContext> context;
     device_->GetDevice()->GetImmediateContext(&context);
@@ -325,14 +337,12 @@ bool Duplicator::Duplicate(UINT timeout)
         std::lock_guard<std::mutex> lock(mutex_);
         lastFrame_ = Frame
         {
-            frame_++,
-            sharedTexture,
+            lastFrameId_++,
+            sharedTextureWrapper,
             frameInfo,
             metaData_
-        }; 
+        };
     }
-
-    return true;
 }
 
 
