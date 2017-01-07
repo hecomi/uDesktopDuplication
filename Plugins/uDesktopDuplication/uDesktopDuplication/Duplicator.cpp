@@ -33,8 +33,7 @@ Duplicator::~Duplicator()
 
 void Duplicator::InitializeDevice()
 {
-    const UINT cachedTextureNum = 2;
-    device_ = std::make_shared<IsolatedD3D11Device>(cachedTextureNum);
+    device_ = std::make_shared<IsolatedD3D11Device>();
 
     if (FAILED(device_->Create(monitor_->GetAdapter())))
     {
@@ -315,17 +314,12 @@ void Duplicator::Duplicate(UINT timeout)
         return;
     }
 
-    //auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, lastFrameId_ % 2);
-    auto sharedTextureWrapper = device_->GetCompatibleSharedTexture(texture, 0);
-    if (!sharedTextureWrapper)
+    auto sharedTexture = device_->GetCompatibleSharedTexture(texture);
+    if (!sharedTexture)
     {
         Debug::Error("Duplicator::Duplicate() => Shared texture is null.");
         return;
     }
-
-    auto sharedTexture = sharedTextureWrapper->Lock();
-    if (!sharedTexture) return;
-    ScopedReleaser sharedTextureReleaser([&] { sharedTextureWrapper->Unlock(); });
 
     {
         UDD_SCOPE_TIMER(CopyResource);
@@ -342,7 +336,7 @@ void Duplicator::Duplicate(UINT timeout)
         lastFrame_ = Frame
         {
             lastFrameId_++,
-            sharedTextureWrapper,
+            sharedTexture,
             frameInfo,
             metaData_
         };

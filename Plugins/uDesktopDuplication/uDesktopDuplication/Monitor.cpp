@@ -75,15 +75,10 @@ void Monitor::Render()
     if (frame.id == lastFrameId_) return;
     lastFrameId_ = frame.id;
 
-    const auto& sharedTextureWrapper = frame.texture;
-    auto sharedTexture = sharedTextureWrapper->Lock();
-    if (!sharedTexture) return;
-    ScopedReleaser sharedTextureReleaser([&] { sharedTextureWrapper->Unlock(); });
-
 	if (unityTexture_)
 	{
 		D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
-		sharedTexture->GetDesc(&srcDesc);
+		frame.texture->GetDesc(&srcDesc);
 		unityTexture_->GetDesc(&dstDesc);
 		if (srcDesc.Width  != dstDesc.Width ||
 			srcDesc.Height != dstDesc.Height)
@@ -97,7 +92,7 @@ void Monitor::Render()
 		{
 			ComPtr<ID3D11DeviceContext> context;
 			GetDevice()->GetImmediateContext(&context);
-			context->CopyResource(unityTexture_, sharedTexture.Get());
+			context->CopyResource(unityTexture_, frame.texture.Get());
 
             auto cursor = GetMonitorManager()->GetCursor();
             cursor->Draw(unityTexture_);

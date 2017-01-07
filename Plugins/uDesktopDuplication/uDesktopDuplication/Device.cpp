@@ -15,39 +15,8 @@ using namespace Microsoft::WRL;
 
 
 
-const Microsoft::WRL::ComPtr<ID3D11Texture2D>& SharedTextureWrapper::Get() const
+IsolatedD3D11Device::IsolatedD3D11Device()
 {
-    return pointer_;
-}
-
-
-Microsoft::WRL::ComPtr<ID3D11Texture2D> SharedTextureWrapper::Lock()
-{
-    if (locked_) return nullptr;
-    locked_ = true;
-    return pointer_;
-}
-
-
-void SharedTextureWrapper::Unlock()
-{
-    locked_ = false;
-}
-
-
-bool SharedTextureWrapper::IsLocked() const
-{
-    return locked_;
-}
-
-
-
-IsolatedD3D11Device::IsolatedD3D11Device(UINT cachedTextureNum)
-{
-    for (UINT i = 0; i < cachedTextureNum; ++i) 
-    {
-        cachedSharedTextures_.push_back(std::make_shared<SharedTextureWrapper>());
-    }
 }
 
 
@@ -96,42 +65,33 @@ ComPtr<ID3D11Device> IsolatedD3D11Device::GetDevice()
 }
 
 
-std::shared_ptr<SharedTextureWrapper> IsolatedD3D11Device::GetCompatibleSharedTexture(
-    const ComPtr<ID3D11Texture2D>& src,
-    UINT index)
+Microsoft::WRL::ComPtr<ID3D11Texture2D> IsolatedD3D11Device::GetCompatibleSharedTexture(
+    const ComPtr<ID3D11Texture2D>& src)
 {
-    if (index < 0 || index >= cachedSharedTextures_.size())
-    {
-        Debug::Error("IsolatedD3D11Device::GetCompatibleSharedTexture() => ", index, " is out of cachedTextures range.");
-        return nullptr;
-    }
-
-    auto& sharedTextureWrapper = cachedSharedTextures_.at(index);
-    auto& texture = sharedTextureWrapper->pointer_; // raw pointer
-
-    // check if the format and size of the current texture are same as the source one
     D3D11_TEXTURE2D_DESC srcDesc;
     src->GetDesc(&srcDesc);
-    if (texture) 
+
+    // check if the format and size of the current texture are same as the source one
+    if (cachedSharedTexture_) 
     {
         D3D11_TEXTURE2D_DESC targetDesc;
-        texture->GetDesc(&targetDesc);
+        cachedSharedTexture_->GetDesc(&targetDesc);
         if (targetDesc.Format == srcDesc.Format && 
             targetDesc.Width  == srcDesc.Width  && 
             targetDesc.Height == srcDesc.Height)
         {
-            return sharedTextureWrapper;
+            return cachedSharedTexture_;
         }
     }
 
     // for sharing this texture with unity device
     srcDesc.MiscFlags = D3D11_RESOURCE_MISC_SHARED;
 
-    if (FAILED(device_->CreateTexture2D(&srcDesc, nullptr, &texture)))
+    if (FAILED(device_->CreateTexture2D(&srcDesc, nullptr, &cachedSharedTexture_)))
     {
         Debug::Error("IsolatedD3D11Device::GetCompatibleSharedTexture() => Creating shared texture failed.");
         return nullptr;
     }
 
-    return sharedTextureWrapper;
+    return cachedSharedTexture_;
 }
