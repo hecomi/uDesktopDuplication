@@ -98,6 +98,9 @@ void Monitor::Render()
 			ComPtr<ID3D11DeviceContext> context;
 			GetDevice()->GetImmediateContext(&context);
 			context->CopyResource(unityTexture_, sharedTexture.Get());
+
+            auto cursor = GetMonitorManager()->GetCursor();
+            cursor->Draw(unityTexture_);
 		}
 	}
 

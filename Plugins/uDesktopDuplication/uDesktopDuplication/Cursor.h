@@ -17,9 +17,10 @@ public:
     void UpdateBuffer(
         Duplicator* duplicator, 
         const DXGI_OUTDUPL_FRAME_INFO& frameInfo);
-    void Draw(
-        Duplicator* duplicator, 
-        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& targetTexture);
+    void UpdateTexture(
+        Duplicator* duplicator,
+        const Microsoft::WRL::ComPtr<ID3D11Texture2D>& desktopTexture);
+    void Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture);
     void GetTexture(ID3D11Texture2D* texture);
 
     bool IsVisible() const;
@@ -38,4 +39,5 @@ private:
     Buffer<BYTE> bgraBuffer_;
     DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_;
     LARGE_INTEGER timestamp_;
+    D3D11_BOX capturedImageArea_;
 };

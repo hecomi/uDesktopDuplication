@@ -62,16 +62,16 @@ void Cursor::UpdateBuffer(Duplicator* duplicator, const DXGI_OUTDUPL_FRAME_INFO&
 }
 
 
-void Cursor::Draw(
+void Cursor::UpdateTexture(
     Duplicator* duplicator, 
-    const ComPtr<ID3D11Texture2D>& targetTexture)
+    const ComPtr<ID3D11Texture2D>& desktopTexture)
 {
     auto monitor = duplicator->GetMonitor();
 
     // Check desktop texure
-    if (targetTexture == nullptr) 
+    if (desktopTexture == nullptr) 
     {
-        Debug::Error("Cursor::UpdateTexture() => target texture is null.");
+        Debug::Error("Cursor::UpdateTexture() => Desktop texture is null.");
         return;
     }
 
@@ -194,7 +194,7 @@ void Cursor::Draw(
         return;
     }
 
-    D3D11_BOX capturedImageArea 
+    capturedImageArea_ = D3D11_BOX 
     { 
         static_cast<UINT>(capturedImageLeft), 
         static_cast<UINT>(capturedImageTop),
@@ -218,7 +218,7 @@ void Cursor::Draw(
         desc.Usage              = D3D11_USAGE_STAGING;
         desc.BindFlags          = 0;
         desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags          = 0;
+        desc.MiscFlags          = D3D11_RESOURCE_MISC_SHARED;
 
         if (FAILED(duplicator->GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
         {
@@ -231,7 +231,7 @@ void Cursor::Draw(
     {
         ComPtr<ID3D11DeviceContext> context;
         duplicator->GetDevice()->GetImmediateContext(&context);
-        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, targetTexture.Get(), 0, &capturedImageArea);
+        context->CopySubresourceRegion(texture.Get(), 0, 0, 0, 0, desktopTexture.Get(), 0, &capturedImageArea_);
     }
 
     // Get mapped surface to access pixels in CPU
@@ -359,17 +359,26 @@ void Cursor::Draw(
         }
     }
 
-    {
-        ComPtr<ID3D11DeviceContext> context;
-        duplicator->GetDevice()->GetImmediateContext(&context);
-        context->UpdateSubresource(targetTexture.Get(), 0, &capturedImageArea, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
-    }
-
     if (FAILED(surface->Unmap()))
     {
         Debug::Error("Cursor::UpdateTexture() => surface->Unmap() failed.");
         return;
     }
+}
+
+
+void Cursor::Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
+{
+    if (texture == nullptr) 
+    {
+        Debug::Error("Cursor::UpdateTexture() => Desktop texture is null.");
+        return;
+    }
+
+    const auto capturedImageWidth = capturedImageArea_.right - capturedImageArea_.left;
+    ComPtr<ID3D11DeviceContext> context;
+    GetDevice()->GetImmediateContext(&context);
+    context->UpdateSubresource(texture.Get(), 0, &capturedImageArea_, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
 }
 
 

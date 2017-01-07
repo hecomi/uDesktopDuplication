@@ -12,7 +12,7 @@ class SharedTextureWrapper
 {
 friend class IsolatedD3D11Device;
 public:
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> Get();
+    const Microsoft::WRL::ComPtr<ID3D11Texture2D>& Get() const;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> Lock();
     void Unlock();
     bool IsLocked() const;

@@ -327,9 +327,12 @@ void Duplicator::Duplicate(UINT timeout)
     if (!sharedTexture) return;
     ScopedReleaser sharedTextureReleaser([&] { sharedTextureWrapper->Unlock(); });
 
-    ComPtr<ID3D11DeviceContext> context;
-    device_->GetDevice()->GetImmediateContext(&context);
-    context->CopyResource(sharedTexture.Get(), texture.Get());
+    {
+        UDD_SCOPE_TIMER(CopyResource);
+        ComPtr<ID3D11DeviceContext> context;
+        device_->GetDevice()->GetImmediateContext(&context);
+        context->CopyResource(sharedTexture.Get(), texture.Get());
+    }
 
     UpdateCursor(sharedTexture, frameInfo);
     UpdateMetadata(frameInfo.TotalMetadataBufferSize);
@@ -362,7 +365,7 @@ void Duplicator::UpdateCursor(
     {
         auto cursor = manager->GetCursor();
         cursor->UpdateBuffer(this, frameInfo);
-        cursor->Draw(this, texture);
+        cursor->UpdateTexture(this, texture);
     }
 }
 

@@ -15,7 +15,7 @@ using namespace Microsoft::WRL;
 
 
 
-Microsoft::WRL::ComPtr<ID3D11Texture2D> SharedTextureWrapper::Get()
+const Microsoft::WRL::ComPtr<ID3D11Texture2D>& SharedTextureWrapper::Get() const
 {
     return pointer_;
 }
