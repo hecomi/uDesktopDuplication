@@ -28,7 +28,7 @@ Usage
 Attach `uDesktopDuplication/Texture` component to the target object, then its main texture will be replaced with the captured screen. Please see example scenes for more details.
 
 
-Lisence
+License
 -------
 The MIT License (MIT)
 
