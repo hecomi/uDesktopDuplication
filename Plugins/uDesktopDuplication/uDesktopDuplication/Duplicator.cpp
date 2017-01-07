@@ -322,7 +322,6 @@ void Duplicator::Duplicate(UINT timeout)
     }
 
     {
-        UDD_SCOPE_TIMER(CopyResource);
         ComPtr<ID3D11DeviceContext> context;
         device_->GetDevice()->GetImmediateContext(&context);
         context->CopyResource(sharedTexture.Get(), texture.Get());
