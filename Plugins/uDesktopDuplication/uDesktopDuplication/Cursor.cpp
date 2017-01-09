@@ -218,7 +218,7 @@ void Cursor::UpdateTexture(
         desc.Usage              = D3D11_USAGE_STAGING;
         desc.BindFlags          = 0;
         desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags          = D3D11_RESOURCE_MISC_SHARED;
+        desc.MiscFlags          = 0;
 
         if (FAILED(duplicator->GetDevice()->CreateTexture2D(&desc, nullptr, &texture)))
         {
