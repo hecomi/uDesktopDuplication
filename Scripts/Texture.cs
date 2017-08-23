@@ -271,7 +271,10 @@ public class Texture : MonoBehaviour
 
     void RequireUpdate()
     {
-        monitor.shouldBeUpdated = true;
+        if (monitor != null)
+        {
+            monitor.shouldBeUpdated = true;
+        }
     }
 
     void Reinitialize()
@@ -283,7 +286,9 @@ public class Texture : MonoBehaviour
     void UpdateMaterial()
     {
         width = transform.localScale.x;
-        rotation = monitor.rotation;
+        if (monitor != null) {
+            rotation = monitor.rotation;
+        }
         material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
     }
 
