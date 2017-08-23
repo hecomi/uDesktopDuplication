@@ -84,6 +84,7 @@ void MonitorManager::Update()
 
 void MonitorManager::RequireReinitilization()
 {
+    Debug::Log("MonitorManager::Reinitialize() was required.");
     isReinitializationRequired_ = true;
 }
 

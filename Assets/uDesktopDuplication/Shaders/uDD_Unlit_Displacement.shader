@@ -142,7 +142,7 @@ DsOutput domain(
     float disp = length(_DispTex.SampleLevel(sampler_DispTex, o.f2TexCoord, 0)) * _DispFactor;
     f3Position.xyz += f3Normal * disp;
 
-    o.f4Position = mul(UNITY_MATRIX_MVP, float4(f3Position.xyz, 1.0));
+    o.f4Position = UnityObjectToClipPos(float4(f3Position.xyz, 1.0));
         
     return o;
 }
