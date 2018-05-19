@@ -32,6 +32,8 @@ MonitorManager::~MonitorManager()
 
 void MonitorManager::Initialize()
 {
+    Debug::Log(__FUNCTION__);
+
     Finalize();
 
     // Get factory
@@ -63,6 +65,8 @@ void MonitorManager::Initialize()
 
 void MonitorManager::Finalize()
 {
+    Debug::Log(__FUNCTION__);
+
     for (const auto& monitor : monitors_)
     {
         monitor->Finalize();
@@ -74,6 +78,8 @@ void MonitorManager::Finalize()
 
 void MonitorManager::Update()
 {
+    Debug::Log(__FUNCTION__);
+
     if (isReinitializationRequired_)
     {
         Reinitialize();
@@ -84,6 +90,8 @@ void MonitorManager::Update()
 
 void MonitorManager::RequireReinitilization()
 {
+    Debug::Log(__FUNCTION__);
+
     Debug::Log("MonitorManager::Reinitialize() was required.");
     isReinitializationRequired_ = true;
 }
@@ -91,6 +99,8 @@ void MonitorManager::RequireReinitilization()
 
 void MonitorManager::Reinitialize()
 {
+    Debug::Log(__FUNCTION__);
+
     Debug::Log("MonitorManager::Reinitialize()");
     Initialize();
     SendMessageToUnity(Message::Reinitialized);

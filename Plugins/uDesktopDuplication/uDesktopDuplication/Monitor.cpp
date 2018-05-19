@@ -30,6 +30,8 @@ void Monitor::Initialize(
     const ComPtr<IDXGIOutput> &output
 )
 {
+    Debug::Log(__FUNCTION__);
+
     adapter_ = adapter;
     output_ = output;
 
@@ -64,12 +66,16 @@ void Monitor::Initialize(
 
 void Monitor::Finalize()
 {
+    Debug::Log(__FUNCTION__);
+
     StopCapture();
 }
 
 
 void Monitor::Render()
 {
+    Debug::Log(__FUNCTION__);
+
     const auto& frame = duplicator_->GetLastFrame();
 
     if (frame.id == lastFrameId_) return;
@@ -113,6 +119,8 @@ void Monitor::Render()
 
 void Monitor::StartCapture()
 {
+    Debug::Log(__FUNCTION__);
+
     if (duplicator_->GetState() == DuplicatorState::Ready)
     {
         duplicator_->Start();
@@ -122,6 +130,8 @@ void Monitor::StartCapture()
 
 void Monitor::StopCapture()
 {
+    Debug::Log(__FUNCTION__);
+
     duplicator_->Stop();
 }
 

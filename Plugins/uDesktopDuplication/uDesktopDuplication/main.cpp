@@ -35,6 +35,8 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Initialize()
     {
+        Debug::Log(__FUNCTION__);
+
         if (g_unity && !g_manager)
         {
             Debug::Initialize();
@@ -63,6 +65,8 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
     {
+        Debug::Log(__FUNCTION__);
+
         if (!g_manager) return;
 
         g_manager->Finalize();
@@ -76,6 +80,8 @@ extern "C"
 
     void UNITY_INTERFACE_API OnGraphicsDeviceEvent(UnityGfxDeviceEventType event)
     {
+        Debug::Log(__FUNCTION__);
+
         switch (event)
         {
             case kUnityGfxDeviceEventInitialize:
@@ -93,6 +99,8 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginLoad(IUnityInterfaces* unityInterfaces)
     {
+        Debug::Log(__FUNCTION__);
+
         g_unity = unityInterfaces;
         auto unityGraphics = g_unity->Get<IUnityGraphics>();
         unityGraphics->RegisterDeviceEventCallback(OnGraphicsDeviceEvent);
@@ -100,6 +108,8 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API UnityPluginUnload()
     {
+        Debug::Log(__FUNCTION__);
+
         auto unityGraphics = g_unity->Get<IUnityGraphics>();
         unityGraphics->UnregisterDeviceEventCallback(OnGraphicsDeviceEvent);
         g_unity = nullptr;
@@ -107,6 +117,8 @@ extern "C"
 
     void UNITY_INTERFACE_API OnRenderEvent(int id)
     {
+        Debug::Log(__FUNCTION__);
+
         if (!g_manager) return;
         if (auto monitor = g_manager->GetMonitor(id))
         {
@@ -121,18 +133,24 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Reinitialize()
     {
+        Debug::Log(__FUNCTION__);
+
         if (!g_manager) return;
         return g_manager->Reinitialize();
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Update()
     {
+        Debug::Log(__FUNCTION__);
+
         if (!g_manager) return;
         g_manager->Update();
     }
 
     UNITY_INTERFACE_EXPORT Message UNITY_INTERFACE_API PopMessage()
     {
+        Debug::Log(__FUNCTION__);
+
         if (g_messages.empty()) return Message::None;
 
         const auto message = g_messages.front();
