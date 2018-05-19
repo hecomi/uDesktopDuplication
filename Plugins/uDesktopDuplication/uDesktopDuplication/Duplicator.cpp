@@ -46,7 +46,8 @@ void Duplicator::InitializeDevice()
 void Duplicator::InitializeDuplication()
 {
 	ComPtr<IDXGIOutput1> output1;
-	if (FAILED(monitor_->GetOutput().As(&output1))) {
+	if (FAILED(monitor_->GetOutput().As(&output1))) 
+    {
 		return;
 	}
 
@@ -243,6 +244,8 @@ void Duplicator::Duplicate(UINT timeout)
 
     if (!dupl_ || !device_) return;
 
+    Release();
+
     ComPtr<IDXGIResource> resource;
     DXGI_OUTDUPL_FRAME_INFO frameInfo;
     const auto hr = dupl_->AcquireNextFrame(timeout, &frameInfo, &resource);
@@ -285,33 +288,7 @@ void Duplicator::Duplicate(UINT timeout)
         return;
     }
 
-    ScopedReleaser releaser([this] 
-    {
-        const auto hr = dupl_->ReleaseFrame();
-        if (FAILED(hr))
-        {
-            switch (hr)
-            {
-                case DXGI_ERROR_ACCESS_LOST:
-                {
-                    Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
-                    state_ = State::AccessLost;
-                    break;
-                }
-                case DXGI_ERROR_INVALID_CALL:
-                {
-                    Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
-                    break;
-                }
-                default:
-                {
-                    state_ = State::Unknown;
-                    Debug::Error("Duplicator::Duplicate() => Unknown Error.");
-                    break;
-                }
-            }
-        }
-    });
+    isFrameAcquired_ = true;
 
     ComPtr<ID3D11Texture2D> texture;
     if (FAILED(resource.As(&texture))) 
@@ -346,6 +323,39 @@ void Duplicator::Duplicate(UINT timeout)
             metaData_
         };
     }
+}
+
+
+void Duplicator::Release()
+{
+    if (!isFrameAcquired_) return;
+
+    const auto hr = dupl_->ReleaseFrame();
+    if (FAILED(hr))
+    {
+        switch (hr)
+        {
+            case DXGI_ERROR_ACCESS_LOST:
+            {
+                Debug::Log("Duplicator::Duplicate() => DXGI_ERROR_ACCESS_LOST.");
+                state_ = State::AccessLost;
+                break;
+            }
+            case DXGI_ERROR_INVALID_CALL:
+            {
+                Debug::Error("Duplicator::Duplicate() => DXGI_ERROR_INVALID_CALL.");
+                break;
+            }
+            default:
+            {
+                state_ = State::Unknown;
+                Debug::Error("Duplicator::Duplicate() => Unknown Error.");
+                break;
+            }
+        }
+    }
+
+    isFrameAcquired_ = false;
 }
 
 

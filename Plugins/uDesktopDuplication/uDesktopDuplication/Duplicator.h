@@ -68,6 +68,7 @@ private:
     void CheckUnityAdapter();
 
     void Duplicate(UINT timeout);
+    void Release();
 
     void UpdateCursor(
         const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
@@ -83,6 +84,7 @@ private:
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;
     Frame lastFrame_;
     UINT lastFrameId_ = 0;
+    bool isFrameAquired_ = false;
 
     volatile bool shouldRun_ = false;
     std::thread thread_;
