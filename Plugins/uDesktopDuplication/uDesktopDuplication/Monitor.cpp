@@ -81,32 +81,35 @@ void Monitor::Render()
     if (frame.id == lastFrameId_) return;
     lastFrameId_ = frame.id;
 
-	if (unityTexture_)
-	{
-		D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
-		frame.texture->GetDesc(&srcDesc);
-		unityTexture_->GetDesc(&dstDesc);
-		if (srcDesc.Width  != dstDesc.Width ||
-			srcDesc.Height != dstDesc.Height)
-		{
-			Debug::Error("Monitor::Render() => Texture sizes are defferent.");
-			Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
-			Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
-            return;
-		}
-		else
-		{
-			ComPtr<ID3D11DeviceContext> context;
-			GetDevice()->GetImmediateContext(&context);
-			context->CopyResource(unityTexture_, frame.texture.Get());
+    if (unityTexture_ == nullptr) 
+    {
+        Debug::Error("Monitor::Render() => Target texture has not been set yet..");
+        return;
+    }
 
-            auto& manager = GetMonitorManager();
-            if (id_ == manager->GetCursorMonitorId())
-            {
-                manager->GetCursor()->Draw(unityTexture_);
-            }
-		}
-	}
+    D3D11_TEXTURE2D_DESC srcDesc, dstDesc;
+    frame.texture->GetDesc(&srcDesc);
+    unityTexture_->GetDesc(&dstDesc);
+    if (srcDesc.Width  != dstDesc.Width ||
+        srcDesc.Height != dstDesc.Height)
+    {
+        Debug::Error("Monitor::Render() => Texture sizes are defferent.");
+        Debug::Error("    Source : (", srcDesc.Width, ", ", srcDesc.Height, ")");
+        Debug::Error("    Dest   : (", dstDesc.Width, ", ", dstDesc.Height, ")");
+        return;
+    }
+    else
+    {
+        ComPtr<ID3D11DeviceContext> context;
+        GetDevice()->GetImmediateContext(&context);
+        context->CopyResource(unityTexture_, frame.texture.Get());
+
+        auto& manager = GetMonitorManager();
+        if (id_ == manager->GetCursorMonitorId())
+        {
+            manager->GetCursor()->Draw(unityTexture_);
+        }
+    }
 
 	if (UseGetPixels())
 	{

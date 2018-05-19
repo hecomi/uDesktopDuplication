@@ -84,7 +84,7 @@ private:
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;
     Frame lastFrame_;
     UINT lastFrameId_ = 0;
-    bool isFrameAquired_ = false;
+    bool isFrameAcquired_ = false;
 
     volatile bool shouldRun_ = false;
     std::thread thread_;
