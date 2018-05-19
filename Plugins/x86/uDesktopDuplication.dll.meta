@@ -27,6 +27,12 @@ PluginImporter:
           Exclude Win64: 1
     data:
       first:
+        '': data
+      second:
+        enabled: 0
+        settings: {}
+    data:
+      first:
         Android: Android
       second:
         enabled: 1
@@ -37,7 +43,17 @@ PluginImporter:
         Any: 
       second:
         enabled: 1
-        settings: {}
+        settings:
+          Exclude Editor: 0
+          Exclude Linux: 0
+          Exclude Linux64: 0
+          Exclude LinuxUniversal: 0
+          Exclude OSXIntel: 0
+          Exclude OSXIntel64: 0
+          Exclude OSXUniversal: 0
+          Exclude WebGL: 0
+          Exclude Win: 0
+          Exclude Win64: 1
     data:
       first:
         Editor: Editor
@@ -46,7 +62,13 @@ PluginImporter:
         settings:
           CPU: x86
           DefaultValueInitialized: true
-          OS: Windows
+          OS: AnyOS
+    data:
+      first:
+        Facebook: WebGL
+      second:
+        enabled: 1
+        settings: {}
     data:
       first:
         Facebook: Win
@@ -117,6 +139,12 @@ PluginImporter:
         enabled: 0
         settings:
           CPU: None
+    data:
+      first:
+        WebGL: WebGL
+      second:
+        enabled: 1
+        settings: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 

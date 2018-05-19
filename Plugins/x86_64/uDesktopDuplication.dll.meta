@@ -11,18 +11,64 @@ PluginImporter:
   platformData:
     data:
       first:
+        '': Any
+      second:
+        enabled: 0
+        settings:
+          Exclude Android: 0
+          Exclude Editor: 0
+          Exclude Linux: 0
+          Exclude Linux64: 0
+          Exclude LinuxUniversal: 0
+          Exclude OSXIntel: 0
+          Exclude OSXIntel64: 0
+          Exclude OSXUniversal: 0
+          Exclude Win: 1
+          Exclude Win64: 0
+    data:
+      first:
+        '': data
+      second:
+        enabled: 0
+        settings: {}
+    data:
+      first:
+        Android: Android
+      second:
+        enabled: 1
+        settings:
+          CPU: ARMv7
+    data:
+      first:
         Any: 
       second:
         enabled: 1
-        settings: {}
+        settings:
+          Exclude Editor: 0
+          Exclude Linux: 0
+          Exclude Linux64: 0
+          Exclude LinuxUniversal: 0
+          Exclude OSXIntel: 0
+          Exclude OSXIntel64: 0
+          Exclude OSXUniversal: 0
+          Exclude WebGL: 0
+          Exclude Win: 1
+          Exclude Win64: 0
     data:
       first:
         Editor: Editor
       second:
-        enabled: 0
+        enabled: 1
         settings:
           CPU: x86_64
           DefaultValueInitialized: true
+          OS: AnyOS
+    data:
+      first:
+        Facebook: WebGL
+      second:
+        enabled: 1
+        settings: {}
     data:
       first:
         Facebook: Win
@@ -41,7 +87,7 @@ PluginImporter:
       first:
         Standalone: Linux
       second:
-        enabled: 0
+        enabled: 1
         settings:
           CPU: None
     data:
@@ -57,12 +103,12 @@ PluginImporter:
       second:
         enabled: 1
         settings:
-          CPU: x86_64
+          CPU: AnyCPU
     data:
       first:
         Standalone: OSXIntel
       second:
-        enabled: 0
+        enabled: 1
         settings:
           CPU: None
     data:
@@ -76,9 +122,9 @@ PluginImporter:
       first:
         Standalone: OSXUniversal
       second:
-        enabled: 0
+        enabled: 1
         settings:
-          CPU: x86_64
+          CPU: AnyCPU
     data:
       first:
         Standalone: Win
@@ -93,6 +139,12 @@ PluginImporter:
         enabled: 1
         settings:
           CPU: AnyCPU
+    data:
+      first:
+        WebGL: WebGL
+      second:
+        enabled: 1
+        settings: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
