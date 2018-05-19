@@ -44,14 +44,16 @@ extern "C"
 			auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
 
 			Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
-			if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){
-				Debug::Error("fatal");
+			if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice))))
+            {
+				Debug::Error("Initialize() => device->QueryInterface() failed.");
 				return;
 			}
 
 			Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-			if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) {
-				Debug::Error("fatal");
+			if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) 
+            {
+				Debug::Error("Initialize() => dxgiDevice->GetAdapter() failed.");
 				return;
 			}
 
