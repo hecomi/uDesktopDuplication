@@ -135,8 +135,6 @@ void Duplicator::CheckUnityAdapter()
 
 void Duplicator::Start()
 {
-    Debug::Log(__FUNCTION__);
-
     if (state_ != State::Ready) return;
 
     Stop();
@@ -182,8 +180,6 @@ void Duplicator::Start()
 
 void Duplicator::Stop()
 {
-    Debug::Log(__FUNCTION__);
-
     shouldRun_ = false;
 
     if (thread_.joinable())
@@ -240,8 +236,6 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 
 void Duplicator::Duplicate(UINT timeout)
 {
-    Debug::Log(__FUNCTION__);
-
     if (!dupl_ || !device_) return;
 
     Release();
@@ -363,8 +357,6 @@ void Duplicator::UpdateCursor(
     const ComPtr<ID3D11Texture2D>& texture,
     const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
-    Debug::Log(__FUNCTION__);
-
     auto& manager = GetMonitorManager();
 
 	if (frameInfo.PointerPosition.Visible)
@@ -383,8 +375,6 @@ void Duplicator::UpdateCursor(
 
 void Duplicator::UpdateMetadata(UINT totalBufferSize)
 {
-    Debug::Log(__FUNCTION__);
-
     metaData_.buffer.ExpandIfNeeded(totalBufferSize);
     if (!metaData_.buffer.Empty())
     {
@@ -396,8 +386,6 @@ void Duplicator::UpdateMetadata(UINT totalBufferSize)
 
 void Duplicator::UpdateMoveRects()
 {
-    Debug::Log(__FUNCTION__);
-
     const auto hr = dupl_->GetFrameMoveRects(
         metaData_.buffer.Size(),
         metaData_.buffer.As<DXGI_OUTDUPL_MOVE_RECT>(), 
@@ -440,8 +428,6 @@ void Duplicator::UpdateMoveRects()
 
 void Duplicator::UpdateDirtyRects()
 {
-    Debug::Log(__FUNCTION__);
-
     const auto hr = dupl_->GetFrameDirtyRects(
         metaData_.buffer.Size() - metaData_.moveRectSize,
         metaData_.buffer.As<RECT>(metaData_.moveRectSize /* offset */), 
