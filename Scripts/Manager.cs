@@ -99,6 +99,12 @@ public class Manager : MonoBehaviour
         Lib.Initialize();
 
         CreateMonitors();
+
+        #if UNITY_2018_1_OR_NEWER
+        Shader.DisableKeyword("USE_GAMMA_TO_LINEAR_SPACE");
+        #else
+        Shader.EnableKeyword("USE_GAMMA_TO_LINEAR_SPACE");
+        #endif
     }
 
     void OnApplicationQuit()
