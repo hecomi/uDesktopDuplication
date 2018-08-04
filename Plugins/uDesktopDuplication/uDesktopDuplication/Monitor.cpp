@@ -458,7 +458,6 @@ bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
             const auto outCol = col;
             const auto outIndex = 4 * (outRow * width + outCol);
 
-
             // BGRA -> RGBA
             output[outIndex + 0] = bufferForGetPixels_[inIndex + 2];
             output[outIndex + 1] = bufferForGetPixels_[inIndex + 1];
