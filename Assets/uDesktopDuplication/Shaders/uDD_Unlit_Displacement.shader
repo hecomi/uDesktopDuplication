@@ -168,6 +168,7 @@ Pass
     #pragma multi_compile ___ USE_CLIP
     #pragma multi_compile ___ BEND_ON
     #pragma multi_compile _FORWARD_Y _FORWARD_Z
+    #pragma multi_compile ___ USE_GAMMA_TO_LINEAR_SPACE
     ENDCG
 }
 

@@ -283,13 +283,16 @@ public class Texture : MonoBehaviour
         monitor = Manager.GetMonitor(lastMonitorId_);
     }
 
+    int clipPositionScaleKey_ = Shader.PropertyToID("_ClipPositionScale");
     void UpdateMaterial()
     {
         width = transform.localScale.x;
+
         if (monitor != null) {
             rotation = monitor.rotation;
         }
-        material.SetVector("_ClipPositionScale", new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
+
+        material.SetVector(clipPositionScaleKey_, new Vector4(clipPos.x, clipPos.y, clipScale.x, clipScale.y));
     }
 
     public Vector3 GetWorldPositionFromCoord(Vector2 coord)

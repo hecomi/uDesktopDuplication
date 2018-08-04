@@ -58,9 +58,11 @@ inline float2 uddClipUV(float2 uv)
 
 inline void uddConvertToLinearIfNeeded(inout fixed3 rgb)
 {
+#ifdef USE_GAMMA_TO_LINEAR_SPACE
     if (!IsGammaSpace()) {
         rgb = GammaToLinearSpace(rgb);
     }
+#endif
 }
 
 inline fixed4 uddGetTexture(sampler2D tex, float2 uv)
