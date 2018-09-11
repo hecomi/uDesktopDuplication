@@ -62,8 +62,13 @@ public class Manager : MonoBehaviour
     private float reinitializationTimer_ = 0f;
     private bool isFirstFrame_ = true;
 
-    public static event Lib.DebugLogDelegate onDebugLog = msg => Debug.Log(msg);
-    public static event Lib.DebugLogDelegate onDebugErr = msg => Debug.LogError(msg);
+    public static event Lib.DebugLogDelegate onDebugLog = OnDebugLog;
+    public static event Lib.DebugLogDelegate onDebugErr = OnDebugErr;
+
+    [AOT.MonoPInvokeCallback(typeof(Lib.DebugLogDelegate))]
+    private static void OnDebugLog(string msg) { Debug.Log(msg); }
+    [AOT.MonoPInvokeCallback(typeof(Lib.DebugLogDelegate))]
+    private static void OnDebugErr(string msg) { Debug.LogError(msg); }
 
     public delegate void ReinitializeHandler();
     public static event ReinitializeHandler onReinitialized;
