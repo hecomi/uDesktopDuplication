@@ -77,7 +77,13 @@ void Monitor::Render()
 
     if (unityTexture_ == nullptr) 
     {
-        Debug::Error("Monitor::Render() => Target texture has not been set yet..");
+        Debug::Error("Monitor::Render() => Target texture has not been set yet.");
+        return;
+    }
+
+    if (!frame.texture)
+    {
+        Debug::Error("Monitor::Render() => frame doesn't have texture.");
         return;
     }
 
