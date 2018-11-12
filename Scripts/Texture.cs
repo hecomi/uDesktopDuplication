@@ -240,6 +240,13 @@ public class Texture : MonoBehaviour
         }
     }
 
+    int clipPositionScaleKey_;
+
+    void Awake()
+    {
+        clipPositionScaleKey_ = Shader.PropertyToID("_ClipPositionScale");
+    }
+
     void OnEnable()
     {
         if (monitor == null) {
@@ -271,8 +278,7 @@ public class Texture : MonoBehaviour
 
     void RequireUpdate()
     {
-        if (monitor != null)
-        {
+        if (monitor != null) {
             monitor.shouldBeUpdated = true;
         }
     }
@@ -283,7 +289,6 @@ public class Texture : MonoBehaviour
         monitor = Manager.GetMonitor(lastMonitorId_);
     }
 
-    int clipPositionScaleKey_ = Shader.PropertyToID("_ClipPositionScale");
     void UpdateMaterial()
     {
         width = transform.localScale.x;
