@@ -23,7 +23,6 @@
 IUnityInterfaces* g_unity = nullptr;
 std::unique_ptr<MonitorManager> g_manager;
 std::queue<Message> g_messages;
-ID3D11DeviceContext* g_deviceContextForMainThread = nullptr;
 
 
 extern "C"
@@ -35,40 +34,23 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Initialize()
     {
-        if (g_unity && !g_manager)
+        if (!g_unity) return;
+
+        if (!g_manager)
         {
             Debug::Initialize();
-
-			auto device = g_unity->Get<IUnityGraphicsD3D11>()->GetDevice();
-
-			Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
-			if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice))))
-            {
-				Debug::Error("Initialize() => device->QueryInterface() failed.");
-				return;
-			}
-
-			Microsoft::WRL::ComPtr<IDXGIAdapter> dxgiAdapter;
-			if (FAILED(dxgiDevice->GetAdapter(&dxgiAdapter))) 
-            {
-				Debug::Error("Initialize() => dxgiDevice->GetAdapter() failed.");
-				return;
-			}
-
-			DXGI_ADAPTER_DESC desc;
-			dxgiAdapter->GetDesc(&desc);
-
-            g_manager = std::make_unique<MonitorManager>(desc.AdapterLuid);
+            g_manager = std::make_unique<MonitorManager>();
             g_manager->Initialize();
         }
     }
 
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API Finalize()
     {
-        if (!g_manager) return;
-
-        g_manager->Finalize();
-        g_manager.reset();
+        if (g_manager)
+        {
+            g_manager->Finalize();
+            g_manager.reset();
+        }
 
         std::queue<Message> empty;
         g_messages.swap(empty);

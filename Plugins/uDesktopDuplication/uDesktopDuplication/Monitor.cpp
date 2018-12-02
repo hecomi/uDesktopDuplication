@@ -21,7 +21,6 @@ Monitor::Monitor(int id)
 
 Monitor::~Monitor()
 {
-    duplicator_->Stop();
 }
 
 

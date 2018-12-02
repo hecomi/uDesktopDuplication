@@ -9,6 +9,7 @@
 #include "Common.h"
 
 
+class MonitorManager;
 enum class DuplicatorState;
 
 
@@ -56,11 +57,10 @@ public:
 private:
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);
 
-    int id_ = -1;
-
+    MonitorManager* manager_ = nullptr;
+    const int id_;
     UINT dpiX_ = -1, dpiY_ = -1;
     int width_ = -1, height_ = -1;
-
     bool hasBeenUpdated_ = false;
     bool useGetPixels_ = false;
 

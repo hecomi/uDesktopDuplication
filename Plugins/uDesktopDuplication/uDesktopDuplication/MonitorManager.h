@@ -13,7 +13,7 @@ class Cursor;
 class MonitorManager
 {
 public:
-    explicit MonitorManager(LUID unityAdapterLuid_);
+    MonitorManager();
     ~MonitorManager();
 	void Initialize();
     void Finalize();
@@ -34,7 +34,6 @@ public:
     int GetTotalHeight() const;
 
 private:
-	LUID unityAdapterLuid_;
     UINT frameRate_ = 60;
     bool enableTextureCopyFromGpuToCpu_ = false;
     std::vector<std::shared_ptr<Monitor>> monitors_;

@@ -18,22 +18,18 @@ using namespace Microsoft::WRL;
 
 
 
-MonitorManager::MonitorManager(LUID unityAdapterLuid)
-	: unityAdapterLuid_(unityAdapterLuid)
+MonitorManager::MonitorManager()
 {
 }
 
 
 MonitorManager::~MonitorManager()
 {
-    Finalize();
 }
 
 
 void MonitorManager::Initialize()
 {
-    Finalize();
-
     // Get factory
     ComPtr<IDXGIFactory1> factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
@@ -52,7 +48,6 @@ void MonitorManager::Initialize()
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
             auto monitor = std::make_shared<Monitor>(id++);
-            const auto unityAdapterLuid = GetUnityAdapterLuid();
             monitor->Initialize(adapter, output);
             monitor->StartCapture();
             monitors_.push_back(monitor);
@@ -92,6 +87,7 @@ void MonitorManager::RequireReinitilization()
 void MonitorManager::Reinitialize()
 {
     Debug::Log("MonitorManager::Reinitialize()");
+    Finalize();
     Initialize();
     SendMessageToUnity(Message::Reinitialized);
 }

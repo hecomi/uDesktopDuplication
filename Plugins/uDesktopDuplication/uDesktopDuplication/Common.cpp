@@ -37,7 +37,7 @@ const std::unique_ptr<MonitorManager>& GetMonitorManager()
 
 LUID GetUnityAdapterLuid()
 {
-    const auto device = GetUnity()->Get<IUnityGraphicsD3D11>()->GetDevice();
+    const auto device = GetDevice();
 
     Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
     if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){
