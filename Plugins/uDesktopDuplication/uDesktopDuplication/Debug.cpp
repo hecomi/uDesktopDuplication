@@ -40,3 +40,17 @@ void Debug::Finalize()
     Debug::SetLogFunc(nullptr);
     Debug::SetErrorFunc(nullptr);
 }
+
+
+decltype(DebugFunctionScopedTimer::currentId) DebugFunctionScopedTimer::currentId = 0;
+
+
+DebugFunctionScopedTimer::DebugFunctionScopedTimer(const char* name)
+    : ScopedTimer([this](std::chrono::microseconds us) { 
+        Debug::Log("<< [", id_, "]", name_,  " : ", us.count(), "[us]"); 
+    })
+    , name_(name)
+    , id_(currentId++)
+{
+    Debug::Log(">> [", id_, "]", name_);
+}

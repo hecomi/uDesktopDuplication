@@ -27,6 +27,8 @@ IsolatedD3D11Device::~IsolatedD3D11Device()
 
 HRESULT IsolatedD3D11Device::Create(const ComPtr<IDXGIAdapter>& adapter)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto driverType = adapter ? 
         D3D_DRIVER_TYPE_UNKNOWN : 
         D3D_DRIVER_TYPE_HARDWARE;
@@ -68,6 +70,8 @@ ComPtr<ID3D11Device> IsolatedD3D11Device::GetDevice()
 Microsoft::WRL::ComPtr<ID3D11Texture2D> IsolatedD3D11Device::GetCompatibleSharedTexture(
     const ComPtr<ID3D11Texture2D>& src)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     D3D11_TEXTURE2D_DESC srcDesc;
     src->GetDesc(&srcDesc);
 

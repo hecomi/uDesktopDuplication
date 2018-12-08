@@ -30,6 +30,8 @@ MonitorManager::~MonitorManager()
 
 void MonitorManager::Initialize()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     ComPtr<IDXGIFactory1> factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
     {
@@ -69,6 +71,8 @@ void MonitorManager::Initialize()
 
 void MonitorManager::Finalize()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     for (const auto& monitor : monitors_)
     {
         monitor->Finalize();
@@ -80,6 +84,8 @@ void MonitorManager::Finalize()
 
 void MonitorManager::Update()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (isReinitializationRequired_)
     {
         Reinitialize();
@@ -97,6 +103,8 @@ void MonitorManager::RequireReinitilization()
 
 void MonitorManager::Reinitialize()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     Debug::Log("MonitorManager::Reinitialize()");
     Finalize();
     Initialize();
@@ -106,6 +114,8 @@ void MonitorManager::Reinitialize()
 
 bool MonitorManager::HasMonitorCountChanged() const
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     ComPtr<IDXGIFactory1> factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
     {

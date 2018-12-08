@@ -29,6 +29,8 @@ void Monitor::Initialize(
     const ComPtr<IDXGIOutput> &output
 )
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     adapter_ = adapter;
     output_ = output;
 
@@ -75,12 +77,16 @@ void Monitor::Initialize(
 
 void Monitor::Finalize()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     StopCapture();
 }
 
 
 void Monitor::Render()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto& frame = duplicator_->GetLastFrame();
 
     if (frame.id == lastFrameId_) return;
@@ -133,6 +139,8 @@ void Monitor::Render()
 
 void Monitor::StartCapture()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (duplicator_->GetState() == DuplicatorState::Ready)
     {
         duplicator_->Start();
@@ -142,6 +150,8 @@ void Monitor::StartCapture()
 
 void Monitor::StopCapture()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     duplicator_->Stop();
 }
 
@@ -302,6 +312,8 @@ bool Monitor::UseGetPixels() const
 
 void Monitor::CopyTextureFromGpuToCpu(ID3D11Texture2D* texture)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto monitorRot = static_cast<DXGI_MODE_ROTATION>(GetRotation());
     const auto monitorWidth = GetWidth();
     const auto monitorHeight = GetHeight();
@@ -367,6 +379,8 @@ void Monitor::CopyTextureFromGpuToCpu(ID3D11Texture2D* texture)
 
 bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (!UseGetPixels())
     {
         Debug::Error("Monitor::GetPixels() => UseGetPixels(true) must have been called when you want to use GetPixels().");

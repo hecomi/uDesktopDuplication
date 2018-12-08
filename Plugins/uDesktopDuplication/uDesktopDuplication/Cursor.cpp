@@ -21,6 +21,8 @@ Cursor::~Cursor()
 
 void Cursor::UpdateBuffer(Duplicator* duplicator, const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (frameInfo.LastMouseUpdateTime.QuadPart == 0)
     {
         return;
@@ -66,6 +68,8 @@ void Cursor::UpdateTexture(
     Duplicator* duplicator, 
     const ComPtr<ID3D11Texture2D>& desktopTexture)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     auto monitor = duplicator->GetMonitor();
 
     // Check desktop texure
@@ -369,6 +373,8 @@ void Cursor::UpdateTexture(
 
 void Cursor::Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (texture == nullptr) 
     {
         Debug::Error("Cursor::UpdateTexture() => Desktop texture is null.");
@@ -384,6 +390,8 @@ void Cursor::Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
 
 void Cursor::GetTexture(ID3D11Texture2D* texture)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (!bgraBuffer_)
     {
         Debug::Error("Cursor::GetTexture() => bgra32Buffer is null.");

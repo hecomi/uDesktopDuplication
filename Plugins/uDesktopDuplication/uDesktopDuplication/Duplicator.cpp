@@ -33,6 +33,8 @@ Duplicator::~Duplicator()
 
 void Duplicator::InitializeDevice()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     device_ = std::make_shared<IsolatedD3D11Device>();
 
     if (FAILED(device_->Create(monitor_->GetAdapter())))
@@ -45,6 +47,8 @@ void Duplicator::InitializeDevice()
 
 void Duplicator::InitializeDuplication()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
 	ComPtr<IDXGIOutput1> output1;
 	if (FAILED(monitor_->GetOutput().As(&output1))) 
     {
@@ -107,6 +111,8 @@ void Duplicator::InitializeDuplication()
 
 void Duplicator::CheckUnityAdapter()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     DXGI_ADAPTER_DESC desc;
     monitor_->GetAdapter()->GetDesc(&desc);
 
@@ -125,6 +131,8 @@ void Duplicator::CheckUnityAdapter()
 
 void Duplicator::Start()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (state_ != State::Ready) return;
 
     Stop();
@@ -170,6 +178,8 @@ void Duplicator::Start()
 
 void Duplicator::Stop()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     shouldRun_ = false;
 
     if (thread_.joinable())
@@ -226,6 +236,8 @@ const Duplicator::Frame& Duplicator::GetLastFrame() const
 
 void Duplicator::Duplicate(UINT timeout)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (!dupl_ || !device_) return;
 
     Release();
@@ -312,6 +324,8 @@ void Duplicator::Duplicate(UINT timeout)
 
 void Duplicator::Release()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     if (!isFrameAcquired_) return;
 
     const auto hr = dupl_->ReleaseFrame();
@@ -347,6 +361,8 @@ void Duplicator::UpdateCursor(
     const ComPtr<ID3D11Texture2D>& texture,
     const DXGI_OUTDUPL_FRAME_INFO& frameInfo)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     auto& manager = GetMonitorManager();
 
 	if (frameInfo.PointerPosition.Visible)
@@ -365,6 +381,8 @@ void Duplicator::UpdateCursor(
 
 void Duplicator::UpdateMetadata(UINT totalBufferSize)
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     metaData_.buffer.ExpandIfNeeded(totalBufferSize);
     if (!metaData_.buffer.Empty())
     {
@@ -376,6 +394,8 @@ void Duplicator::UpdateMetadata(UINT totalBufferSize)
 
 void Duplicator::UpdateMoveRects()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto hr = dupl_->GetFrameMoveRects(
         metaData_.buffer.Size(),
         metaData_.buffer.As<DXGI_OUTDUPL_MOVE_RECT>(), 
@@ -418,6 +438,8 @@ void Duplicator::UpdateMoveRects()
 
 void Duplicator::UpdateDirtyRects()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto hr = dupl_->GetFrameDirtyRects(
         metaData_.buffer.Size() - metaData_.moveRectSize,
         metaData_.buffer.As<RECT>(metaData_.moveRectSize /* offset */), 

@@ -60,6 +60,8 @@ const std::unique_ptr<MonitorManager>& GetMonitorManager()
 
 LUID GetUnityAdapterLuid()
 {
+    UDD_FUNCTION_SCOPE_TIMER
+
     const auto device = GetDevice();
 
     Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;

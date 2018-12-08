@@ -10,7 +10,9 @@
 
 
 // Debug flag
+#ifdef _DEBUG
 #define UDD_DEBUG_ON
+#endif
 
 
 // Logging
@@ -156,16 +158,25 @@ private:
 };
 
 
+class DebugFunctionScopedTimer : public ScopedTimer
+{
+public:
+    explicit DebugFunctionScopedTimer(const char* name);
+
+private:
+    static unsigned int currentId;
+    const char* const name_;
+    const unsigned int id_;
+};
+
+
 #ifdef UDD_DEBUG_ON
 #define UDD_FUNCTION_SCOPE_TIMER \
-    ScopedTimer _timer_##__COUNTER__([](std::chrono::microseconds us) \
-    { \
-        Debug::Log(__FUNCTION__, "@", __FILE__, ":", __LINE__, " => ", us.count(), " [us]"); \
-    });
+    DebugFunctionScopedTimer _timer_##__COUNTER__(__FUNCTION__);
 #define UDD_SCOPE_TIMER(Name) \
     ScopedTimer _timer_##__COUNTER__([](std::chrono::microseconds us) \
     { \
-        Debug::Log(#Name, " => ", us.count(), " [us]"); \
+        Debug::Log(#Name, " : ", us.count(), " [us]"); \
     });
 #else
 #define UDD_FUNCTION_SCOPE_TIMER
