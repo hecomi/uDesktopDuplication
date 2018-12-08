@@ -77,7 +77,7 @@ private:
     void UpdateMoveRects();
     void UpdateDirtyRects();
 
-    Monitor* monitor_ = nullptr;
+    Monitor* const monitor_ = nullptr;
     std::atomic<State> state_ = State::Ready;
 
     std::shared_ptr<class IsolatedD3D11Device> device_;

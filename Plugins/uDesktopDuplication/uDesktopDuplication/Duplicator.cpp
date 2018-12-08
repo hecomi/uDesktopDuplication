@@ -57,17 +57,7 @@ void Duplicator::InitializeDuplication()
 		case S_OK:
 		{
 			state_ = State::Ready;
-			const auto rot = static_cast<DXGI_MODE_ROTATION>(monitor_->GetRotation());
 			Debug::Log("Duplicator::Initialize() => OK.");
-			Debug::Log("    ID    : ", monitor_->GetId());
-			Debug::Log("    Size  : (", monitor_->GetWidth(), ", ", monitor_->GetHeight(), ")");
-			Debug::Log("    DPI   : (", monitor_->GetDpiX(), ", ", monitor_->GetDpiY(), ")");
-			Debug::Log("    Rot   : ",
-				rot == DXGI_MODE_ROTATION_IDENTITY ? "Landscape" :
-				rot == DXGI_MODE_ROTATION_ROTATE90 ? "Portrait" :
-				rot == DXGI_MODE_ROTATION_ROTATE180 ? "Landscape (flipped)" :
-				rot == DXGI_MODE_ROTATION_ROTATE270 ? "Portrait (flipped)" :
-				"Unspecified");
 			break;
 		}
 		case E_INVALIDARG:

@@ -40,12 +40,24 @@ private:
     };
 
     template <class T>
-    static void Output(T&& arg)
+    static void Output(const T& arg)
     {
         if (mode_ == Mode::None) return;
         if (ss_.good())
         {
-            ss_ << std::forward<T>(arg);
+            ss_ << arg;
+        }
+    }
+
+    static void Output(const WCHAR* arg)
+    {
+        if (mode_ == Mode::None) return;
+        if (ss_.good())
+        {
+            char buf[256];
+            size_t size;
+            wcstombs_s(&size, buf, arg, 256);
+            ss_ << buf;
         }
     }
 
@@ -89,10 +101,10 @@ private:
     }
 
     template <class Arg, class... RestArgs>
-    static void _Log(Level level, Arg&& arg, RestArgs&&... restArgs)
+    static void _Log(Level level, const Arg& arg, const RestArgs&... restArgs)
     {
-        Output(std::forward<Arg>(arg));
-        _Log(level, std::forward<RestArgs>(restArgs)...);
+        Output(arg);
+        _Log(level, restArgs...);
     }
 
     static void _Log(Level level)

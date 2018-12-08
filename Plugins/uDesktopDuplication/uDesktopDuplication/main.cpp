@@ -39,6 +39,7 @@ extern "C"
         if (!g_manager)
         {
             Debug::Initialize();
+            OutputWindowsInformation();
             g_manager = std::make_unique<MonitorManager>();
             g_manager->Initialize();
         }

@@ -57,6 +57,18 @@ void Monitor::Initialize(
 		// DPI is set as -1, so the application has to use the appropriate value.
 	}
 
+    const auto rot = outputDesc_.Rotation;
+    Debug::Log("Monitor::Initialized() =>");
+    Debug::Log("    ID    : ", id_);
+    Debug::Log("    Size  : (", width_, ", ", height_, ")");
+    Debug::Log("    DPI   : (", dpiX_, ", ", dpiY_, ")");
+    Debug::Log("    Rot   : ",
+        rot == DXGI_MODE_ROTATION_IDENTITY ? "Landscape" :
+        rot == DXGI_MODE_ROTATION_ROTATE90 ? "Portrait" :
+        rot == DXGI_MODE_ROTATION_ROTATE180 ? "Landscape (flipped)" :
+        rot == DXGI_MODE_ROTATION_ROTATE270 ? "Portrait (flipped)" :
+        "Unspecified");
+
     duplicator_ = std::make_shared<Duplicator>(this);
 }
 

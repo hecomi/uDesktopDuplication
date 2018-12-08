@@ -7,6 +7,9 @@
 
 
 
+// Output windows version
+void OutputWindowsInformation();
+
 // Unity interface getter
 struct IUnityInterfaces;
 IUnityInterfaces* GetUnity();

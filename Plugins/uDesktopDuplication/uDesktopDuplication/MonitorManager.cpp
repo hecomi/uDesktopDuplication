@@ -30,7 +30,6 @@ MonitorManager::~MonitorManager()
 
 void MonitorManager::Initialize()
 {
-    // Get factory
     ComPtr<IDXGIFactory1> factory;
     if (FAILED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
     {
@@ -38,20 +37,32 @@ void MonitorManager::Initialize()
         return;
     }
 
-    // Check all display adapters
-    int id = 0;
+    std::vector<std::pair<ComPtr<IDXGIAdapter1>, ComPtr<IDXGIOutput>>> outputs;
+
     ComPtr<IDXGIAdapter1> adapter;
     for (int i = 0; (factory->EnumAdapters1(i, &adapter) != DXGI_ERROR_NOT_FOUND); ++i) 
     {
-        // Search the main monitor from all outputs
+        DXGI_ADAPTER_DESC desc;
+        if (FAILED(adapter->GetDesc(&desc))) continue;
+        Debug::Log("Graphics Card [", i, "] : ", desc.Description);
+
         ComPtr<IDXGIOutput> output;
         for (int j = 0; (adapter->EnumOutputs(j, &output) != DXGI_ERROR_NOT_FOUND); ++j) 
         {
-            auto monitor = std::make_shared<Monitor>(id++);
-            monitor->Initialize(adapter, output);
-            monitor->StartCapture();
-            monitors_.push_back(monitor);
+            DXGI_OUTPUT_DESC desc;
+            if (FAILED(output->GetDesc(&desc))) continue;
+            Debug::Log("  > Monitor[", j, "] : ", desc.DeviceName);
+            outputs.emplace_back(adapter, output);
         }
+    }
+
+    for (int id = 0; id < static_cast<int>(outputs.size()); ++id)
+    {
+        const auto& pair = outputs.at(id);
+        auto monitor = std::make_shared<Monitor>(id);
+        monitor->Initialize(pair.first, pair.second);
+        monitor->StartCapture();
+        monitors_.push_back(monitor);
     }
 }
 
