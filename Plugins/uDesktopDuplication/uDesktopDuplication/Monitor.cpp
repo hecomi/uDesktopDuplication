@@ -411,24 +411,24 @@ bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
         {
             left   = y;
             top    = monitorWidth - x - width;
-            right  = y + width;
-            bottom = monitorWidth - x;
+            right  = y + width - 1;
+            bottom = monitorWidth - x - 1;
             break;
         }
         case DXGI_MODE_ROTATION_ROTATE180:
         {
             left   = monitorWidth - x - width;
             top    = monitorHeight - y - height;
-            right  = monitorWidth - x;
-            bottom = monitorHeight - y;
+            right  = monitorWidth - x - 1;
+            bottom = monitorHeight - y - 1;
             break;
         }
         case DXGI_MODE_ROTATION_ROTATE270:
         {
             left   = monitorHeight - y - height;
             top    = x;
-            right  = monitorHeight - y;
-            bottom = x + width;
+            right  = monitorHeight - y - 1;
+            bottom = x + width - 1;
             break;
         }
         case DXGI_MODE_ROTATION_IDENTITY:
@@ -437,8 +437,8 @@ bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
         {
             left   = x;
             top    = y;
-            right  = x + width;
-            bottom = y + height;
+            right  = x + width - 1;
+            bottom = y + height - 1;
             break;
         }
     }
