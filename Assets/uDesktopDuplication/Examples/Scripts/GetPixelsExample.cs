@@ -6,27 +6,38 @@ public class GetPixelsExample : MonoBehaviour
 
     [SerializeField] int x = 100;
     [SerializeField] int y = 100;
-    const int width = 64;
-    const int height = 32;
+    [SerializeField] int w = 64;
+    [SerializeField] int h = 32;
     
     public Texture2D texture;
-    Color32[] colors = new Color32[width * height];
+    Color32[] colors;
+
+    void CreateTextureIfNeeded()
+    {
+        if (!texture || texture.width != w || texture.height != h)
+        {
+            colors = new Color32[w * h];
+            texture = new Texture2D(w, h, TextureFormat.ARGB32, false);
+            GetComponent<Renderer>().material.mainTexture = texture;
+        }
+    }
 
     void Start()
     {
-        texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
-        GetComponent<Renderer>().material.mainTexture = texture;
+        CreateTextureIfNeeded();
     }
 
     void Update()
     {
+        CreateTextureIfNeeded();
+
         // must be called (performance will be slightly down).
         uDesktopDuplication.Manager.primary.useGetPixels = true;
 
         var monitor = uddTexture.monitor;
         if (!monitor.hasBeenUpdated) return;
 
-        if (monitor.GetPixels(colors, x, y, width, height)) {
+        if (monitor.GetPixels(colors, x, y, w, h)) {
             texture.SetPixels32(colors);
             texture.Apply();
         }

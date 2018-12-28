@@ -53,6 +53,7 @@ public:
     void UseGetPixels(bool use);
     bool UseGetPixels() const;
     bool GetPixels(BYTE* output, int x, int y, int width, int height);
+    BYTE* GetBuffer() const;
 
 private:
     void CopyTextureFromGpuToCpu(ID3D11Texture2D* texture);

@@ -499,3 +499,14 @@ bool Monitor::GetPixels(BYTE* output, int x, int y, int width, int height)
 
     return true;
 }
+
+
+BYTE* Monitor::GetBuffer() const
+{
+    if (!bufferForGetPixels_)
+    {
+        Debug::Error("Monitor::GetBuffer() => CopyTextureFromGpuToCpu() has not been called yet.");
+        return nullptr;
+    }
+    return bufferForGetPixels_.Get();
+}

@@ -366,7 +366,7 @@ extern "C"
         return 0;
     }
 
-    UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetMoveRects(int id)
+    UNITY_INTERFACE_EXPORT DXGI_OUTDUPL_MOVE_RECT* UNITY_INTERFACE_API GetMoveRects(int id)
     {
         if (!g_manager) return nullptr;
         if (auto monitor = g_manager->GetMonitor(id))
@@ -386,7 +386,7 @@ extern "C"
         return 0;
     }
 
-    UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetDirtyRects(int id)
+    UNITY_INTERFACE_EXPORT RECT* UNITY_INTERFACE_API GetDirtyRects(int id)
     {
         if (!g_manager) return nullptr;
         if (auto monitor = g_manager->GetMonitor(id))
@@ -398,12 +398,22 @@ extern "C"
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API GetPixels(int id, BYTE* output, int x, int y, int width, int height)
     {
-        if (!g_manager) return nullptr;
+        if (!g_manager) return false;
         if (auto monitor = g_manager->GetMonitor(id))
         {
             return monitor->GetPixels(output, x, y, width, height);
         }
         return false;
+    }
+
+    UNITY_INTERFACE_EXPORT BYTE* UNITY_INTERFACE_API GetBuffer(int id)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetBuffer();
+        }
+        return nullptr;
     }
 
     UNITY_INTERFACE_EXPORT bool UNITY_INTERFACE_API HasBeenUpdated(int id)
