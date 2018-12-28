@@ -169,6 +169,8 @@ public static class Lib
     [DllImport("uDesktopDuplication", EntryPoint = "GetPixels")]
     private static extern bool GetPixels_Internal(int id, System.IntPtr ptr, int x, int y, int width, int height);
     [DllImport("uDesktopDuplication")]
+    public static extern IntPtr GetBuffer(int id);
+    [DllImport("uDesktopDuplication")]
     public static extern bool HasBeenUpdated(int id);
     [DllImport("uDesktopDuplication")]
     public static extern bool UseGetPixels(int id, bool use);

@@ -238,6 +238,11 @@ public class Monitor
         get { return Lib.GetDirtyRects(id); }
     }
 
+    public System.IntPtr buffer
+    {
+        get { return Lib.GetBuffer(id); }
+    }
+
     public bool hasBeenUpdated
     {
         get { return Lib.HasBeenUpdated(id); }
