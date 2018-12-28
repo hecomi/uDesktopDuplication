@@ -7,10 +7,10 @@ public class BufferExample : MonoBehaviour
     [SerializeField]
     uDesktopDuplication.Texture uddTexture;
 
-	Texture2D texture_;
-	Color32[] pixels_;
-	GCHandle handle_;
-	IntPtr ptr_ = IntPtr.Zero;
+    Texture2D texture_;
+    Color32[] pixels_;
+    GCHandle handle_;
+    IntPtr ptr_ = IntPtr.Zero;
 
     [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl, SetLastError = false)]
     public static extern IntPtr memcpy(IntPtr dest, IntPtr src, int count);
@@ -48,11 +48,11 @@ public class BufferExample : MonoBehaviour
         var height = uddTexture.monitor.height;
 
         // TextureFormat.BGRA32 should be set but it causes an error now.
-		texture_ = new Texture2D(width, height, TextureFormat.RGBA32, false);
-		texture_.filterMode = FilterMode.Bilinear;
-		pixels_ = texture_.GetPixels32();
-		handle_ = GCHandle.Alloc(pixels_, GCHandleType.Pinned);
-		ptr_ = handle_.AddrOfPinnedObject();
+        texture_ = new Texture2D(width, height, TextureFormat.RGBA32, false);
+        texture_.filterMode = FilterMode.Bilinear;
+        pixels_ = texture_.GetPixels32();
+        handle_ = GCHandle.Alloc(pixels_, GCHandleType.Pinned);
+        ptr_ = handle_.AddrOfPinnedObject();
 
         GetComponent<Renderer>().material.mainTexture = texture_;
     }
@@ -66,7 +66,7 @@ public class BufferExample : MonoBehaviour
         var height = uddTexture.monitor.height;
         memcpy(ptr_, buffer, width * height * sizeof(Byte) * 4);
 
-		texture_.SetPixels32(pixels_);
-		texture_.Apply();
+        texture_.SetPixels32(pixels_);
+        texture_.Apply();
     }
 }
