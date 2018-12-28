@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class RaycastTest : MonoBehaviour
+public class RaycastExample : MonoBehaviour
 {
     public Transform from;
     public Transform to;
