@@ -124,7 +124,13 @@ void Monitor::Render()
         auto& manager = GetMonitorManager();
         if (id_ == manager->GetCursorMonitorId())
         {
-            manager->GetCursor()->Draw(unityTexture_);
+            if (auto cursor = manager->GetCursor())
+            {
+                if (cursor->IsVisible())
+                {
+                    cursor->Draw(unityTexture_);
+                }
+            }
         }
     }
 
