@@ -141,7 +141,7 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern bool IsPrimary(int id);
     [DllImport("uDesktopDuplication")]
-    public static extern bool IsCursorVisible(int id);
+    public static extern bool IsCursorVisible();
     [DllImport("uDesktopDuplication")]
     public static extern int GetCursorX();
     [DllImport("uDesktopDuplication")]
@@ -155,7 +155,11 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern CursorShapeType GetCursorShapeType();
     [DllImport("uDesktopDuplication")]
-    public static extern void GetCursorTexture(int id, System.IntPtr ptr);
+    public static extern void GetCursorTexture(IntPtr ptr);
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetCursorHotSpotX();
+    [DllImport("uDesktopDuplication")]
+    public static extern int GetCursorHotSpotY();
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
     [DllImport("uDesktopDuplication")]
@@ -167,7 +171,7 @@ public static class Lib
     [DllImport("uDesktopDuplication", EntryPoint = "GetDirtyRects")]
     private static extern IntPtr GetDirtyRects_Internal(int id);
     [DllImport("uDesktopDuplication", EntryPoint = "GetPixels")]
-    private static extern bool GetPixels_Internal(int id, System.IntPtr ptr, int x, int y, int width, int height);
+    private static extern bool GetPixels_Internal(int id, IntPtr ptr, int x, int y, int width, int height);
     [DllImport("uDesktopDuplication")]
     public static extern IntPtr GetBuffer(int id);
     [DllImport("uDesktopDuplication")]

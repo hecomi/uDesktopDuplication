@@ -27,11 +27,13 @@ public class Loupe : MonoBehaviour
         }
 
         var monitor = uddTexture_.monitor;
+        var hotspotX = uDesktopDuplication.Lib.GetCursorHotSpotX();
+        var hotspotY = uDesktopDuplication.Lib.GetCursorHotSpotY();
         var x = monitor.isCursorVisible ? 
-            (float)monitor.cursorX / monitor.width :
+            (float)(monitor.cursorX + hotspotX) / monitor.width :
             (float)monitor.systemCursorX / monitor.width;
         var y = monitor.isCursorVisible ? 
-            (float)monitor.cursorY / monitor.height :
+            (float)(monitor.cursorY + hotspotY) / monitor.height :
             (float)monitor.systemCursorY / monitor.height;
         var w = 1f / zoom;
         var h = w / aspect * monitor.aspect;

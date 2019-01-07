@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using MeshForwardDirection = uDesktopDuplication.Texture.MeshForwardDirection;
 
 [RequireComponent(typeof(uDesktopDuplication.Texture))]
 public class GazePointAnalyzer : MonoBehaviour
