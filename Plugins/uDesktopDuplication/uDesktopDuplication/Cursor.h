@@ -30,6 +30,8 @@ public:
     int GetHeight() const;
     int GetPitch() const;
     int GetType() const;
+    int GetHotSpotX() const;
+    int GetHotSpotY() const;
 
 private:
     bool isVisible_ = false;

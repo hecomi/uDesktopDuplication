@@ -340,6 +340,18 @@ extern "C"
         return g_manager->GetCursor()->GetType();
     }
 
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorHotSpotX()
+    {
+        if (!g_manager) return -1;
+        return g_manager->GetCursor()->GetHotSpotX();
+    }
+
+    UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetCursorHotSpotY()
+    {
+        if (!g_manager) return -1;
+        return g_manager->GetCursor()->GetHotSpotY();
+    }
+
     UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API GetCursorTexture(ID3D11Texture2D* texture)
     {
         if (!g_manager) return;

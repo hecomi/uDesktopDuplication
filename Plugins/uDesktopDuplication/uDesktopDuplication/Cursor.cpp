@@ -465,3 +465,15 @@ int Cursor::GetType() const
 {
     return shapeInfo_.Type;
 }
+
+
+int Cursor::GetHotSpotX() const 
+{ 
+    return shapeInfo_.HotSpot.x;
+}
+
+
+int Cursor::GetHotSpotY() const 
+{ 
+    return shapeInfo_.HotSpot.y;
+}

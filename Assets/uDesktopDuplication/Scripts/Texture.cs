@@ -3,6 +3,7 @@
 namespace uDesktopDuplication
 {
 
+[RequireComponent(typeof(Renderer))]
 [AddComponentMenu("uDesktopDuplication/Texture")] 
 public class Texture : MonoBehaviour
 {
