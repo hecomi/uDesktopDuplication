@@ -25,13 +25,13 @@ SubShader
 
     #pragma target 3.0
     #pragma surface surf Standard fullforwardshadows vertex:vert
-    #pragma multi_compile ___ INVERT_X
-    #pragma multi_compile ___ INVERT_Y
+    #pragma shader_feature ___ INVERT_X
+    #pragma shader_feature ___ INVERT_Y
+    #pragma shader_feature _FORWARD_Y _FORWARD_Z
+    #pragma shader_feature ___ USE_GAMMA_TO_LINEAR_SPACE
     #pragma multi_compile ___ ROTATE90 ROTATE180 ROTATE270
     #pragma multi_compile ___ USE_CLIP
     #pragma multi_compile ___ BEND_ON
-    #pragma multi_compile _FORWARD_Y _FORWARD_Z
-    #pragma multi_compile ___ USE_GAMMA_TO_LINEAR_SPACE
 
     #define SURFACE_SHADER
     #include "./uDD_Common.cginc"
