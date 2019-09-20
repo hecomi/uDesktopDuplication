@@ -33,6 +33,7 @@ public:
     DuplicatorState GetDuplicatorState() const;
     void SetUnityTexture(ID3D11Texture2D* texture);
     ID3D11Texture2D* GetUnityTexture() const;
+    HANDLE GetSharedTextureHandle() const;
     void GetName(char* buf, int len) const;
     bool IsPrimary() const;
     bool HasBeenUpdated() const;

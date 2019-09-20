@@ -306,6 +306,16 @@ void Duplicator::Duplicate(UINT timeout)
         context->CopyResource(sharedTexture.Get(), texture.Get());
     }
 
+
+    HANDLE sharedHandle;
+    ComPtr<IDXGIResource> dxgiResource;
+    sharedTexture.As(&dxgiResource);
+    if (FAILED(dxgiResource->GetSharedHandle(&sharedHandle)))
+    {
+        Debug::Error("Duplicator::Duplicate() => Failed to get shared handle.");
+        return;
+    }
+
     UpdateCursor(sharedTexture, frameInfo);
     UpdateMetadata(frameInfo.TotalMetadataBufferSize);
 
@@ -315,6 +325,7 @@ void Duplicator::Duplicate(UINT timeout)
         {
             lastFrameId_++,
             sharedTexture,
+            sharedHandle,
             frameInfo,
             metaData_
         };

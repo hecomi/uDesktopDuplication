@@ -383,7 +383,7 @@ void Cursor::Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
 
     const auto capturedImageWidth = capturedImageArea_.right - capturedImageArea_.left;
     ComPtr<ID3D11DeviceContext> context;
-    GetDevice()->GetImmediateContext(&context);
+    GetUnityDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture.Get(), 0, &capturedImageArea_, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
 }
 
@@ -418,7 +418,7 @@ void Cursor::GetTexture(ID3D11Texture2D* texture)
     }
 
     ComPtr<ID3D11DeviceContext> context;
-    GetDevice()->GetImmediateContext(&context);
+    GetUnityDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture, 0, nullptr, bgraBuffer_.Get(), GetWidth() * 4, 0);
 }
 

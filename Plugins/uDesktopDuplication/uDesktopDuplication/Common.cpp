@@ -46,7 +46,7 @@ IUnityInterfaces* GetUnity()
 }
 
 
-ComPtr<ID3D11Device> GetDevice()
+ComPtr<ID3D11Device> GetUnityDevice()
 {
     return GetUnity()->Get<IUnityGraphicsD3D11>()->GetDevice();
 }
@@ -62,7 +62,7 @@ LUID GetUnityAdapterLuid()
 {
     UDD_FUNCTION_SCOPE_TIMER
 
-    const auto device = GetDevice();
+    const auto device = GetUnityDevice();
 
     Microsoft::WRL::ComPtr<IDXGIDevice1> dxgiDevice;
     if (FAILED(device->QueryInterface(IID_PPV_ARGS(&dxgiDevice)))){

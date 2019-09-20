@@ -117,9 +117,19 @@ void Monitor::Render()
     }
     else
     {
+        ComPtr<ID3D11Texture2D> desktopTexture;
+        if (FAILED(GetUnityDevice()->OpenSharedResource(
+            frame.textureHandle,
+            __uuidof(ID3D11Texture2D),
+            &desktopTexture)))
+        {
+            Debug::Error("Monitor::Render() => Failed to open shared resource.");
+            return;
+        }
+
         ComPtr<ID3D11DeviceContext> context;
-        GetDevice()->GetImmediateContext(&context);
-        context->CopyResource(unityTexture_, frame.texture.Get());
+        GetUnityDevice()->GetImmediateContext(&context);
+        context->CopyResource(unityTexture_, desktopTexture.Get());
 
         auto& manager = GetMonitorManager();
         if (id_ == manager->GetCursorMonitorId())
@@ -195,6 +205,15 @@ void Monitor::SetUnityTexture(ID3D11Texture2D* texture)
 ID3D11Texture2D* Monitor::GetUnityTexture() const
 { 
     return unityTexture_; 
+}
+
+
+HANDLE Monitor::GetSharedTextureHandle() const
+{
+    UDD_FUNCTION_SCOPE_TIMER
+
+    const auto& frame = duplicator_->GetLastFrame();
+    return frame.textureHandle;
 }
 
 
@@ -344,7 +363,7 @@ void Monitor::CopyTextureFromGpuToCpu(ID3D11Texture2D* texture)
         desc.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
         desc.MiscFlags          = 0;
 
-        if (FAILED(GetDevice()->CreateTexture2D(&desc, nullptr, &textureForGetPixels_)))
+        if (FAILED(GetUnityDevice()->CreateTexture2D(&desc, nullptr, &textureForGetPixels_)))
         {
             Debug::Error("Monitor::CopyTextureFromGpuToCpu() => GetDevice()->CreateTexture2D() failed.");
             return;
@@ -353,7 +372,7 @@ void Monitor::CopyTextureFromGpuToCpu(ID3D11Texture2D* texture)
 
     {
         ComPtr<ID3D11DeviceContext> context;
-        GetDevice()->GetImmediateContext(&context);
+        GetUnityDevice()->GetImmediateContext(&context);
         context->CopyResource(textureForGetPixels_.Get(), texture);
     }
 

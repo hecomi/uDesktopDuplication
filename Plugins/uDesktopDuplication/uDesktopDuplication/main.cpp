@@ -368,6 +368,16 @@ extern "C"
         }
     }
 
+    UNITY_INTERFACE_EXPORT void* UNITY_INTERFACE_API GetSharedTextureHandle(int id)
+    {
+        if (!g_manager) return nullptr;
+        if (auto monitor = g_manager->GetMonitor(id))
+        {
+            return monitor->GetSharedTextureHandle();
+        }
+        return nullptr;
+    }
+
     UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API GetMoveRectCount(int id)
     {
         if (!g_manager) return -1;

@@ -16,7 +16,7 @@ IUnityInterfaces* GetUnity();
 
 // ID3D11Device (in Unity) getter
 struct ID3D11Device;
-Microsoft::WRL::ComPtr<ID3D11Device> GetDevice();
+Microsoft::WRL::ComPtr<ID3D11Device> GetUnityDevice();
 
 // Manager getter
 class MonitorManager;

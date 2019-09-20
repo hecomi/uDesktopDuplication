@@ -163,6 +163,8 @@ public static class Lib
     [DllImport("uDesktopDuplication")]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
     [DllImport("uDesktopDuplication")]
+    public static extern IntPtr GetSharedTextureHandle(int id);
+    [DllImport("uDesktopDuplication")]
     public static extern int GetMoveRectCount(int id);
     [DllImport("uDesktopDuplication", EntryPoint = "GetMoveRects")]
     private static extern IntPtr GetMoveRects_Internal(int id);
