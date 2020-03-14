@@ -9,7 +9,7 @@
 
 class Duplicator;
 
-class Cursor
+class Cursor final
 {
 public:
     explicit Cursor();
@@ -39,7 +39,7 @@ private:
     int y_ = -1;
     Buffer<BYTE> buffer_;
     Buffer<BYTE> bgraBuffer_;
-    DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_;
-    LARGE_INTEGER timestamp_;
-    D3D11_BOX capturedImageArea_;
+    DXGI_OUTDUPL_POINTER_SHAPE_INFO shapeInfo_ = {};
+    LARGE_INTEGER timestamp_ = {};
+    D3D11_BOX capturedImageArea_ = {};
 };

@@ -13,7 +13,7 @@ class MonitorManager;
 enum class DuplicatorState;
 
 
-class Monitor
+class Monitor final
 {
 public:
     explicit Monitor(int id);
@@ -68,8 +68,8 @@ private:
 
     Microsoft::WRL::ComPtr<IDXGIOutput> output_;
     Microsoft::WRL::ComPtr<IDXGIAdapter> adapter_;
-    DXGI_OUTPUT_DESC outputDesc_;
-    MONITORINFOEX monitorInfo_;
+    DXGI_OUTPUT_DESC outputDesc_ = {};
+    MONITORINFOEX monitorInfo_ = {};
 
     std::shared_ptr<class Duplicator> duplicator_;
     UINT lastFrameId_ = -1;

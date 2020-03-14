@@ -8,7 +8,7 @@
 
 
 // Thraed safe self created ID3D11Device from specified adapter
-class IsolatedD3D11Device
+class IsolatedD3D11Device final
 {
 public:
     IsolatedD3D11Device();

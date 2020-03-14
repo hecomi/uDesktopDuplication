@@ -30,7 +30,7 @@ enum class DuplicatorState
 };
 
 
-class Duplicator
+class Duplicator final
 {
 public:
     using State = DuplicatorState;
@@ -83,7 +83,7 @@ private:
 
     std::shared_ptr<class IsolatedD3D11Device> device_;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> dupl_;
-    Frame lastFrame_;
+    Frame lastFrame_ = {};
     UINT lastFrameId_ = 0;
     bool isFrameAcquired_ = false;
 
@@ -91,5 +91,5 @@ private:
     std::thread thread_;
     mutable std::mutex mutex_;
 
-    Metadata metaData_;
+    Metadata metaData_ = {};
 };

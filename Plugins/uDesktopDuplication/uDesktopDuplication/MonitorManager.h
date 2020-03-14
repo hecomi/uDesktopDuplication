@@ -10,7 +10,7 @@ struct IUnityInterfaces;
 class Monitor;
 class Cursor;
 
-class MonitorManager
+class MonitorManager final
 {
 public:
     MonitorManager();

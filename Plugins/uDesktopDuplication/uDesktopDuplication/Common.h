@@ -33,7 +33,7 @@ class ScopedReleaser
 public:
     using ReleaseFuncType = std::function<void()>;
     ScopedReleaser(ReleaseFuncType&& func) : func_(func) {}
-    ~ScopedReleaser() { func_(); }
+    virtual ~ScopedReleaser() { func_(); }
 
 private:
     const ReleaseFuncType func_;
@@ -48,7 +48,7 @@ public:
     using microseconds = std::chrono::microseconds;
     using TimerFuncType = std::function<void(microseconds)>;
     ScopedTimer(TimerFuncType&& func);
-    ~ScopedTimer();
+    virtual ~ScopedTimer();
 
 private:
     const TimerFuncType func_;
@@ -71,7 +71,7 @@ void SendMessageToUnity(Message message);
 
 // Buffer
 template <class T>
-class Buffer
+class Buffer final
 {
 public:
     Buffer() 

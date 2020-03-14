@@ -99,7 +99,7 @@ void Cursor::UpdateTexture(
     bgraBuffer_.ExpandIfNeeded(bgraBufferSize);
     
     // Check buffers
-    if (!bgraBuffer_ || !buffer_) 
+    if (!bgraBuffer_ || !buffer_)
     {
         Debug::Error("Cursor::UpdateTexture() => no buffer.");
         return;
