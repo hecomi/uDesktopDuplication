@@ -161,7 +161,7 @@ void Cursor::UpdateTexture(
 
     if (capturedImageRight >= desktopImageWidth) 
     {
-        capturedImageWidth -= capturedImageRight - desktopImageWidth;
+        capturedImageWidth -= capturedImageRight - desktopImageWidth + 1;
         capturedImageRight = desktopImageWidth - 1;
     }
 
@@ -174,7 +174,7 @@ void Cursor::UpdateTexture(
 
     if (capturedImageBottom >= desktopImageHeight) 
     {
-        capturedImageHeight -= capturedImageBottom - desktopImageHeight;
+        capturedImageHeight -= capturedImageBottom - desktopImageHeight + 1;
         capturedImageBottom = desktopImageHeight - 1;
     }
 
@@ -193,12 +193,7 @@ void Cursor::UpdateTexture(
         return;
     }
 
-    if (capturedImageWidth == 0 || capturedImageHeight == 0)
-    {
-        return;
-    }
-
-    capturedImageArea_ = D3D11_BOX 
+    capturedImageArea_ =
     { 
         static_cast<UINT>(capturedImageLeft), 
         static_cast<UINT>(capturedImageTop),
@@ -208,12 +203,17 @@ void Cursor::UpdateTexture(
         1 
     };
 
+    if (capturedImageWidth == 0 || capturedImageHeight == 0)
+    {
+        return;
+    }
+
     // Create texture for capturing desktop image
     ComPtr<ID3D11Texture2D> texture;
     {
         D3D11_TEXTURE2D_DESC desc;
-        desc.Width              = capturedImageWidth;
-        desc.Height             = capturedImageHeight;
+        desc.Width              = cursorImageWidth;
+        desc.Height             = cursorImageHeight;
         desc.MipLevels          = 1;
         desc.ArraySize          = 1;
         desc.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
@@ -256,10 +256,6 @@ void Cursor::UpdateTexture(
     // Finally, get the desktop texture under the mouse cursor.
     const auto desktop32 = reinterpret_cast<UINT*>(mappedSurface.pBits);
     const UINT desktopPitch = mappedSurface.Pitch / sizeof(UINT);
-
-    // Rotate cursor image to match the monitor orientation
-    Buffer<BYTE> rotatedBuffer_;
-    rotatedBuffer_.ExpandIfNeeded(buffer_.Size());
 
     for (int y = 0; y < capturedImageHeight; ++y)
     {
@@ -382,6 +378,8 @@ void Cursor::Draw(const Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture)
     }
 
     const auto capturedImageWidth = capturedImageArea_.right - capturedImageArea_.left;
+    if (capturedImageWidth == 0) return;
+
     ComPtr<ID3D11DeviceContext> context;
     GetUnityDevice()->GetImmediateContext(&context);
     context->UpdateSubresource(texture.Get(), 0, &capturedImageArea_, bgraBuffer_.Get(), capturedImageWidth * 4, 0);
