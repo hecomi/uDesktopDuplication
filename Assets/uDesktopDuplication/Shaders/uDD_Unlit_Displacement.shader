@@ -4,6 +4,7 @@
 Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
+    _ColorScale ("ColorScale", Range(0.0, 10.0)) = 1.0
     _MainTex ("Texture", 2D) = "white" {}
     [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
     [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
@@ -30,9 +31,6 @@ CGINCLUDE
 #include "./uDD_Common.cginc"
 #include "Tessellation.cginc"
 
-half _Radius;
-half _Width;
-half _Thickness;
 Texture2D _DispTex;
 SamplerState sampler_DispTex;
 half _DispFactor;
@@ -150,7 +148,7 @@ DsOutput domain(
 
 fixed4 frag(DsOutput i) : SV_Target
 {
-    return uddGetScreenTexture(i.f2TexCoord);
+    return uddGetScreenTexture(i.f2TexCoord) * _Color * _ColorScale;
 }
 
 ENDCG

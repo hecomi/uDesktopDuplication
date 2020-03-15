@@ -2,8 +2,11 @@
 #define UDD_PARAMS_CGINC
 
 sampler2D _MainTex;
-fixed4 _Color;
-sampler2D _CursorTex;
+half4 _Color;
+half _ColorScale;
+half _Radius;
+half _Width;
+half _Thickness;
 
 half4 _CursorPositionScale;
 #define _CursorX _CursorPositionScale.x
