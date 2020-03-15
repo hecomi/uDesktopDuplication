@@ -4,6 +4,7 @@
 Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
+    _ColorScale ("ColorScale", Range(0.0, 10.0)) = 1.0
     _MainTex ("Texture", 2D) = "white" {}
     [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
     [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
@@ -26,10 +27,6 @@ CGINCLUDE
 
 #include "./uDD_Common.cginc"
 
-half _Radius;
-half _Width;
-half _Thickness;
-
 v2f vert(appdata v)
 {
     v2f o;
@@ -41,7 +38,7 @@ v2f vert(appdata v)
 
 fixed4 frag(v2f i) : SV_Target
 {
-    return fixed4(uddGetScreenTexture(i.uv).rgb, 1.0) * _Color;
+    return fixed4(uddGetScreenTexture(i.uv).rgb * _ColorScale, 1.0) * _Color;
 }
 
 ENDCG

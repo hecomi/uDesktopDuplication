@@ -4,6 +4,7 @@
 Properties
 {
     _Color ("Color", Color) = (1, 1, 1, 1)
+    _ColorScale ("ColorScale", Range(0.0, 10.0)) = 1.0
     _MainTex ("Texture", 2D) = "white" {}
     _Mask ("Mask", Range(0, 1)) = 0.1
     [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
@@ -28,9 +29,6 @@ CGINCLUDE
 #include "./uDD_Common.cginc"
 
 fixed _Mask;
-half _Radius;
-half _Width;
-half _Thickness;
 
 v2f vert(appdata v)
 {
@@ -45,7 +43,7 @@ fixed4 frag(v2f i) : SV_Target
 {
     fixed4 tex = uddGetScreenTexture(i.uv);
     fixed alpha = pow((tex.r + tex.g + tex.b) / 3.0, _Mask);
-    return fixed4(tex.rgb * _Color.rgb, alpha * _Color.a);
+    return fixed4(tex.rgb * _Color.rgb * _ColorScale, alpha * _Color.a);
 }
 
 ENDCG

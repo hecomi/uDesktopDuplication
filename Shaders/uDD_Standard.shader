@@ -7,6 +7,7 @@ Properties
     _MainTex ("Albedo (RGB)", 2D) = "white" {}
     _Glossiness ("Smoothness", Range(0, 1)) = 0.5
     _Metallic ("Metallic", Range(0, 1)) = 0.0
+    _Emissive ("Emissive", Range(0, 10)) = 0.0
     [KeywordEnum(Y, Z)] _Forward("Mesh Forward Direction", Int) = 0
     [Toggle(BEND_ON)] _Bend("Use Bend", Int) = 0
     [PowerSlider(10.0)] _Radius("Bend Radius", Range(1, 100)) = 30
@@ -38,9 +39,7 @@ SubShader
 
     half _Glossiness;
     half _Metallic;
-    half _Radius;
-    half _Width;
-    half _Thickness;
+    half _Emissive;
 
     void vert(inout appdata_full v)
     {
@@ -55,6 +54,7 @@ SubShader
         o.Metallic = _Metallic;
         o.Smoothness = _Glossiness;
         o.Alpha = c.a;
+        o.Emission = c.rgb * _Emissive;
     }
 
     ENDCG
