@@ -76,111 +76,115 @@ public struct DXGI_OUTDUPL_MOVE_RECT
 
 public static class Lib
 {
+    const string dllName = "uDesktopDuplication";
+
     public delegate void MessageHandler(Message message);
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public delegate void DebugLogDelegate(string str);
 
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool IsInitialized();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void Initialize();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void Finalize();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void Reinitialize();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void Update();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern Message PopMessage();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void EnableDebug();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void DisableDebug();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void SetDebugMode(DebugMode mode);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void SetLogFunc(DebugLogDelegate func);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void SetErrorFunc(DebugLogDelegate func);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetMonitorCount();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool HasMonitorCountChanged();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorMonitorId();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetTotalWidth();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetTotalHeight();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern IntPtr GetRenderEventFunc();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetId(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern DuplicatorState GetState(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void GetName(int id, StringBuilder buf, int len);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetLeft(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetRight(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetTop(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetBottom(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetWidth(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetHeight(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetDpiX(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetDpiY(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
+    public static extern bool IsHDR(int id);
+    [DllImport(dllName)]
     public static extern MonitorRotation GetRotation(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool IsPrimary(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool IsCursorVisible();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorX();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorY();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorShapeWidth();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorShapeHeight();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorShapePitch();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern CursorShapeType GetCursorShapeType();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void GetCursorTexture(IntPtr ptr);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorHotSpotX();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetCursorHotSpotY();
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int SetTexturePtr(int id, IntPtr ptr);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern IntPtr GetSharedTextureHandle(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetMoveRectCount(int id);
-    [DllImport("uDesktopDuplication", EntryPoint = "GetMoveRects")]
+    [DllImport(dllName, EntryPoint = "GetMoveRects")]
     private static extern IntPtr GetMoveRects_Internal(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern int GetDirtyRectCount(int id);
-    [DllImport("uDesktopDuplication", EntryPoint = "GetDirtyRects")]
+    [DllImport(dllName, EntryPoint = "GetDirtyRects")]
     private static extern IntPtr GetDirtyRects_Internal(int id);
-    [DllImport("uDesktopDuplication", EntryPoint = "GetPixels")]
+    [DllImport(dllName, EntryPoint = "GetPixels")]
     private static extern bool GetPixels_Internal(int id, IntPtr ptr, int x, int y, int width, int height);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern IntPtr GetBuffer(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool HasBeenUpdated(int id);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern bool UseGetPixels(int id, bool use);
-    [DllImport("uDesktopDuplication")]
+    [DllImport(dllName)]
     public static extern void SetFrameRate(uint frameRate);
 
     public static string GetName(int id)

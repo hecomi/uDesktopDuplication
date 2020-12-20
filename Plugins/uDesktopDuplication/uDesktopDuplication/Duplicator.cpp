@@ -39,7 +39,7 @@ void Duplicator::InitializeDevice()
 
     if (FAILED(device_->Create(monitor_->GetAdapter())))
     {
-        Debug::Error("Monitor::Initialize() => IsolatedD3D11Device::Create() failed.");
+        Debug::Error("Duplicator::InitializeDevice() => IsolatedD3D11Device::Create() failed.");
         state_ = State::Unknown;
     }
 }

@@ -46,6 +46,7 @@ public:
     int GetRotation() const;
     int GetDpiX() const;
     int GetDpiY() const;
+    bool IsHDR() const;
     Microsoft::WRL::ComPtr<IDXGIOutputDuplication> GetDeskDupl();
     int GetMoveRectCount() const;
     DXGI_OUTDUPL_MOVE_RECT* GetMoveRects() const;
@@ -63,6 +64,7 @@ private:
     const int id_;
     UINT dpiX_ = -1, dpiY_ = -1;
     int width_ = -1, height_ = -1;
+    bool isHDR_ = false;
     bool hasBeenUpdated_ = false;
     bool useGetPixels_ = false;
 

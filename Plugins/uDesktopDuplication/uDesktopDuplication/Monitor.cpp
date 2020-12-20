@@ -1,4 +1,5 @@
 #include <d3d11.h>
+#include <dxgi1_6.h>
 #include <ShellScalingAPI.h>
 #include <queue>
 #include "Monitor.h"
@@ -58,6 +59,16 @@ void Monitor::Initialize(
 		Debug::Error("Monitor::Initialize() => GetDpiForMonitor() failed.");
 		// DPI is set as -1, so the application has to use the appropriate value.
 	}
+
+    ComPtr<IDXGIOutput6> output6;
+    if (SUCCEEDED(output_.As(&output6)))
+    {
+        DXGI_OUTPUT_DESC1 desc1;
+        if (SUCCEEDED(output6->GetDesc1(&desc1)))
+        {
+            isHDR_ = desc1.ColorSpace == DXGI_COLOR_SPACE_TYPE::DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
+        }
+    }
 
     const auto rot = outputDesc_.Rotation;
     Debug::Log("Monitor::Initialized() =>");
@@ -292,6 +303,12 @@ int Monitor::GetWidth() const
 int Monitor::GetHeight() const
 {
     return height_;
+}
+
+
+bool Monitor::IsHDR() const
+{
+    return static_cast<int>(isHDR_);
 }
 
 

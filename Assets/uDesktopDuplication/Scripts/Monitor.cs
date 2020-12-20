@@ -130,6 +130,11 @@ public class Monitor
         }
     }
 
+    public bool isHDR
+    {
+        get { return Lib.IsHDR(id); }
+    }
+
     public float widthMeter
     { 
         get { return width / dpiX * 0.0254f; }
