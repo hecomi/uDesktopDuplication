@@ -6,17 +6,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/uDesktopDuplication/Examples/Scenes/Switch Scenes.unity
+    path: Assets/uDesktopDuplication/Samples/01. Basic/Switch Scenes.unity
     guid: 9ce9467b01f36d647ace156faef9cb9f
   - enabled: 1
-    path: Assets/uDesktopDuplication/Examples/Scenes/Primary Monitor.unity
+    path: Assets/uDesktopDuplication/Samples/01. Basic/Primary Monitor.unity
     guid: f9bfdaaf005950544860a1f6efad2925
   - enabled: 1
-    path: Assets/uDesktopDuplication/Examples/Scenes/Multiple Monitors Roundly.unity
+    path: Assets/uDesktopDuplication/Samples/01. Basic/Multiple Monitors Roundly.unity
     guid: 4bae91f55031b98488c9e668031f7387
   - enabled: 1
-    path: Assets/uDesktopDuplication/Examples/Scenes/Shaders.unity
+    path: Assets/uDesktopDuplication/Samples/01. Basic/Shaders.unity
     guid: f66b67cb0e751dc4ca0251b38bc8638d
   - enabled: 1
-    path: Assets/uDesktopDuplication/Examples/Scenes/Zoom.unity
+    path: Assets/uDesktopDuplication/Samples/02. Loupe/Loupe.unity
     guid: f3d41026babadc241b9d0852b0831584
+  m_configObjects: {}

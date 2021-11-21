@@ -1,0 +1,58 @@
+{
+    "name":"com.hecomi.udesktopduplication",
+    "version": "1.8.0",
+    "displayName": "uDesktopDuplication",
+    "description": "Desktop Duplication API implementation for Unity (only for Windows 8/10)",
+    "license": "MIT License",
+    "author": {
+        "name": "hecomi",
+        "url": "https://tips.hecomi.com"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hecomi/uDesktopDuplication"
+    },
+    "keywords": [
+        "unity",
+        "screen-capture",
+        "desktop-capture",
+        "native-plugin"
+    ],
+    "samples": [
+        {
+            "displayName": "01. Basic",
+            "description": "Basic collection of samples for uDesktopDuplication.",
+            "path": "Samples~/01. Basic"
+        },
+        {
+            "displayName": "02. Loupe",
+            "description": "Sample of enlarging a part of the screen.",
+            "path": "Samples~/02. Loupe"
+        },
+        {
+            "displayName": "03. Raycast",
+            "description": "Sample of using a custom raycast to get screen information.",
+            "path": "Samples~/03. Raycast"
+        },
+        {
+            "displayName": "04. GetPixels",
+            "description": "Sample of cropping a part of a captured image.",
+            "path": "Samples~/04. GetPixels"
+        },
+        {
+            "displayName": "05. Buffer",
+            "description": "Sample to get and copy the buffer of the entire captured screen.",
+            "path": "Samples~/05. Buffer"
+        },
+        {
+            "displayName": "06. Meta",
+            "description": "A sample using the meta-information that can be obtained with the DesktopDuplication API.",
+            "path": "Samples~/06. Basic"
+        },
+        {
+            "displayName": "07. Displacement",
+            "description": "A sample that uses screen brightness to make the screen uneven.",
+            "path": "Samples~/07. Displacement"
+        }
+    ]
+}

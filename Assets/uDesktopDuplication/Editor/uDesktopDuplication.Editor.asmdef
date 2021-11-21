@@ -1,12 +1,11 @@
 {
-    "name": "uDD-Examples",
+    "name": "uDesktopDuplication.Editor",
+    "rootNamespace": "",
     "references": [
         "GUID:7547219be89abee4ba3cf7f48b516b7b"
     ],
     "includePlatforms": [
-        "Editor",
-        "WindowsStandalone32",
-        "WindowsStandalone64"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
