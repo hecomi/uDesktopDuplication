@@ -47,7 +47,7 @@
         {
             "displayName": "06. Meta",
             "description": "A sample using the meta-information that can be obtained with the DesktopDuplication API.",
-            "path": "Samples~/06. Basic"
+            "path": "Samples~/06. Meta"
         },
         {
             "displayName": "07. Displacement",
